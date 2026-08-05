@@ -5116,14 +5116,26 @@
     // the swap finishes exactly as the hold ends, with nothing left to
     // cut over abruptly when the showcase content arrives next
     // ("타이틀... 그룹이 상단에 홀딩될때 자연스럽게... 전환").
-    let pinStart = 0, runPx = 0;
+    //
+    // Kept section-relative throughout, not converted to document/
+    // scrollY coordinates — .apps has its own position:relative, so
+    // runway.offsetTop (and everything derived from it) is already
+    // relative to .apps, not the page. Measured: 237px, against an
+    // actual document position of ~31773px — using that against
+    // window.scrollY directly made pinStart land near 0, so the whole
+    // crossfade fired at the top of the page instead of at the hold.
+    // section.getBoundingClientRect().top, read live every frame, is
+    // what closes the gap between the two coordinate spaces — same
+    // fix already in place for the closing plate's own runway
+    // (initClosingHandoff, initClosingEntrance).
+    let pinOffset = 0, runPx = 0;
     function measure() {
       const introTopPx = parseFloat(getComputedStyle(intro).top) || 0;
       // Runway is a plain flow element, so its own offsetTop is reliable
-      // even while intro above it is sticky-displaced — same trick as
-      // the closing plate's own runway (initClosingHandoff).
+      // (relative to .apps) even while intro above it is sticky-
+      // displaced.
       const introStaticTop = runway.offsetTop - intro.offsetHeight;
-      pinStart = introStaticTop - introTopPx;
+      pinOffset = introTopPx - introStaticTop;
       runPx = runway.offsetHeight;
     }
 
@@ -5131,12 +5143,12 @@
     function update() {
       ticking = false;
       if (runPx <= 0) return;
-      const t = smootherstep(clamp01((window.scrollY - pinStart) / runPx));
+      const raw = pinOffset - sec.getBoundingClientRect().top;
+      const t = smootherstep(clamp01(raw / runPx));
       // Only touches the ground once the hold has actually begun — at
       // t=0 it would otherwise force opacity to 1 on every page load,
       // stomping the separate fade-IN initClosingHandoff drives during
-      // the handover itself (which runs long before scrollY ever
-      // reaches pinStart).
+      // the handover itself (which runs long before the hold begins).
       if (t > 0) ground.style.opacity = (1 - t).toFixed(3);
       sec.style.backgroundColor = mix(APPS_FILL, PAPER, t);
       // The copy has to invert with the ground or it goes invisible
