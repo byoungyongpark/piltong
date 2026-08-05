@@ -4630,8 +4630,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      the incoming word is set at OUR PHILOSOPHY's own size, which is
      wider than the wordmark it replaces, and overflow:hidden would have
      shaved its ends off. inset() with negative side values clips the top
-     and bottom on the box and leaves the sides open. */
-  clip-path: inset(-1px -100vw);
+     and bottom on the box and leaves the sides open.
+     The top/bottom value is +3px, not 0 — trimmed slightly INWARD, not
+     out. At ticker=1 the mark's bottom edge lands exactly flush with the
+     slot's own top edge (both derived from the same window height), so
+     with a 0px clip that seam sat precisely on the clip boundary and the
+     letters' own anti-aliased edge pixels — P I L T O N G's descenders —
+     bled through as a row of dashes ("어플리케이션 위로 잔상"). Trimming
+     3px inside the box clips well past those pixels. Safe: the slot's
+     own height carries 20% headroom over what APPLICATIONS actually
+     needs (13px clear top and bottom, measured), so 3px never touches
+     the title's own glyphs. */
+  clip-path: inset(3px -100vw);
   transform: translateX(-50%) translateY(calc(-1 * var(--mark-rise, 0px)));
   opacity: var(--mark-fade, 1);
   pointer-events: none;
