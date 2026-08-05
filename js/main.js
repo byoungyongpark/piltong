@@ -5137,28 +5137,14 @@
     // before the box clears the top at t=1 (verified: its viewport
     // position is exactly 2(1-t)*viewportH, reaching 0 only there).
     // That's where the pure, unmixed colour sits (i=0), so Paper is
-    // what the sweep actually ends on, not the ladder's darkest step
-    // ("페이퍼색이 마지막을 차지하면 더 자연스러울것 같아" — already
-    // true; the band SIZES below are what changed).
-    //
-    // Bands are no longer equal fifths. Weighted (STEPS - i), so band 0
-    // (the true colour, at the edge that reads last) gets the biggest
-    // share and each darker step narrows — reading as Paper with a
-    // graduated dark accent trailing off, rather than uniform stripes
-    // ("커튼의 높이도 명도단계처럼 점진적으로 표현되면").
+    // what the sweep actually ends on ("밴드의 마지막이 페이퍼색이
+    // 되고"). Equal bands again — the graduated weighting tried here
+    // was reverted on request ("밴드폭은 원래대로 돌리자").
     function curtainRamp(color) {
       probe.style.color = color;
       const base = curtainLightness(getComputedStyle(probe).color);
       const away = base > .5 ? -1 : 1;
-      const weights = [];
-      let totalWeight = 0;
-      for (let i = 0; i < CURTAIN_STEPS; i++) {
-        const w = CURTAIN_STEPS - i;
-        weights.push(w);
-        totalWeight += w;
-      }
       const stops = [];
-      let acc = 0;
       for (let i = 0; i < CURTAIN_STEPS; i++) {
         const target = Math.min(.97, Math.max(.06, base + away * i * CURTAIN_STEP_L));
         let band = color;
@@ -5168,11 +5154,8 @@
             : ((target - base) / (1 - base)) * 100;
           band = `color-mix(in oklab, ${color}, ${away < 0 ? 'black' : 'white'} ${p.toFixed(2)}%)`;
         }
-        const startPct = (acc / totalWeight) * 100;
-        acc += weights[i];
-        const endPct = (acc / totalWeight) * 100;
-        stops.push(`${band} ${startPct.toFixed(2)}%`);
-        stops.push(`${band} ${endPct.toFixed(2)}%`);
+        stops.push(`${band} ${(i / CURTAIN_STEPS * 100).toFixed(2)}%`);
+        stops.push(`${band} ${((i + 1) / CURTAIN_STEPS * 100).toFixed(2)}%`);
       }
       return `linear-gradient(to top, ${stops.join(', ')})`;
     }
