@@ -5117,7 +5117,7 @@
     // own copy rather than shared since the colour here never varies
     // (always Paper). Built once: it's a static gradient, only the
     // element's transform moves per frame.
-    const CURTAIN_STEPS = 5;
+    const CURTAIN_STEPS = 4;
     const CURTAIN_STEP_L = .085;
     const probe = document.createElement('span');
     probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:0;height:0';
