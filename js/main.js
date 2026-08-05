@@ -5156,6 +5156,25 @@
       // flood (initClosingHandoff).
       if (lead) lead.style.color = mix(PAPER, INK, t);
       if (body) body.style.color = mix(PAPER_70, INK_70, t);
+
+      // The dock: once the hold is spent (raw past runPx), the title is
+      // carried up by exactly the scroll past that point instead of
+      // being left to CSS's own sticky release. Tried leaving it to the
+      // browser first — position:sticky DOES release on its own once
+      // its containing block runs out, but it releases by tracking that
+      // container's OWN trailing edge, not the title's true static
+      // position, and the runway sitting between the two turned that
+      // into a permanent, unpredictable offset (measured 44px short of
+      // .apps__showcase's own margin-top, not 0 — see the note on
+      // .apps__intro in style.css). Translating it explicitly, 1px per
+      // 1px of scroll past the hold, reproduces the same "unstuck, now
+      // scrolling normally" motion but starting from an exact, known
+      // point, so the showcase's margin-top is the whole story: nothing
+      // to compensate for ("여백 80~100정도 두고... 자석처럼
+      // 도킹되듯이"). Continuous at the seam — at raw===runPx this is
+      // translateY(0), exactly where CSS sticky already had it pinned.
+      const excess = Math.max(0, raw - runPx);
+      intro.style.transform = excess > 0 ? `translateY(${(-excess).toFixed(1)}px)` : '';
     }
     function onScroll() {
       if (ticking) return;
