@@ -5128,7 +5128,7 @@
     // what closes the gap between the two coordinate spaces — same
     // fix already in place for the closing plate's own runway
     // (initClosingHandoff, initClosingEntrance).
-    let pinOffset = 0, runPx = 0;
+    let pinOffset = 0, runPx = 0, preroll = 0;
     function measure() {
       const introTopPx = parseFloat(getComputedStyle(intro).top) || 0;
       // Runway is a plain flow element, so its own offsetTop is reliable
@@ -5137,6 +5137,15 @@
       const introStaticTop = runway.offsetTop - intro.offsetHeight;
       pinOffset = introTopPx - introStaticTop;
       runPx = runway.offsetHeight;
+      // How far before the pin itself the crossfade starts — the hold
+      // is still the finish line (unchanged), but starting exactly at
+      // t=0 there read as an abrupt cut right as the title caught,
+      // rather than something already underway by the time it settles
+      // ("홀딩 되기 전부터 자연스럽게... 전환"). Scaled off the
+      // viewport, like the intro's own rise/fade window
+      // (initApplicationsEntrance's vh*.55), so the two motions read as
+      // one approach rather than two unrelated triggers.
+      preroll = window.innerHeight * .6;
     }
 
     let ticking = false;
@@ -5144,7 +5153,7 @@
       ticking = false;
       if (runPx <= 0) return;
       const raw = pinOffset - sec.getBoundingClientRect().top;
-      const t = smootherstep(clamp01(raw / runPx));
+      const t = smootherstep(clamp01((raw + preroll) / (runPx + preroll)));
       // Only touches the ground once the hold has actually begun — at
       // t=0 it would otherwise force opacity to 1 on every page load,
       // stomping the separate fade-IN initClosingHandoff drives during
