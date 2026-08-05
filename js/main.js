@@ -5084,6 +5084,7 @@
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smootherstep = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10);
+    const win = (v, a, b) => smootherstep(clamp01((v - a) / (b - a)));
 
     const parseColor = str => {
       const m = str.trim();
@@ -5220,6 +5221,29 @@
       // flood (initClosingHandoff).
       if (lead) lead.style.color = mix(PAPER, INK, t);
       if (body) body.style.color = mix(PAPER_70, INK_70, t);
+
+      // The title ducks under the curtain rather than riding visibly
+      // above it the whole way through — it fades out before the flap
+      // arrives (curtain covers the full viewport around t=.5) and
+      // back in a beat before the colour finishes settling, not at the
+      // exact instant it does, so the reappearance reads as its own
+      // moment rather than tied to the crossfade's own finish
+      // ("잠시 사라졌다가 색이 다 전환되기 약간 이전에 자연스럽게 다시
+      // 나타나게"). Opacity only — the dock's own translateY (below)
+      // still owns intro's transform, so this stays on a different
+      // property to avoid the two fighting over it.
+      const INTRO_OUT = [.20, .42];
+      const INTRO_IN = [.60, .85];
+      // Gated on t > INTRO_OUT[0], not written every frame — before
+      // that, .apps__intro's OWN entrance rise/fade
+      // (initApplicationsEntrance) is still what should be driving its
+      // opacity. Measured that animation finishes (locks at 1) by
+      // t=.058, well ahead of .20, so nothing is cut short by handing
+      // control over here.
+      if (t > INTRO_OUT[0]) {
+        const introVisible = clamp01(1 - win(t, INTRO_OUT[0], INTRO_OUT[1]) + win(t, INTRO_IN[0], INTRO_IN[1]));
+        intro.style.opacity = introVisible.toFixed(3);
+      }
 
       // The dock: once the hold is spent (raw past runPx), the title is
       // carried up by exactly the scroll past that point instead of
