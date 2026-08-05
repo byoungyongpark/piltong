@@ -5070,6 +5070,97 @@
 
   initApplicationsEntrance();
 
+  /* ---------- Applications: bg.png settles to solid Paper while the intro group holds ---------- */
+
+  function initApplicationsGroundFade() {
+    const sec = document.querySelector('.apps');
+    const ground = document.querySelector('.apps__ground');
+    const intro = document.querySelector('.apps__intro');
+    const runway = document.querySelector('.apps__runway');
+    const lead = document.querySelector('.apps__lead');
+    const body = document.querySelector('.apps__body');
+    if (!sec || !ground || !intro || !runway || prefersReduced) return;
+
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const smootherstep = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10);
+
+    const parseColor = str => {
+      const m = str.trim();
+      if (m.startsWith('#')) {
+        const h = m.slice(1);
+        const parts = h.length === 3
+          ? h.split('').map(c => c + c)
+          : [h.slice(0, 2), h.slice(2, 4), h.slice(4, 6)];
+        return parts.map(x => parseInt(x, 16)).concat(1);
+      }
+      const n = (m.match(/-?[\d.]+/g) || []).map(Number);
+      return [n[0] || 0, n[1] || 0, n[2] || 0, n.length > 3 ? n[3] : 1];
+    };
+    const mix = (a, b, t) => {
+      const c = [0, 1, 2].map(i => Math.round(a[i] + (b[i] - a[i]) * t));
+      const al = a[3] + (b[3] - a[3]) * t;
+      return al >= .999 ? `rgb(${c.join(',')})` : `rgba(${c.join(',')},${al.toFixed(3)})`;
+    };
+
+    const root = getComputedStyle(document.documentElement);
+    const readVar = n => root.getPropertyValue(n).trim();
+    const APPS_FILL = parseColor(readVar('--apps-fill'));
+    const PAPER = parseColor(readVar('--paper'));
+    const PAPER_70 = parseColor(readVar('--paper-70'));
+    const INK = parseColor(readVar('--ink'));
+    const INK_70 = parseColor(readVar('--ink-70'));
+
+    // The hold itself IS the transition's window — the runway is empty
+    // scroll that exists only so .apps__intro (sticky) reads as pinned
+    // in place while it passes beneath. Riding the same distance means
+    // the swap finishes exactly as the hold ends, with nothing left to
+    // cut over abruptly when the showcase content arrives next
+    // ("타이틀... 그룹이 상단에 홀딩될때 자연스럽게... 전환").
+    let pinStart = 0, runPx = 0;
+    function measure() {
+      const introTopPx = parseFloat(getComputedStyle(intro).top) || 0;
+      // Runway is a plain flow element, so its own offsetTop is reliable
+      // even while intro above it is sticky-displaced — same trick as
+      // the closing plate's own runway (initClosingHandoff).
+      const introStaticTop = runway.offsetTop - intro.offsetHeight;
+      pinStart = introStaticTop - introTopPx;
+      runPx = runway.offsetHeight;
+    }
+
+    let ticking = false;
+    function update() {
+      ticking = false;
+      if (runPx <= 0) return;
+      const t = smootherstep(clamp01((window.scrollY - pinStart) / runPx));
+      // Only touches the ground once the hold has actually begun — at
+      // t=0 it would otherwise force opacity to 1 on every page load,
+      // stomping the separate fade-IN initClosingHandoff drives during
+      // the handover itself (which runs long before scrollY ever
+      // reaches pinStart).
+      if (t > 0) ground.style.opacity = (1 - t).toFixed(3);
+      sec.style.backgroundColor = mix(APPS_FILL, PAPER, t);
+      // The copy has to invert with the ground or it goes invisible
+      // against Paper — same reasoning as the closing section's own
+      // flood (initClosingHandoff).
+      if (lead) lead.style.color = mix(PAPER, INK, t);
+      if (body) body.style.color = mix(PAPER_70, INK_70, t);
+    }
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+    function remeasure() { measure(); update(); }
+
+    remeasure();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+    window.addEventListener('load', remeasure);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', remeasure, { passive: true });
+  }
+
+  initApplicationsGroundFade();
+
   // The ground used to pan through its own length here — the image is
   // 1800x2601, far taller than any viewport once it covers the width, so
   // it travelled upward through a fixed window as you scrolled. Removed
