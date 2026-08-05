@@ -1,0 +1,39 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "color": {
+    "foundation": {
+      "ink": {
+        "$type": "color",
+        "$value": "#181C23",
+        "$description": "주요 텍스트, 어두운 배경, 구조를 만드는 기본색"
+      },
+      "paper": {
+        "$type": "color",
+        "$value": "#F7F5F0",
+        "$description": "기본 지면과 넓은 여백을 위한 따뜻한 바탕색"
+      },
+      "white": {
+        "$type": "color",
+        "$value": "#FFFFFF",
+        "$description": "디지털 UI, 역상 텍스트, 명료한 중립 배경"
+      }
+    },
+    "signal": {
+      "100": {
+        "$type": "color",
+        "$value": "#F24E1B",
+        "$description": "핵심 단어, 중요 상태, 작은 면적의 강한 강조"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#E75B35",
+        "$description": "중간 이상 면적의 신호색 배경과 그래픽 면"
+      },
+      "soft": {
+        "$type": "color",
+        "$value": "#F7D8CC",
+        "$description": "약한 강조, 안내 영역, 부드러운 상태 배경"
+      }
+    }
+  }
+}

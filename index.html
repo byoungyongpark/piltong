@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PILTONG — Digital Solution Partner</title>
+<meta name="description" content="PILTONG은 AI·디자인·개발 회사가 아니라, 복잡한 문제를 가장 적절한 방식으로 해결하는 디지털 솔루션 파트너입니다.">
+<link rel="icon" type="image/svg+xml" href="images/mark.svg">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<!-- Archivo and Saira dropped with the switch to a single Latin face;
+     IBM Plex Mono stays for the small labels, which are a separate role. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@100..900&display=swap">
+<link rel="stylesheet" href="css/style.css?v=2026080572">
+</head>
+<body>
+
+<!-- Filter defs only, never rendered directly — feMorphology (dilate)
+     fuses close/overlapping glyph shapes into one solid silhouette,
+     then feComposite "out" against the un-dilated original keeps only
+     the RING that grew outward from it. That ring, not a per-glyph
+     -webkit-text-stroke, is what .whyp__row--outline uses: a stroke
+     that reads as one continuous outline around the merged word
+     instead of doubled-up lines wherever two letters sit close
+     together. Reinstated after two cheaper alternatives (a bare
+     blur(), then a thinner plain stroke) both looked worse than this
+     one did — the actual complaint was specifically about a
+     continuous-scroll flicker, not this technique's own visual
+     result, so bring the LOOK back and keep chasing the flicker
+     separately rather than trading the look away for it. See
+     css/style.css for how it's applied. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- radius (ring thickness) 2.2 -> 1.3, flood-opacity (ring colour)
+         .38 -> .22 — thinner and lighter, so the ring reads as a
+         delicate line even where the underlying dilate still has to
+         bridge a seam between two close letters, rather than a thick
+         dark line making any remaining imperfection more obvious. -->
+    <filter id="whypOutlineFilter" x="-1%" y="-10%" width="102%" height="120%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="1.3" result="dilated"/>
+      <feComposite in="dilated" in2="SourceAlpha" operator="out" result="ring"/>
+      <feFlood flood-color="#181C23" flood-opacity=".22" result="ringColor"/>
+      <feComposite in="ringColor" in2="ring" operator="in"/>
+    </filter>
+  </defs>
+</svg>
+
+<main id="top">
+
+  <!-- ===== 01 Hero ===== -->
+  <div class="hero-bleed">
+    <div class="hero-bleed__bg" id="heroBg" aria-hidden="true"></div>
+
+    <section class="frame frame--ink hero">
+      <button type="button" class="hero-logo hero-in" id="heroLogo" data-hero-timed="mark" aria-label="PILTONG — 맨 위로 이동">
+        <svg class="hero-logo__mark" viewBox="0 0 229.56 30.65" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M19.69,0H4.92C2.2,0,0,2.2,0,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-10.61h13.65c2.72,0,4.92-2.2,4.92-4.92V4.92c0-2.72-2.2-4.92-4.92-4.92ZM18.57,11.73c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-3.72c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v3.72Z"/>
+          <path d="M38.79,0h4.08c1.09,0,1.97.88,1.97,1.97v28.39h-4.08c-1.09,0-1.97-.88-1.97-1.97V0h0Z" transform="translate(83.62 30.36) rotate(-180)"/>
+          <path d="M185.85,0h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08V8.01c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v20.38c0,1.09.88,1.97,1.97,1.97h4.08V4.92c0-2.72-2.2-4.92-4.92-4.92Z"/>
+          <path d="M101.94,0h-13.36v4.08c0,1.09.88,1.97,1.97,1.97h7.32v22.35c0,1.09.88,1.97,1.97,1.97h4.08V6.05h9.28V1.97c0-1.09-.88-1.97-1.97-1.97h-9.28Z"/>
+          <path d="M81.65,24.6h-16.6V1.97c0-1.09-.88-1.97-1.97-1.97h-4.08v28.68c0,1.09.88,1.97,1.97,1.97h22.65v-4.08c0-1.09-.88-1.97-1.97-1.97Z"/>
+          <path d="M147.06,0h-14.77c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92V4.92c0-2.72-2.2-4.92-4.92-4.92ZM145.94,22.35c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v14.33Z"/>
+          <path d="M209.87,0c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-11.23c0-1.09-.88-1.97-1.97-1.97h-10.34v4.08c0,1.09.88,1.97,1.97,1.97h4.29v4.06c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h16.6V1.97c0-1.09-.88-1.97-1.97-1.97h-17.72Z"/>
+        </svg>
+      </button>
+
+      <div class="hero-content">
+        <p class="hero-eyebrow hero-in" data-hero-timed="eyebrow">A New Beginning</p>
+        <h1 class="display display--en hero-in hero-in--clip" data-hero-timed="title">
+          <span class="hero-line">Designing</span>
+          <span class="hero-line">The</span>
+          <span class="hero-line">Appropriate</span>
+          <span class="hero-line">Solution</span>
+        </h1>
+      </div>
+
+      <div class="frame__meta hero-in" data-hero-timed="meta">
+        <span class="scroll-cue"><em class="scroll-cue__label">SCROLL</em><i></i></span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===== 02 Our Philosophy =====
+       Deliberately a sibling of .hero-bleed, not a child: that wrapper
+       clips its overflow, which would cut off the display type where
+       it spills onto the next section. -->
+  <section class="frame frame--paper statement" id="ourPhilosophy">
+    <div class="statement__stage">
+      <figure class="statement__figure reveal">
+        <!-- Stable clip mask: .statement__figure never itself moves (bar
+             the one-shot .reveal entrance), so its overflow:hidden acts
+             as a fixed window around the tilt below — see style.css. -->
+        <div class="statement__tilt">
+          <div class="statement__media" id="statementMedia">
+            <!-- Was overview.jpg. The scroll-driven cross-fade that used to
+                 cycle several stills here only engages with two or more
+                 frames (initStatementMedia, main.js), so a single moving
+                 source replaces it outright rather than sitting inside it. -->
+            <video class="statement__video" autoplay muted loop playsinline aria-hidden="true">
+              <source src="images/philosophy.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </figure>
+
+      <!-- Source order is photo, then this text column, so the stacked
+           mobile layout reads correctly; the desktop grid places both
+           explicitly, so their order here does not bind it.
+           The English + Korean group is wrapped together so it can be
+           ONE sticky item — see .statement__col — pinned in the tall
+           column the photo occupies until the photo's own bottom
+           approaches, at which point it releases like any sticky
+           element and scrolls on with the rest of the page. -->
+      <div class="statement__col">
+        <!-- No .reveal on the English — main.js splits each line into
+             per-letter spans and animates them itself (see
+             initPhilosophyScatter). If JS never runs, the words just
+             sit static and readable; there is no opacity:0 default to
+             strand them invisible. -->
+        <p class="statement__big" id="philosophyWord">
+          <span class="statement__line" data-word="OUR">OUR</span>
+          <span class="statement__line" data-word="PHILO">PHILO</span>
+          <span class="statement__line" data-word="SOPHY">SOPHY</span>
+        </p>
+
+        <!-- No .reveal here either — like the English above, these are
+             driven directly by initPhilosophyScatter (see main.js) so
+             their entrance can be SEQUENCED after the English letters
+             finish pouring in, and so they replay on re-entry the same
+             way the English does. The generic .reveal system is
+             one-shot and fires independently of the English timing, so
+             it can't do either of those. -->
+        <div class="statement__body">
+          <p class="statement__lead statement__korean-in"><span class="statement__lead-line1">우리는 기술보다</span><br>문제를 먼저 봅니다.</p>
+          <p class="statement__detail statement__korean-in">기술은 목적이 아니라 수단입니다.<br>우리는 문제의 본질을 이해하고,<br>가장 적절한 해결책을 설계합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 02 -> 03 transition =====
+       A scroll-driven wipe standing in for DFY's year cards: VISION
+       rises from the bottom, zooms until it leaves the frame, and the
+       ground changes to section 03's photograph behind it. Once the
+       word has fully zoomed away and the ground has settled, three
+       vision statements cross-blur into one another in the same
+       centred spot — see initVisionWipe's ZOOM_FRACTION split in
+       main.js for how one section hosts both phases on one continuous
+       scroll-progress value. The outer section is only a scroll
+       runway — everything visible is in the sticky stage, which is why
+       both phases still read as one screen apiece. -->
+  <section class="vwipe" id="visionWipe">
+    <div class="vwipe__stage">
+      <div class="vwipe__ground vwipe__ground--from" aria-hidden="true"></div>
+      <div class="vwipe__ground vwipe__ground--to" aria-hidden="true"></div>
+      <span class="vwipe__word" aria-hidden="true">VISION</span>
+      <div class="vwipe__vision" id="vwipeVision">
+        <div class="vwipe__vstep">
+          <span class="vwipe__veng">More Clarity</span>
+          <h2 class="vwipe__vtitle">더 명확한 경험</h2>
+          <p class="vwipe__vbody">복잡한 기술보다<br>누구나 쉽게 이해할 수 있는<br>디지털 경험을 만듭니다.</p>
+        </div>
+        <div class="vwipe__vstep">
+          <span class="vwipe__veng">Better Connection</span>
+          <h2 class="vwipe__vtitle">더 자연스러운 연결</h2>
+          <p class="vwipe__vbody">전략, 디자인, 기술을<br>하나의 흐름으로 연결하여<br>더 나은 해결을 만듭니다.</p>
+        </div>
+        <div class="vwipe__vstep">
+          <span class="vwipe__veng">Lasting Value</span>
+          <h2 class="vwipe__vtitle">오래 지속되는 가치</h2>
+          <p class="vwipe__vbody">일회성 결과보다<br>오랫동안 사용할 수 있는<br>디지털 시스템을 설계합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 04 How We Think — PARKED (hidden 일단, restore by removing this comment wrap) =====
+  <section id="how-we-think" class="frame frame--ink frame--auto hwt">
+    <div class="hwt__head">
+      <p class="eyebrow reveal">OUR APPROACH</p>
+      <h2 class="hwt__title reveal">우리의 기준을<br>실천하는 방식</h2>
+      <div class="hwt__desc">
+        <p class="reveal">우리는 해결책을 먼저 정하지 않습니다.</p>
+        <p class="reveal">문제의 본질과 목적을 이해한 뒤,<br>가장 적절한 방향을 설계합니다.</p>
+      </div>
+    </div>
+
+    <ol class="hwt__grid">
+      <li class="hwt__card reveal" data-delay="0">
+        <span class="hwt__num">01</span>
+        <span class="hwt__key">Essential</span>
+        <h3 class="hwt__name">본질에서 시작합니다.</h3>
+      </li>
+      <li class="hwt__card reveal" data-delay="90">
+        <span class="hwt__num">02</span>
+        <span class="hwt__key">Appropriate</span>
+        <h3 class="hwt__name">가장 적절한 방법을 선택합니다.</h3>
+      </li>
+      <li class="hwt__card reveal" data-delay="180">
+        <span class="hwt__num">03</span>
+        <span class="hwt__key">Integrated</span>
+        <h3 class="hwt__name">필요한 역량을 연결합니다.</h3>
+      </li>
+      <li class="hwt__card reveal" data-delay="270">
+        <span class="hwt__num">04</span>
+        <span class="hwt__key">Sustainable</span>
+        <h3 class="hwt__name">오래 사용할 수 있는 시스템을 만듭니다.</h3>
+      </li>
+    </ol>
+  </section>
+  ===== end 04 (parked) ===== -->
+
+  <!-- ===== 05 Our Approach =====
+       Not a pinned/scroll-jacked stage any more — content scrolls past
+       normally (each .acycle__step is plain document flow, alternating
+       left/right), while .acycle__bg stays pinned behind it the whole
+       time via the sticky-with-negative-margin trick (see .acycle__bg
+       in style.css) and swaps its active ground image once per step,
+       driven by initApproachActive's IntersectionObserver in main.js —
+       not a continuous scroll-position blend. Backgrounds are temporary
+       placeholders reusing existing site imagery; swap the four
+       .acycle__ground background-image URLs when real photos are
+       ready — nothing else needs to change.
+       .acycle__intro is a full-screen title moment ahead of the four
+       steps, not one of them — initApproachActive only ever looks at
+       .acycle__step, so it sits over ground 0 (already .is-active by
+       default) without any script change. -->
+  <section class="acycle" id="ourApproach" data-eq-bg="light">
+    <div class="acycle__bg" aria-hidden="true">
+      <div class="acycle__ground is-active" style="background-image:url('images/bg_approach.png')"></div>
+      <div class="acycle__ground" style="background-image:url('images/bg_approach_02.png')"></div>
+      <div class="acycle__ground" style="background-image:url('images/bg_approach_03.png')"></div>
+      <div class="acycle__ground" style="background-image:url('images/bg_approach_04.png')"></div>
+      <div class="acycle__scrim"></div>
+    </div>
+
+    <div class="acycle__list" id="acycleList">
+      <div class="acycle__intro acycle__intro--onlight">
+        <h2 class="acycle__intro-title">OUR APPROACH</h2>
+      </div>
+      <div class="acycle__step acycle__step--left acycle__step--onlight">
+        <h2 class="acycle__word">Essential</h2>
+        <div class="acycle__copy">
+          <h3 class="acycle__title">본질에서의 시작</h3>
+          <p class="acycle__body">요청된 기능보다<br>해결해야 할 문제를 먼저 이해합니다.</p>
+        </div>
+      </div>
+      <div class="acycle__step acycle__step--right acycle__step--onlight">
+        <h2 class="acycle__word">Appropriate</h2>
+        <div class="acycle__copy">
+          <h3 class="acycle__title">가장 적절한 선택</h3>
+          <p class="acycle__body">새로운 기술보다<br>상황과 목적에 맞는 해결을 선택합니다.</p>
+        </div>
+      </div>
+      <div class="acycle__step acycle__step--left acycle__step--onlight">
+        <h2 class="acycle__word">Integrated</h2>
+        <div class="acycle__copy">
+          <h3 class="acycle__title">필요 역량의 연결</h3>
+          <p class="acycle__body">전략, 디자인, 기술을<br>하나의 흐름으로 연결하여 완성합니다.</p>
+        </div>
+      </div>
+      <div class="acycle__step acycle__step--right acycle__step--onlight">
+        <h2 class="acycle__word">Sustainable</h2>
+        <div class="acycle__copy">
+          <h3 class="acycle__title">지속 가능한 설계</h3>
+          <p class="acycle__body">일회성 결과보다<br>지속 가능한 구조와 경험을 만듭니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Why Piltong =====
+       Two counter-scrolling marquee rows (solid "WHY PILTONG" / outline
+       "WHY PILTONG") run continuously via CSS animation — that part
+       isn't scroll-linked. What IS scroll-linked (initWhyPiltong in
+       main.js): as the section's own runway scrolls, the mark rises
+       and scales into the centre, and the marquee rows blur in step
+       with it, so attention hands off from the moving title to the
+       mark. A second, separate sticky runway below cross-blurs through
+       the copy beats one at a time — same HOLD/FADE presence math
+       #visionWipe's own vision-statement cycle uses — with the
+       "디자인/기술/AI/전략" beat additionally gathering in from four
+       scattered starting points as its own beat takes over, echoing
+       the copy's own "여러 도구가 정리된 하나의 시스템" idea in motion
+       rather than only in the words. -->
+  <section class="whyp" id="whyPiltong">
+    <div class="whyp__marquee-stage">
+      <div class="whyp__marquee-sticky">
+        <!-- Each track is now ONE text run, not four separate <span>s —
+             four elements each contributing their own layout box meant
+             four separate chances for sub-pixel width rounding to
+             disagree between this row's two (supposedly identical)
+             tracks, which is what read as a visible jump/flicker right
+             at the loop seam. One run per track removes that
+             entirely: both tracks are now guaranteed pixel-identical
+             widths, since they're the exact same string laid out the
+             exact same way. -->
+        <div class="whyp__row whyp__row--solid" aria-hidden="true">
+          <!-- Same three photos, same order, in both tracks, so the two
+               stay pixel-identical for the seamless loop. Three, not
+               four — see the outline row below for why. -->
+          <div class="whyp__track">WHY PILTONG<img class="whyp__track-photo" src="images/w_01.jpg" alt="">WHY PILTONG<img class="whyp__track-photo" src="images/w_02.jpg" alt="">WHY PILTONG<img class="whyp__track-photo" src="images/w_03.jpg" alt=""></div>
+          <div class="whyp__track">WHY PILTONG<img class="whyp__track-photo" src="images/w_01.jpg" alt="">WHY PILTONG<img class="whyp__track-photo" src="images/w_02.jpg" alt="">WHY PILTONG<img class="whyp__track-photo" src="images/w_03.jpg" alt=""></div>
+        </div>
+        <div class="whyp__row whyp__row--outline" aria-hidden="true">
+          <!-- Photos here too, but NOT by splitting the filter across
+               per-phrase spans again (tried once, fragmented it into 8
+               filtered elements instead of 2 and made the flicker
+               frequent enough to notice). Instead: these two tracks
+               stay plain text, filtered as a whole (2 elements, same
+               as the safe baseline) with a blank reserved slot — same
+               box as .whyp__track-photo — everywhere a photo should
+               sit. A second, unfiltered .whyp__row-photos layer with
+               the mirror-image structure (blank WHERE the text is,
+               real photos where the slots are) sits absolutely
+               positioned on top, running the exact same animation so
+               it never drifts out of sync. -->
+          <div class="whyp__track">WHY PILTONG<span class="whyp__track-photo--ghost"></span>WHY PILTONG<span class="whyp__track-photo--ghost"></span>WHY PILTONG<span class="whyp__track-photo--ghost"></span></div>
+          <div class="whyp__track">WHY PILTONG<span class="whyp__track-photo--ghost"></span>WHY PILTONG<span class="whyp__track-photo--ghost"></span>WHY PILTONG<span class="whyp__track-photo--ghost"></span></div>
+          <div class="whyp__row-photos">
+            <div class="whyp__track"><span class="whyp__track-text--ghost">WHY PILTONG</span><img class="whyp__track-photo" src="images/w_05.jpg" alt=""><span class="whyp__track-text--ghost">WHY PILTONG</span><img class="whyp__track-photo" src="images/w_06.jpg" alt=""><span class="whyp__track-text--ghost">WHY PILTONG</span><img class="whyp__track-photo" src="images/w_08.jpg" alt=""></div>
+            <div class="whyp__track"><span class="whyp__track-text--ghost">WHY PILTONG</span><img class="whyp__track-photo" src="images/w_05.jpg" alt=""><span class="whyp__track-text--ghost">WHY PILTONG</span><img class="whyp__track-photo" src="images/w_06.jpg" alt=""><span class="whyp__track-text--ghost">WHY PILTONG</span><img class="whyp__track-photo" src="images/w_08.jpg" alt=""></div>
+          </div>
+        </div>
+        <div class="whyp__media">
+          <!-- Sits inside the media box, so it rides with the footage as
+               that translates up the screen. The marquee behind already
+               says WHY PILTONG in full-bleed type, so this is decorative
+               rather than a second heading — aria-hidden keeps it out of
+               the reading order (the section's own h2 is
+               .whyp__sr-title). -->
+          <span class="whyp__media-label" aria-hidden="true">WHY PILTONG</span>
+          <!-- No autoplay attribute — initWhyPiltong in main.js starts
+               it once the mark has actually begun rising into view
+               (mediaP > 0) and pauses it again once fully scrolled
+               back out, rather than playing immediately on page load
+               regardless of scroll position. muted is required for
+               autoplay to be allowed at all in effectively every
+               browser; playsinline stops iOS from hijacking it into
+               fullscreen the moment it starts. -->
+          <video class="whyp__media-img" muted loop playsinline preload="metadata">
+            <source src="images/movie.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+      <h2 class="whyp__sr-title">Why Piltong</h2>
+    </div>
+    <div class="whyp__copy-stage">
+      <div class="whyp__copy-sticky">
+        <!-- Fades in once this stage is fully pinned, holds through all
+             the beats, fades out again before release into Brand wall
+             — see the BG_WHY_* constants in initWhyPiltong (main.js). -->
+        <img class="whyp__copy-bg" src="images/bg_why.png" alt="" aria-hidden="true">
+        <p class="whyp__step">필통은<br>도구를 담는 물건이 아닙니다.</p>
+        <p class="whyp__step">필요한 순간,<br>가장 적절한 도구를 꺼낼 수 있도록<br>정리된 하나의 시스템입니다.</p>
+        <p class="whyp__step whyp__step--bridge">우리에게도 중요한 것은<br>더 많은 기술이 아니라,<br><mark>가장 적절한 선택</mark>입니다.</p>
+        <div class="whyp__step whyp__keywords">
+          <span class="whyp__keyword">디자인</span>
+          <span class="whyp__keyword">기술</span>
+          <span class="whyp__keyword whyp__keyword--en">AI</span>
+          <span class="whyp__keyword">전략</span>
+        </div>
+        <p class="whyp__step">우리는 많은 것을 만드는 회사가 아니라,<br>문제에 맞는 가장 적절한 해결을<br>선택하고 연결하는 파트너입니다.</p>
+        <p class="whyp__step whyp__step--conclusion">그 생각을 가장 잘 담을 수 있는 이름, <mark>PILTONG</mark>입니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Brand wall =====
+       Full-bleed concrete photo with the white logo revealing glyph by
+       glyph, left of centre in the shadowed bay. Closes the page as
+       the finale right after WHY PILTONG's last beat. Both driven by
+       the same scroll progress in initBrandWall (main.js): the photo
+       (.brandwall__bg) rises into place and keeps drifting gently, and
+       the logo's per-glyph stagger (is-in) re-plays every time the
+       section is entered — scrolling down into it or back up into it
+       — rather than once ever, which is why it isn't on the generic
+       one-shot .reveal system. -->
+  <section class="frame brandwall">
+    <video class="brandwall__bg" autoplay muted loop playsinline aria-hidden="true">
+      <source src="images/logo_promotion_background.mp4" type="video/mp4">
+    </video>
+    <div class="brandwall__logo" role="img" aria-label="PILTONG">
+      <!-- Symbol: no reflection — only the wordmark below gets one. -->
+      <svg class="brandwall__symbol" viewBox="0 0 70.87 70.87" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g class="bw-glyph" style="--i:0"><path d="M23.02,43.39c-3.13,0-5.67-2.54-5.67-5.67v-14.65c0-3.13,2.54-5.67,5.67-5.67h24.68c3.13,0,5.67,2.54,5.67,5.67v11.65c0,3.12,2.55,5.67,5.67,5.67h11.83V14.17c0-7.83-6.35-14.17-14.17-14.17H14.17C6.35,0,0,6.35,0,14.17v42.52c0,7.83,6.35,14.17,14.17,14.17h26.19v-21.8c0-3.12-2.55-5.67-5.67-5.67h-11.67Z"/></g>
+      </svg>
+      <svg class="brandwall__wordmark" viewBox="99.66 20.11 229.56 30.37" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g class="bw-glyph" style="--i:1"><path d="M119.35,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-10.61h13.65c2.72,0,4.92-2.2,4.92-4.92v-9.9c0-2.72-2.2-4.92-4.92-4.92ZM118.22,31.84c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-3.72c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v3.72Z"/></g>
+        <g class="bw-glyph" style="--i:2"><path d="M138.44,20.11h4.08c1.09,0,1.97.88,1.97,1.97v28.39h-4.08c-1.09,0-1.97-.88-1.97-1.97v-28.39h0Z" transform="translate(282.93 70.58) rotate(-180)"/></g>
+        <g class="bw-glyph" style="--i:3"><path d="M181.31,44.71h-16.6v-22.63c0-1.09-.88-1.97-1.97-1.97h-4.08v28.68c0,1.09.88,1.97,1.97,1.97h22.65v-4.08c0-1.09-.88-1.97-1.97-1.97Z"/></g>
+        <g class="bw-glyph" style="--i:4"><path d="M201.59,20.11h-13.36v4.08c0,1.09.88,1.97,1.97,1.97h7.32v22.35c0,1.09.88,1.97,1.97,1.97h4.08v-24.32h9.28v-4.08c0-1.09-.88-1.97-1.97-1.97h-9.28Z"/></g>
+        <g class="bw-glyph" style="--i:5"><path d="M246.71,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-20.51c0-2.72-2.2-4.92-4.92-4.92ZM245.59,42.45c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v14.33Z"/></g>
+        <g class="bw-glyph" style="--i:6"><path d="M285.5,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-22.35c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v20.38c0,1.09.88,1.97,1.97,1.97h4.08v-25.44c0-2.72-2.2-4.92-4.92-4.92Z"/></g>
+        <g class="bw-glyph" style="--i:7"><path d="M309.52,20.11c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-11.23c0-1.09-.88-1.97-1.97-1.97h-10.34v4.08c0,1.09.88,1.97,1.97,1.97h4.29v4.06c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h16.6v-4.08c0-1.09-.88-1.97-1.97-1.97h-17.72Z"/></g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ===== 06 Brand Identity =====
+       Dark-to-light hand-off from Brand wall lives in initBrandIdentity
+       (main.js): .brandid__intro's own background-color is set inline,
+       charcoal → warm grey → paper, tied to the SAME kind of scroll
+       progress every other section entrance in this file uses, not a
+       separate transition section. -->
+  <section class="frame brandid brandid__intro" id="brandIdentity">
+    <div class="brandid__intro-head">
+      <span class="brandid__intro-index"><span class="brandid__intro-index-line brandid__intro-index-line--brand">VISUAL</span><span class="brandid__intro-index-line brandid__intro-index-line--identity">IDENTI<span class="brandid__intro-index-kern">T</span>Y</span></span>
+    </div>
+    <div class="brandid__intro-stack">
+      <!-- Not the full symbol again (Brand wall just closed on that) —
+           an actual macro shot: structure (the corner, the curve, the
+           open notch) before material. Centred and full-width, with
+           the index word above pulled down to just tuck under it.
+           No pin/runway any more (removed on request) — scales/slides
+           into place over the same one-screen natural approach as
+           Brand wall's own video (see initBrandIdentity's updateIntro
+           in main.js), not a long pinned scrub. -->
+      <div class="brandid__intro-photo">
+        <div class="brandid__intro-photo-frame">
+          <img class="brandid__intro-photo-img" src="images/symbol_dev.png" alt="PILTONG 심볼 디테일" width="1376" height="768">
+        </div>
+      </div>
+      <div class="brandid__intro-row">
+        <h2 class="brandid__intro-title brandid__reveal">기준이<br>형태가 되는 순간</h2>
+        <div class="brandid__intro-copy">
+          <p class="brandid__body brandid__reveal">PILTONG의 아이덴티티는<br>우리의 기준을 가장 단순한 형태로 압축한 결과입니다.</p>
+          <p class="brandid__body brandid__reveal">복잡함을 정리하고,<br>적절한 방향을 선택하며,<br>하나의 명확한 인상으로 연결합니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shape DNA: one sticky viewport-height stage for the whole section
+       (same "tall runway, sticky stage inside it" shape the Color
+       Principle stage below uses) — 40% media / 60% title+principles,
+       both columns held fixed on screen the whole time. Only the
+       principles cross-fade (data-dna index driven by continuous scroll
+       progress through the runway, updateDna in main.js), same restraint
+       as before (opacity only). -->
+  <!-- 40/60, both edges flush with the viewport (no outer margin either
+       side) — video fills its 40% completely (object-fit:cover, no
+       gap top/bottom/left); SHAPE/DNA sits left-aligned directly above
+       "형태를 만드는" (same left edge, font-size untouched), that title
+       + the four principles keep their existing left/right layout
+       unchanged, and the whole right-hand group is vertically centred
+       within the 60%. -->
+  <section class="frame--paper brandid brandid__dna" id="shapeDna">
+    <div class="brandid__dna-sticky">
+      <div class="brandid__dna-media">
+        <video class="brandid__dna-media-video" autoplay muted loop playsinline aria-hidden="true">
+          <source src="images/symbol_loop.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="brandid__dna-right">
+        <div class="brandid__dna-group">
+          <span class="brandid__dna-index" aria-hidden="true">SHAPE DNA</span>
+          <h2 class="brandid__dna-title">형태를 만드는 네 가지 기준</h2>
+        </div>
+        <div class="brandid__dna-detail-col">
+          <div class="brandid__dna-items">
+            <article class="brandid__dna-item" data-dna="0">
+              <h3 class="brandid__dna-name"><span class="brandid__dna-kr">균형</span>BALANCE</h3>
+              <p class="brandid__dna-copy">샤프함과 부드러움이<br>한쪽으로 치우치지 않도록 조율했습니다.</p>
+            </article>
+            <article class="brandid__dna-item" data-dna="1">
+              <h3 class="brandid__dna-name"><span class="brandid__dna-kr">열림</span>OPENNESS</h3>
+              <p class="brandid__dna-copy">닫힌 형태보다 확장성과 가능성을 남기는<br>열린 구조를 선택했습니다.</p>
+            </article>
+            <article class="brandid__dna-item" data-dna="2">
+              <h3 class="brandid__dna-name"><span class="brandid__dna-kr">명확성</span>CLARITY</h3>
+              <p class="brandid__dna-copy">작은 크기에서도 형태와 인상이<br>분명하게 유지되도록 설계했습니다.</p>
+            </article>
+            <article class="brandid__dna-item" data-dna="3">
+              <h3 class="brandid__dna-name"><span class="brandid__dna-kr">흐름</span>FLOW</h3>
+              <p class="brandid__dna-copy">각 요소가 끊어지지 않고 하나의<br>방향으로 이어지는 조형 리듬을 담았습니다.</p>
+            </article>
+          </div>
+        </div>
+        <!-- Was a single span whose textContent was swapped on each
+             step, so the number changed with no motion at all. Now a
+             reel: all four numerals stacked in a column behind a
+             one-numeral-tall window, rolled by transform as the active
+             index changes, the way a date picker's drum turns
+             ("숫자 달력 피커 넘어가는 듯한 모션"). updateDna (main.js)
+             drives it; the cells are authored here so the markup still
+             makes sense with JS off. -->
+        <div class="brandid__dna-num" aria-hidden="true">
+          <!-- The leading zero is a separate, static glyph: only the
+               digit that actually changes turns on the drum
+               ("숫자 0은 고정되고 뒤에 바뀌는 숫자만 모션"). Rolling
+               "01"→"02" as one unit spun a 0 that never differs, which
+               read as the whole number shuddering rather than counting. -->
+          <span class="brandid__dna-num-fixed">0</span>
+          <div class="brandid__dna-num-window">
+            <div class="brandid__dna-num-reel">
+              <span class="brandid__dna-num-cell">1</span>
+              <span class="brandid__dna-num-cell">2</span>
+              <span class="brandid__dna-num-cell">3</span>
+              <span class="brandid__dna-num-cell">4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Symbol Construction: left ~60% a large annotated mark, right ~40%
+       copy. Guide lines are hairline, pale ink — a hint of proportion,
+       not a CI-manual spec sheet (no dimension numbers). -->
+  <section class="frame frame--auto frame--paper brandid brandid__construction">
+    <div class="brandid__construction-row">
+      <span class="brandid__construction-index">SYMBOL &amp; WORDMARK</span>
+      <div class="brandid__construction-text">
+        <p class="brandid__lead">단순한 형태는<br>덜어낸 결과가 아니라,<br>필요한 것만 남긴 결과입니다.</p>
+        <p class="brandid__body">PILTONG의 심볼은<br>균형, 여백, 열림과 흐름을 기준으로 설계되어<br>작은 크기에서도 명확한 인상을 유지합니다.</p>
+      </div>
+    </div>
+    <div class="brandid__sizes" aria-hidden="true">
+      <div class="brandid__sizes-item">
+        <img src="images/logo.svg" alt="" style="width:100%">
+      </div>
+      <!-- Sits between the first and second logo in FLOW, which is what
+           sets where it pins: it holds its place until that point scrolls
+           past the sticky line, then rides the bottom of the screen for
+           the rest of the logo run and releases at the last one. It rises
+           in on the second logo's own scroll position (main.js), so it
+           arrives with that logo rather than being there already.
+           height:0 (css) keeps it out of the stack — the logos' spacing
+           is unchanged by its presence. -->
+      <div class="brandid__sizes-loop" data-eq-bg="dark" data-eq-bg-scope="equalizer">
+        <video class="brandid__sizes-loop-video" autoplay muted loop playsinline aria-hidden="true">
+          <source src="images/hf_seamless_loop.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="brandid__sizes-item">
+        <img src="images/logo.svg" alt="" style="width:80%">
+      </div>
+      <div class="brandid__sizes-item">
+        <img src="images/logo.svg" alt="" style="width:60%">
+      </div>
+      <div class="brandid__sizes-item">
+        <img src="images/logo.svg" alt="" style="width:40%">
+      </div>
+      <div class="brandid__sizes-item">
+        <img src="images/logo.svg" alt="" style="width:20%">
+      </div>
+    </div>
+  </section>
+
+  <!-- Symbol Construction (blueprint): a hand-derived bezier-anchor
+       diagram of the actual PILTONG mark, in the same anchor(square)/
+       handle(circle) vocabulary a type-design construction diagram
+       uses (font editor's own visualisation of a glyph's bezier
+       skeleton) — on request ("심볼 svg를 활용해서... 두번째 참조 사진
+       그래픽 형태처럼... 네가 직접 그려봐줄 수 있어?"). Coordinates below
+       are the mark's own path (.brandid__color-symbol etc share the
+       same d) traced segment by segment: every M/V/H/C/c/v/h advances
+       the current point, each cubic (c/C) contributing one on-curve
+       anchor pair plus two off-curve control points, each v/h/V/H
+       contributing an anchor with no handles. 18 anchors, 8 curved
+       corners (16 control points/handle lines) — matches the mark's
+       own construction exactly rather than approximating it.
+
+       Second state (wordmark) added below within the SAME section
+       rather than as its own section, on request ("같은 섹션에서 화면
+       전환으로 이 내용이 나오면 좋겠고") — a pinned stage
+       (.brandid__blueprint-stage/-sticky, same tall-wrapper + sticky-
+       inner shape as .brandid__color-stage/-sticky) holding two
+       full-bleed panels that cross-fade into one another as
+       initBlueprintTransition (main.js) reads scroll progress through
+       the stage, the same continuous scroll-scrubbed approach Color
+       Principle's own screen transition already uses rather than a
+       fixed-duration CSS transition. The wordmark panel carries no
+       anchors/handles ("워드마크는 앵커는 빼고 시원하게 화면 꽉차게
+       크게") — instead the 7 letterform paths (copied from
+       .brandwall__wordmark) are shown large and UNFILLED, their
+       outlines drawing themselves in as the panel comes up on scroll
+       ("라인만 그려지는 느낌으로 구현하고 색상은 채우지 말고"), with the
+       same content structure as the symbol panel underneath. The draw
+       is stroke-dashoffset per letter, timed in JS from each path's own
+       measured length (initBlueprintTransition, main.js).
+
+       Third and fourth states — the mark redrawing itself under the
+       wheel, and Color Principle itself — now live in this SAME pinned
+       sticky too. They were separate sections, which meant that after
+       the wordmark the page had to scroll on and the next section rose
+       up from below to take over. What was wanted is the opposite: the
+       viewport never moves again after the wordmark, and everything
+       that follows happens right here ("워드마크 섹션에서 아래로
+       스크롤되서 진행되는게 아니고... 그 섹션에서 모든동작이 일어나길").
+       So the element below carries BOTH stage class names and Color
+       Principle's id: one pinned stage, four phases, split by
+       BLUEPRINT_END and COLOR_INTRO_END in main.js. -->
+  <section class="brandid brandid__blueprint">
+    <div class="brandid__blueprint-stage brandid__color-stage" id="colorPrinciple">
+      <div class="brandid__blueprint-sticky brandid__color-sticky">
+        <div class="brandid__color-flash" aria-hidden="true"></div>
+        <div class="brandid__blueprint-panel brandid__blueprint-panel--diagram">
+          <div class="brandid__blueprint-row">
+            <div class="brandid__blueprint-visual">
+              <svg class="brandid__blueprint-svg" viewBox="-10 -10 90.87 90.87" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PILTONG 심볼의 베지어 구조 다이어그램">
+                <!-- Construction guides, drawn BEFORE the mark and
+                     scrubbed by the same wheel ("그리드 같은게 먼저...
+                     이것도 휠에 반응"). Four lines only — the mark's own
+                     bounding edges, run past their intersections so they
+                     read as a single # around it ("바깥쪽 # 이모양만").
+                     The seventeen-line version that sat on every anchor
+                     coordinate was noise at this size; these four say
+                     the same thing (here is the square the shape was
+                     built inside) and leave the mark legible. -->
+                <g class="bp-grid">
+                  <line x1="0" y1="-10" x2="0" y2="80.87"/>
+                  <line x1="70.87" y1="-10" x2="70.87" y2="80.87"/>
+                  <line x1="-10" y1="0" x2="80.87" y2="0"/>
+                  <line x1="-10" y1="70.86" x2="80.87" y2="70.86"/>
+                  <!-- Every arc the mark is actually built from, drawn as
+                       its full circle. Not a circle inscribed in the
+                       square — that version was just "a round thing in a
+                       box" and the outline never touched it anywhere.
+                       These are the real ones: each centre and radius is
+                       lifted straight out of the path's own curve
+                       commands, so a quarter of every circle below IS a
+                       piece of the finished outline, and the rest of it
+                       shows the sweep that piece was cut from.
+                       Three at r=14.17 — the outer corners. There is no
+                       fourth because the bottom-right corner is where the
+                       notch cuts in, so the gap in the pattern is itself
+                       the shape's defining move. Five at r=5.67 — the
+                       notch's own corners. -->
+                  <circle cx="14.17" cy="14.17" r="14.17"/>
+                  <circle cx="56.70" cy="14.17" r="14.17"/>
+                  <circle cx="14.17" cy="56.69" r="14.17"/>
+                  <circle cx="23.02" cy="23.07" r="5.67"/>
+                  <circle cx="47.70" cy="23.07" r="5.67"/>
+                  <circle cx="23.02" cy="37.72" r="5.67"/>
+                  <circle cx="59.04" cy="34.72" r="5.67"/>
+                  <circle cx="34.69" cy="49.06" r="5.67"/>
+                </g>
+                <g class="bp-outline">
+                  <path data-seg="0" data-curve="1" d="M23.02,43.39c-3.13,0-5.67-2.54-5.67-5.67"/>
+                  <path data-seg="1" d="M17.35,37.72v-14.65"/>
+                  <path data-seg="2" data-curve="1" d="M17.35,23.07c0-3.13,2.54-5.67,5.67-5.67"/>
+                  <path data-seg="3" d="M23.02,17.40h24.68"/>
+                  <path data-seg="4" data-curve="1" d="M47.70,17.40c3.13,0,5.67,2.54,5.67,5.67"/>
+                  <path data-seg="5" d="M53.37,23.07v11.65"/>
+                  <path data-seg="6" data-curve="1" d="M53.37,34.72c0,3.12,2.55,5.67,5.67,5.67"/>
+                  <path data-seg="7" d="M59.04,40.39h11.83"/>
+                  <path data-seg="8" d="M70.87,40.39V14.17"/>
+                  <path data-seg="9" data-curve="1" d="M70.87,14.17c0-7.83-6.35-14.17-14.17-14.17"/>
+                  <path data-seg="10" d="M56.70,0H14.17"/>
+                  <path data-seg="11" data-curve="1" d="M14.17,0C6.35,0,0,6.35,0,14.17"/>
+                  <path data-seg="12" d="M0,14.17v42.52"/>
+                  <path data-seg="13" data-curve="1" d="M0,56.69c0,7.83,6.35,14.17,14.17,14.17"/>
+                  <path data-seg="14" d="M14.17,70.86h26.19"/>
+                  <path data-seg="15" d="M40.36,70.86v-21.8"/>
+                  <path data-seg="16" data-curve="1" d="M40.36,49.06c0-3.12-2.55-5.67-5.67-5.67"/>
+                  <path data-seg="17" d="M34.69,43.39h-11.67"/>
+                </g>
+                <g class="bp-handles">
+                  <line data-seg="0" x1="23.02" y1="43.39" x2="19.89" y2="43.39"/>
+                  <line data-seg="0" x1="17.35" y1="37.72" x2="17.35" y2="40.85"/>
+                  <line data-seg="2" x1="17.35" y1="23.07" x2="17.35" y2="19.94"/>
+                  <line data-seg="2" x1="23.02" y1="17.40" x2="19.89" y2="17.40"/>
+                  <line data-seg="4" x1="47.70" y1="17.40" x2="50.83" y2="17.40"/>
+                  <line data-seg="4" x1="53.37" y1="23.07" x2="53.37" y2="19.94"/>
+                  <line data-seg="6" x1="53.37" y1="34.72" x2="53.37" y2="37.84"/>
+                  <line data-seg="6" x1="59.04" y1="40.39" x2="55.92" y2="40.39"/>
+                  <line data-seg="9" x1="70.87" y1="14.17" x2="70.87" y2="6.34"/>
+                  <line data-seg="9" x1="56.70" y1="0.00" x2="64.52" y2="0.00"/>
+                  <line data-seg="11" x1="14.17" y1="0.00" x2="6.35" y2="0.00"/>
+                  <line data-seg="11" x1="0.00" y1="14.17" x2="0.00" y2="6.35"/>
+                  <line data-seg="13" x1="0.00" y1="56.69" x2="0.00" y2="64.52"/>
+                  <line data-seg="13" x1="14.17" y1="70.86" x2="6.35" y2="70.86"/>
+                  <line data-seg="16" x1="40.36" y1="49.06" x2="40.36" y2="45.94"/>
+                  <line data-seg="16" x1="34.69" y1="43.39" x2="37.81" y2="43.39"/>
+                </g>
+                <g class="bp-controls">
+                  <circle data-seg="0" cx="19.89" cy="43.39" r="1.1"/>
+                  <circle data-seg="0" cx="17.35" cy="40.85" r="1.1"/>
+                  <circle data-seg="2" cx="17.35" cy="19.94" r="1.1"/>
+                  <circle data-seg="2" cx="19.89" cy="17.40" r="1.1"/>
+                  <circle data-seg="4" cx="50.83" cy="17.40" r="1.1"/>
+                  <circle data-seg="4" cx="53.37" cy="19.94" r="1.1"/>
+                  <circle data-seg="6" cx="53.37" cy="37.84" r="1.1"/>
+                  <circle data-seg="6" cx="55.92" cy="40.39" r="1.1"/>
+                  <circle data-seg="9" cx="70.87" cy="6.34" r="1.1"/>
+                  <circle data-seg="9" cx="64.52" cy="0.00" r="1.1"/>
+                  <circle data-seg="11" cx="6.35" cy="0.00" r="1.1"/>
+                  <circle data-seg="11" cx="0.00" cy="6.35" r="1.1"/>
+                  <circle data-seg="13" cx="0.00" cy="64.52" r="1.1"/>
+                  <circle data-seg="13" cx="6.35" cy="70.86" r="1.1"/>
+                  <circle data-seg="16" cx="40.36" cy="45.94" r="1.1"/>
+                  <circle data-seg="16" cx="37.81" cy="43.39" r="1.1"/>
+                </g>
+                <g class="bp-anchors">
+                  <rect data-anchor="0" x="22.12" y="42.49" width="1.8" height="1.8"/>
+                  <rect data-anchor="1" x="16.45" y="36.82" width="1.8" height="1.8"/>
+                  <rect data-anchor="2" x="16.45" y="22.17" width="1.8" height="1.8"/>
+                  <rect data-anchor="3" x="22.12" y="16.50" width="1.8" height="1.8"/>
+                  <rect data-anchor="4" x="46.80" y="16.50" width="1.8" height="1.8"/>
+                  <rect data-anchor="5" x="52.47" y="22.17" width="1.8" height="1.8"/>
+                  <rect data-anchor="6" x="52.47" y="33.82" width="1.8" height="1.8"/>
+                  <rect data-anchor="7" x="58.14" y="39.49" width="1.8" height="1.8"/>
+                  <rect data-anchor="8" x="69.97" y="39.49" width="1.8" height="1.8"/>
+                  <rect data-anchor="9" x="69.97" y="13.27" width="1.8" height="1.8"/>
+                  <rect data-anchor="10" x="55.80" y="-0.90" width="1.8" height="1.8"/>
+                  <rect data-anchor="11" x="13.27" y="-0.90" width="1.8" height="1.8"/>
+                  <rect data-anchor="12" x="-0.90" y="13.27" width="1.8" height="1.8"/>
+                  <rect data-anchor="13" x="-0.90" y="55.79" width="1.8" height="1.8"/>
+                  <rect data-anchor="14" x="13.27" y="69.96" width="1.8" height="1.8"/>
+                  <rect data-anchor="15" x="39.46" y="69.96" width="1.8" height="1.8"/>
+                  <rect data-anchor="16" x="39.46" y="48.16" width="1.8" height="1.8"/>
+                  <rect data-anchor="17" x="33.79" y="42.49" width="1.8" height="1.8"/>
+                </g>
+              </svg>
+            </div>
+            <div class="brandid__blueprint-text">
+              <span class="brandid__blueprint-index">SYMBOL</span>
+              <p class="brandid__lead">이 형태는 하나의 상징을 만들기 위해<br>시작되지 않았습니다.</p>
+              <p class="brandid__body">복잡한 문제를 정리하는 우리의 방식을,<br>가장 단순하고 오래 사용할 수 있는 구조로 만들기 위해 시작했습니다.</p>
+              <ul class="brandid__blueprint-principles">
+                <li class="brandid__blueprint-principle">
+                  <span class="brandid__blueprint-principle-key">Reduce</span>
+                  <p class="brandid__blueprint-principle-desc">형태에 필요하지 않은<br>요소를 모두 덜어냈습니다.</p>
+                </li>
+                <li class="brandid__blueprint-principle">
+                  <span class="brandid__blueprint-principle-key">Organize</span>
+                  <p class="brandid__blueprint-principle-desc">복잡한 형태를 하나의 구조로 정리했습니다.</p>
+                </li>
+                <li class="brandid__blueprint-principle">
+                  <span class="brandid__blueprint-principle-key">Remain</span>
+                  <p class="brandid__blueprint-principle-desc">시간이 지나도 변하지 않는<br>형태만 남겼습니다.</p>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="brandid__blueprint-panel brandid__blueprint-panel--wordmark">
+          <div class="brandid__blueprint-wordmark-inner">
+            <!-- Sized from the letterforms' MEASURED bbox
+                 (99.66 20.10 → 329.21 50.76), padded .2 units all round.
+                 Not from the 99.66 20.11 229.56 30.37 that
+                 .brandwall__wordmark carries: that viewBox is itself
+                 ~.29 units short at the bottom of the actual glyphs.
+                 Filled and small it never showed, but inherited here —
+                 stroked, and blown up to full column width — it sliced
+                 the foot off the L ("L자 하단이 살짝 잘리네").
+                 The side clearance is no longer produced in here at
+                 all: the svg itself is now the width of the content
+                 column rather than full bleed (css), so P's left edge
+                 lands on the same line as WORDMARK and the copy below
+                 it ("P자가 아래 W라인과 맞게"), and the clearance IS
+                 var(--edge) — bigger than the ~68px the old
+                 full-bleed-plus-fat-viewBox arrangement gave, and
+                 exactly aligned at every width instead of only at the
+                 one where the two happened to coincide.
+                 The .15 that remains is purely so the .7px stroke,
+                 which paints half its width outside the path, has
+                 somewhere to go rather than being sliced by the svg's
+                 own clip — it costs well under a pixel of alignment. -->
+            <svg class="brandid__blueprint-wordmark-svg" viewBox="99.46 19.90 229.95 31.06" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PILTONG 워드마크">
+              <g class="wm-outline">
+                <path d="M119.35,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-10.61h13.65c2.72,0,4.92-2.2,4.92-4.92v-9.9c0-2.72-2.2-4.92-4.92-4.92ZM118.22,31.84c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-3.72c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v3.72Z"/>
+                <path d="M138.44,20.11h4.08c1.09,0,1.97.88,1.97,1.97v28.39h-4.08c-1.09,0-1.97-.88-1.97-1.97v-28.39h0Z" transform="translate(282.93 70.58) rotate(-180)"/>
+                <path d="M181.31,44.71h-16.6v-22.63c0-1.09-.88-1.97-1.97-1.97h-4.08v28.68c0,1.09.88,1.97,1.97,1.97h22.65v-4.08c0-1.09-.88-1.97-1.97-1.97Z"/>
+                <path d="M201.59,20.11h-13.36v4.08c0,1.09.88,1.97,1.97,1.97h7.32v22.35c0,1.09.88,1.97,1.97,1.97h4.08v-24.32h9.28v-4.08c0-1.09-.88-1.97-1.97-1.97h-9.28Z"/>
+                <path d="M246.71,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-20.51c0-2.72-2.2-4.92-4.92-4.92ZM245.59,42.45c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v14.33Z"/>
+                <path d="M285.5,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-22.35c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v20.38c0,1.09.88,1.97,1.97,1.97h4.08v-25.44c0-2.72-2.2-4.92-4.92-4.92Z"/>
+                <path d="M309.52,20.11c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-11.23c0-1.09-.88-1.97-1.97-1.97h-10.34v4.08c0,1.09.88,1.97,1.97,1.97h4.29v4.06c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h16.6v-4.08c0-1.09-.88-1.97-1.97-1.97h-17.72Z"/>
+              </g>
+            </svg>
+            <div class="brandid__blueprint-text brandid__blueprint-text--wordmark">
+              <span class="brandid__blueprint-index">WORDMARK</span>
+              <!-- Title+body on the left, the three-item list beside it
+                   on the right ("아래 목록은 타이틀 + 본문 그룹 우측에
+                   좌우로 배치") — the index above stays full width as
+                   the section's own label. The <br>s below are the line
+                   breaks the copy was given with and are meant to hold;
+                   word-break: keep-all (css) governs any FURTHER
+                   wrapping on narrower screens, so it lands on word
+                   boundaries instead of splitting mid-word. -->
+              <div class="brandid__wordmark-row">
+                <div class="brandid__wordmark-copy">
+                  <p class="brandid__lead">워드마크는 회사명을 표현하는 것이 아니라,<br>회사에 대한 첫인상을 만드는 얼굴입니다.</p>
+                  <p class="brandid__body">누구나 쉽게 읽을 수 있고, 오래 기억될 수 있도록<br>불필요한 장식을 덜어내고 가장 명확한 형태로 설계했습니다.</p>
+                </div>
+                <ul class="brandid__blueprint-principles">
+                  <li class="brandid__blueprint-principle">
+                    <span class="brandid__blueprint-principle-key">Recognition</span>
+                    <p class="brandid__blueprint-principle-desc">명확하게 읽히는 형태</p>
+                  </li>
+                  <li class="brandid__blueprint-principle">
+                    <span class="brandid__blueprint-principle-key">Harmony</span>
+                    <p class="brandid__blueprint-principle-desc">심볼과 하나의 언어</p>
+                  </li>
+                  <li class="brandid__blueprint-principle">
+                    <span class="brandid__blueprint-principle-key">Timeless</span>
+                    <p class="brandid__blueprint-principle-desc">오래 사용할 수 있는 구조</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Phase three: the mark redraws itself under the wheel, then
+             fills and shrinks onto the exact spot the pinball starts
+             from. Phase four is Color Principle itself — head, caption
+             and the Warm White → Charcoal → Signal steps — which simply
+             animate in from here ("여기선 등장시 내용만 자연스럽게
+             애니매이션 되면서 등장"). Both sit in this same sticky as the
+             two panels above, so the screen is already where it needs to
+             be and nothing scrolls in from below. -->
+        <svg class="brandid__color-seal" viewBox="-2 -2 74.87 74.87" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path class="cs-fill" d="M23.02,43.39c-3.13,0-5.67-2.54-5.67-5.67v-14.65c0-3.13,2.54-5.67,5.67-5.67h24.68c3.13,0,5.67,2.54,5.67,5.67v11.65c0,3.12,2.55,5.67,5.67,5.67h11.83V14.17c0-7.83-6.35-14.17-14.17-14.17H14.17C6.35,0,0,6.35,0,14.17v42.52c0,7.83,6.35,14.17,14.17,14.17h26.19v-21.8c0-3.12-2.55-5.67-5.67-5.67h-11.67Z"/>
+        <g class="cs-outline">
+          <path data-curve="1" d="M23.02,43.39c-3.13,0-5.67-2.54-5.67-5.67"/>
+          <path d="M17.35,37.72v-14.65"/>
+          <path data-curve="1" d="M17.35,23.07c0-3.13,2.54-5.67,5.67-5.67"/>
+          <path d="M23.02,17.40h24.68"/>
+          <path data-curve="1" d="M47.70,17.40c3.13,0,5.67,2.54,5.67,5.67"/>
+          <path d="M53.37,23.07v11.65"/>
+          <path data-curve="1" d="M53.37,34.72c0,3.12,2.55,5.67,5.67,5.67"/>
+          <path d="M59.04,40.39h11.83"/>
+          <path d="M70.87,40.39V14.17"/>
+          <path data-curve="1" d="M70.87,14.17c0-7.83-6.35-14.17-14.17-14.17"/>
+          <path d="M56.70,0H14.17"/>
+          <path data-curve="1" d="M14.17,0C6.35,0,0,6.35,0,14.17"/>
+          <path d="M0,14.17v42.52"/>
+          <path data-curve="1" d="M0,56.69c0,7.83,6.35,14.17,14.17,14.17"/>
+          <path d="M14.17,70.86h26.19"/>
+          <path d="M40.36,70.86v-21.8"/>
+          <path data-curve="1" d="M40.36,49.06c0-3.12-2.55-5.67-5.67-5.67"/>
+          <path d="M34.69,43.39h-11.67"/>
+        </g>
+      </svg>
+      <div class="brandid__color-head">
+        <span class="index brandid__color-index">COLOR PRINCIPLE</span>
+        <p class="brandid__color-lead">색은 장식이 아니라, 무엇을 먼저 보게 할지 결정하는 기준입니다.</p>
+      </div>
+      <svg class="brandid__color-symbol" viewBox="0 0 70.87 70.87" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M23.02,43.39c-3.13,0-5.67-2.54-5.67-5.67v-14.65c0-3.13,2.54-5.67,5.67-5.67h24.68c3.13,0,5.67,2.54,5.67,5.67v11.65c0,3.12,2.55,5.67,5.67,5.67h11.83V14.17c0-7.83-6.35-14.17-14.17-14.17H14.17C6.35,0,0,6.35,0,14.17v42.52c0,7.83,6.35,14.17,14.17,14.17h26.19v-21.8c0-3.12-2.55-5.67-5.67-5.67h-11.67Z"/>
+      </svg>
+        <div class="brandid__color-caption">
+          <p class="brandid__color-name" data-color="0">PILTONG Paper<span>여백과 사고를 위한 기본 배경</span></p>
+          <p class="brandid__color-name" data-color="1">PILTONG Ink<span>신뢰와 구조를 만드는 기준색</span></p>
+          <p class="brandid__color-name" data-color="2">Signal Surface<span>시선과 전환을 만드는 강조색</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Color Story: three full-bleed photographs (one per colour
+       token), each with its own caption in the left margin, cross-
+       fading through a curtain wipe as the section scrolls. Same tall-
+       wrapper + single 100svh sticky-inner shape as Color Principle/
+       Shape DNA above (see initColorStory, main.js) — panels stacked
+       absolutely inside one pinned stage rather than three separate
+       screens. -->
+  <section class="brandid brandid__colorstory" id="colorStory">
+    <div class="brandid__colorstory-sticky">
+      <div class="brandid__colorstory-panel" data-panel="0">
+        <img class="brandid__colorstory-img" src="images/bg_color_01.png" alt="">
+        <div class="brandid__colorstory-card">
+          <div class="brandid__colorstory-swatch" style="background-color: var(--paper);"></div>
+          <p class="brandid__colorstory-hex">HEX&nbsp; #F7F5F0</p>
+          <p class="brandid__colorstory-swatchname">PILTONG Paper</p>
+        </div>
+        <div class="brandid__colorstory-copy brandid__colorstory-copy--ink">
+          <span class="brandid__colorstory-eng">PILTONG Paper</span>
+          <p class="brandid__colorstory-lead">생각은 여백에서 시작됩니다.</p>
+          <p class="brandid__colorstory-body">복잡함을 덜어내고,<br>생각이 이어질 수 있는 공간을 만들기 위해 선택했습니다.</p>
+        </div>
+      </div>
+      <div class="brandid__colorstory-panel" data-panel="1">
+        <img class="brandid__colorstory-img" src="images/bg_color_02.png" alt="">
+        <div class="brandid__colorstory-card">
+          <div class="brandid__colorstory-swatch" style="background-color: var(--ink);"></div>
+          <p class="brandid__colorstory-hex">HEX&nbsp; #181C23</p>
+          <p class="brandid__colorstory-swatchname">PILTONG Ink</p>
+        </div>
+        <div class="brandid__colorstory-copy">
+          <span class="brandid__colorstory-eng">PILTONG Ink</span>
+          <p class="brandid__colorstory-lead">기준은 명확해야 오래갑니다.</p>
+          <p class="brandid__colorstory-body">안정적인 구조와 신뢰를 전달하는<br>브랜드의 기준색입니다.</p>
+        </div>
+      </div>
+      <div class="brandid__colorstory-panel" data-panel="2">
+        <img class="brandid__colorstory-img" src="images/bg_color_03.png" alt="">
+        <div class="brandid__colorstory-card">
+          <div class="brandid__colorstory-swatch" style="background-color: var(--signal-surface);"></div>
+          <p class="brandid__colorstory-hex">HEX&nbsp; #E75B35</p>
+          <p class="brandid__colorstory-swatchname">Signal Surface</p>
+        </div>
+        <div class="brandid__colorstory-copy brandid__colorstory-copy--ink">
+          <span class="brandid__colorstory-eng">Signal Surface</span>
+          <p class="brandid__colorstory-lead">모든 것을 강조하지 않습니다.</p>
+          <p class="brandid__colorstory-body">가장 중요한 순간,<br>방향을 알려주기 위해 존재합니다.</p>
+        </div>
+      </div>
+      <!-- The curtain wipe: two flaps that close together (hard-cutting
+           the panel swap while fully covered, so the two photos never
+           show through overlapping each other) then reopen to their
+           own sides, on request ("커튼이라던지 조금 이 섹션 분위기에
+           맞는걸로" / "전환될때 아래 그림이 겹쳐 보이지 않고
+           자연스럽게"). Coloured per-transition to the INCOMING
+           panel's own brand colour (paper/ink/signal-surface, set
+           inline by initColorStory), not a fixed ink, on request
+           ("다음색이 좌우에서 나와서 열리면서 다음 컨텐츠 보여주는
+           구조"). -->
+      <div class="brandid__colorstory-curtain brandid__colorstory-curtain--left" aria-hidden="true"></div>
+      <div class="brandid__colorstory-curtain brandid__colorstory-curtain--right" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- Closing: hands off to Logo System. Next-section label sits partly
+       below the fold on purpose, to read as a preview pulling the
+       scroll onward rather than a fully-arrived footer. -->
+  <!-- The mark, the signal dot and the NEXT / LOGO SYSTEM label are gone
+       from here on request — the loop carries the close on its own. -->
+  <!-- The pinned/sticky version of this section is reverted — see the
+       note on .brandid__closing in style.css for why the generous bands
+       and a viewport-centred stop can't both be true here. To bring the
+       pin back, wrap these three children in
+       <div class="brandid__closing-sticky"> again and restore the
+       commented blocks in style.css + initClosingEntrance. -->
+  <section class="frame frame--paper brandid__closing">
+    <!-- Title and sub-copy share one row ABOVE the video now, on request
+         ("하단의 있는 문구 상단으로 올려서 1200기준에 우측 끝에"): title
+         ranged left, sub-copy ranged right, both inside the same 1200
+         column the title is capped to (TITLE_MAX_W, initClosingFit) — so
+         the copy ends on that column's right edge rather than the
+         footage's, which runs wider. -->
+    <div class="brandid__closing-copy">
+      <p class="brandid__closing-line">우리는 로고를 만든 것이 아니라,<br>우리의 기준을 남겼습니다.</p>
+      <!-- Carries .brandid__body itself rather than a copy of its
+           declarations, so it stays identical to the wordmark panel's own
+           sub-title text ("한글 타이틀 아래 폰트 스타일 그대로") if that
+           rule ever changes. -->
+      <p class="brandid__body brandid__closing-body">이제 그 기준은 모든 경험으로 이어집니다.</p>
+    </div>
+    <div class="brandid__closing-loop-wrap">
+      <video class="brandid__closing-loop" autoplay muted loop playsinline aria-hidden="true">
+        <source src="images/symbol_seamless_loop.mp4" type="video/mp4">
+        <!-- Previous footage. Swap the two <source> lines to restore it —
+             and re-enable the ink backdrop + top/bottom feather in
+             style.css with it, since both were there to sit under this
+             one's dark, edge-to-edge frames. -->
+        <!-- <source src="images/hf_seamless_loop.mp4" type="video/mp4"> -->
+      </video>
+      <!-- Wordmark alone, no symbol — the footage above is already the
+           symbol, turning. Same seven paths and viewBox as
+           .brandwall__wordmark so it is literally the same artwork, and
+           inside the wrapper so it scales and fades with it as one piece
+           on the way in. Sits centred in the dark band the wrapper's
+           padding-bottom opens up below the picture. -->
+      <!-- The box is the glyphs' own measured bbox — whole letters. The
+           slice that makes them read as continuous with the plate's
+           bottom edge is a clip-path instead (--mark-cut, style.css),
+           applied only while that edge is actually there. It used to be
+           baked into this viewBox, which was right until the plate's
+           surface started dissolving into bg.png: with no edge left to
+           be cut BY, permanently cropped letters just read as damaged
+           ("워드마크 지금 애매하게 배경과 안이어진다"). -->
+      <div class="brandid__closing-slot" aria-hidden="true">
+      <svg class="brandid__closing-mark" viewBox="99.66 20.10 229.55 30.66"
+           xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PILTONG">
+        <path d="M119.35,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-10.61h13.65c2.72,0,4.92-2.2,4.92-4.92v-9.9c0-2.72-2.2-4.92-4.92-4.92ZM118.22,31.84c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-3.72c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v3.72Z"/>
+        <path d="M138.44,20.11h4.08c1.09,0,1.97.88,1.97,1.97v28.39h-4.08c-1.09,0-1.97-.88-1.97-1.97v-28.39h0Z" transform="translate(282.93 70.58) rotate(-180)"/>
+        <path d="M181.31,44.71h-16.6v-22.63c0-1.09-.88-1.97-1.97-1.97h-4.08v28.68c0,1.09.88,1.97,1.97,1.97h22.65v-4.08c0-1.09-.88-1.97-1.97-1.97Z"/>
+        <path d="M201.59,20.11h-13.36v4.08c0,1.09.88,1.97,1.97,1.97h7.32v22.35c0,1.09.88,1.97,1.97,1.97h4.08v-24.32h9.28v-4.08c0-1.09-.88-1.97-1.97-1.97h-9.28Z"/>
+        <path d="M246.71,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-20.51c0-2.72-2.2-4.92-4.92-4.92ZM245.59,42.45c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v14.33Z"/>
+        <path d="M285.5,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-22.35c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v20.38c0,1.09.88,1.97,1.97,1.97h4.08v-25.44c0-2.72-2.2-4.92-4.92-4.92Z"/>
+        <path d="M309.52,20.11c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-11.23c0-1.09-.88-1.97-1.97-1.97h-10.34v4.08c0,1.09.88,1.97,1.97,1.97h4.29v4.06c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h16.6v-4.08c0-1.09-.88-1.97-1.97-1.97h-17.72Z"/>
+      </svg>
+        <!-- The next title, sitting exactly one slot below so it rolls
+             up into the wordmark's place — the slot's overflow is what
+             makes the pair read as a ticker rather than a crossfade
+             ("워드마크 자리에 뉴스티커 처럼 바뀌게"). Type is VISUAL
+             IDENTITY's own display word, in paper. -->
+        <span class="brandid__closing-next">APPLICATIONS</span>
+      </div>
+      <!-- Corner ticks: four short 45-degree lines springing out of the
+           block's own corner points. Decorative, hence spans rather than
+           anything carrying meaning. -->
+      <span class="brandid__closing-tick brandid__closing-tick--tl" aria-hidden="true"></span>
+      <span class="brandid__closing-tick brandid__closing-tick--tr" aria-hidden="true"></span>
+      <span class="brandid__closing-tick brandid__closing-tick--bl" aria-hidden="true"></span>
+      <span class="brandid__closing-tick brandid__closing-tick--br" aria-hidden="true"></span>
+    </div>
+    <!-- Empty scroll the pinned plate above travels through while the
+         handover to Applications plays out. Has to be a sibling — see
+         .brandid__closing in style.css. -->
+    <div class="brandid__closing-runway" aria-hidden="true"></div>
+  </section>
+
+  <!-- ===== 08 Applications =====
+       Opens on the same ink the closing plate hands over — see
+       initClosingHandoff (main.js): the page floods from paper to that
+       plate's own floor colour while the plate is still pinned, the
+       plate's own edges dissolve into it, and this section starts on the
+       far side of a surface that never broke.
+       No English label of its own: the APPLICATIONS title arrives on the
+       ticker in the section above and leaves upward, and this follows
+       right behind it. -->
+  <section class="apps" id="applications">
+    <!-- bg.png, laid over the whole viewport as the handover's lift
+         finishes (initClosingHandoff fades it in). Fixed rather than in
+         flow because it has to appear while the closing plate is still
+         pinned — the wordmark lands ON this, and everything below sits
+         inside it. -->
+    <div class="apps__ground" aria-hidden="true"></div>
+    <div class="apps__intro">
+      <p class="apps__lead">하나의 기준은,<br>모든 접점에서 이어집니다.</p>
+      <p class="apps__body">PILTONG의 아이덴티티는 로고에서 끝나지 않습니다.<br>웹사이트와 문서, 명함과 영상까지<br>같은 구조와 여백, 색의 원칙으로 일관된 경험을 만듭니다.</p>
+    </div>
+  </section>
+
+  <!-- ===== 01 Philosophy → end — PARKED (hidden 일단, restore by removing this comment wrap) =====
+  ===== 04 Philosophy =====
+  <section id="philosophy" class="frame frame--paper philosophy">
+    <div class="frame__head reveal">
+      <span class="index">01</span>
+      <h2 class="title">Philosophy</h2>
+    </div>
+    <div class="philosophy__body">
+      <p class="philosophy__line reveal">기술은 목적이 아닌 수단이며, 항상 문제를 먼저 이해하고 가장 합리적인 해결책을 설계합니다.</p>
+      <p class="philosophy__line reveal">브랜드는 화려함보다 <mark>명확함</mark>을, 장식보다 <mark>구조</mark>를, 트렌드보다 <mark>지속성</mark>을 추구합니다.</p>
+      <p class="philosophy__line reveal">디자인은 시각적 표현이 아니라 사고를 정리하는 도구이며, 시그널 컬러는 강조를 위한 기능색일 뿐 브랜드의 중심은 무채색 기반의 구조와 여백, 타이포그래피, 그리드 시스템에 있습니다.</p>
+    </div>
+  </section>
+
+  ===== 05 Positioning =====
+  <section id="positioning" class="frame frame--flush positioning">
+    <div class="poscard poscard--not">
+      <span class="poscard__label reveal">NOT</span>
+      <ul class="reveal">
+        <li>화려함<em>Ornament</em></li>
+        <li>장식<em>Decoration</em></li>
+        <li>트렌드<em>Trend</em></li>
+      </ul>
+    </div>
+    <div class="poscard poscard--but">
+      <span class="poscard__label reveal">BUT</span>
+      <ul class="reveal">
+        <li>명확함<em>Clarity</em></li>
+        <li>구조<em>Structure</em></li>
+        <li>지속성<em>Longevity</em></li>
+      </ul>
+    </div>
+  </section>
+
+  ===== 06 Belief =====
+  <section class="frame frame--paper belief">
+    <p class="caption reveal">PILTONG BELIEVES</p>
+    <p class="statement-text statement-text--lg reveal">PILTONG은 보이는 것을 만드는 회사가 아니라,<br><mark>올바른 기준</mark>과 <mark>가장 적절한 해결책</mark>을<br>설계하는 회사를 지향합니다.</p>
+  </section>
+
+  ===== 07 Criteria =====
+  <section id="criteria" class="frame frame--paper frame--auto criteria">
+    <div class="frame__head reveal">
+      <span class="index">02</span>
+      <h2 class="title">Criteria</h2>
+      <p class="sub">모든 결과물은 아래 네 가지 기준으로 검증됩니다.</p>
+    </div>
+    <ul class="criteria__grid">
+      <li class="criterion reveal"><span class="criterion__num">01</span><h3>단순함</h3><p>Simplicity — 불필요한 것을 덜어낸 상태</p></li>
+      <li class="criterion reveal"><span class="criterion__num">02</span><h3>논리성</h3><p>Logic — 설계에는 이유가 있어야 한다</p></li>
+      <li class="criterion reveal"><span class="criterion__num">03</span><h3>일관성</h3><p>Consistency — 처음과 끝이 같은 기준을 따른다</p></li>
+      <li class="criterion reveal"><span class="criterion__num">04</span><h3>완성도</h3><p>Craft — 마지막 디테일까지 책임진다</p></li>
+    </ul>
+  </section>
+
+  ===== 08 Logo =====
+  <section id="logo" class="frame frame--paper logoshow">
+    <span class="caption reveal">LOGO</span>
+    <img src="images/logo.svg" alt="PILTONG" class="logoshow__logo reveal">
+    <span class="logoshow__caption reveal">PILTONG LOGOTYPE — 2026</span>
+  </section>
+
+  ===== 09 Logo / Construction =====
+  <section id="logo-specs" class="frame frame--paper frame--auto logospecs">
+    <div class="frame__head reveal">
+      <span class="index">03</span>
+      <h2 class="title">Logo</h2>
+      <p class="sub">마크와 워드마크로 구성된 심볼 시스템입니다.</p>
+    </div>
+
+    <div class="showcase reveal">
+      <div class="showcase__panel showcase__panel--ink">
+        <img src="images/mark.svg" alt="PILTONG 마크" class="showcase__mark showcase__mark--paper">
+        <span class="showcase__label">Mark / Paper on Ink</span>
+      </div>
+      <div class="showcase__panel showcase__panel--paper">
+        <img src="images/logo.svg" alt="PILTONG 로고" class="showcase__logo">
+        <span class="showcase__label">Logotype / Ink on Paper</span>
+      </div>
+      <div class="showcase__panel showcase__panel--signal">
+        <img src="images/mark.svg" alt="PILTONG 마크" class="showcase__mark showcase__mark--paper">
+        <span class="showcase__label">Mark / Paper on Signal</span>
+      </div>
+    </div>
+
+    <div class="specs reveal">
+      <div class="spec">
+        <span class="spec__label">Clearspace</span>
+        <div class="spec__figure">
+          <div class="spec__clearspace"><img src="images/mark.svg" alt=""></div>
+        </div>
+        <p>마크 높이(x)의 1/2 만큼 최소 여백을 확보합니다.</p>
+      </div>
+      <div class="spec">
+        <span class="spec__label">Minimum Size</span>
+        <div class="spec__figure spec__figure--row">
+          <img src="images/mark.svg" alt="" style="width:32px">
+          <img src="images/mark.svg" alt="" style="width:16px">
+        </div>
+        <p>디지털 기준 최소 16px, 인쇄 기준 최소 8mm를 권장합니다.</p>
+      </div>
+      <div class="spec">
+        <span class="spec__label">Construction</span>
+        <div class="spec__figure spec__figure--grid">
+          <img src="images/mark.svg" alt="">
+        </div>
+        <p>모든 형태는 동일한 그리드와 곡률 규칙 위에서 만들어집니다.</p>
+      </div>
+    </div>
+  </section>
+
+  ===== 10 Color =====
+  <section id="color" class="frame frame--paper frame--auto colorsys">
+    <div class="frame__head reveal">
+      <span class="index">04</span>
+      <h2 class="title">Color</h2>
+      <p class="sub">무채색 기반의 구조 위에, 시그널 컬러는 강조를 위한 기능색으로만 사용됩니다.</p>
+    </div>
+    <ul class="swatches">
+      <li class="swatch reveal" style="--sw:#181C23;--fg:#F7F5F0">
+        <span class="swatch__block"></span>
+        <span class="swatch__name">Ink</span>
+        <span class="swatch__hex">#181C23</span>
+        <span class="swatch__desc">주요 텍스트, 어두운 배경, 구조를 만드는 기본색</span>
+      </li>
+      <li class="swatch reveal" style="--sw:#F7F5F0;--fg:#181C23">
+        <span class="swatch__block"></span>
+        <span class="swatch__name">Paper</span>
+        <span class="swatch__hex">#F7F5F0</span>
+        <span class="swatch__desc">기본 지면과 넓은 여백을 위한 따뜻한 바탕색</span>
+      </li>
+      <li class="swatch reveal" style="--sw:#FFFFFF;--fg:#181C23">
+        <span class="swatch__block" style="border:1px solid rgba(24,28,35,.12)"></span>
+        <span class="swatch__name">White</span>
+        <span class="swatch__hex">#FFFFFF</span>
+        <span class="swatch__desc">디지털 UI, 역상 텍스트, 명료한 중립 배경</span>
+      </li>
+      <li class="swatch reveal" style="--sw:#F24E1B;--fg:#F7F5F0">
+        <span class="swatch__block"></span>
+        <span class="swatch__name">Signal 100</span>
+        <span class="swatch__hex">#F24E1B</span>
+        <span class="swatch__desc">핵심 단어, 중요 상태, 작은 면적의 강한 강조</span>
+      </li>
+      <li class="swatch reveal" style="--sw:#E75B35;--fg:#F7F5F0">
+        <span class="swatch__block"></span>
+        <span class="swatch__name">Signal Surface</span>
+        <span class="swatch__hex">#E75B35</span>
+        <span class="swatch__desc">중간 이상 면적의 신호색 배경과 그래픽 면</span>
+      </li>
+      <li class="swatch reveal" style="--sw:#F7D8CC;--fg:#181C23">
+        <span class="swatch__block"></span>
+        <span class="swatch__name">Signal Soft</span>
+        <span class="swatch__hex">#F7D8CC</span>
+        <span class="swatch__desc">약한 강조, 안내 영역, 부드러운 상태 배경</span>
+      </li>
+    </ul>
+  </section>
+
+  ===== 11 Typography =====
+  <section id="typography" class="frame frame--paper frame--auto typography">
+    <div class="frame__head reveal">
+      <span class="index">05</span>
+      <h2 class="title">Typography</h2>
+      <p class="sub">Pretendard Variable 하나로 위계를 만듭니다. 굵기와 크기만으로 강약을 표현합니다.</p>
+    </div>
+
+    <div class="specimen reveal">
+      <span class="specimen__glyph">Aa</span>
+      <div class="specimen__meta">
+        <span class="specimen__name">Pretendard Variable</span>
+        <span class="specimen__desc">Weight 400 – 800 · Korean / Latin</span>
+      </div>
+    </div>
+
+    <ul class="typescale reveal">
+      <li class="typescale__row typescale__row--display">
+        <span class="typescale__label">Display / 800</span>
+        <span class="typescale__sample">PILTONG</span>
+        <span class="typescale__size">64–128px</span>
+      </li>
+      <li class="typescale__row typescale__row--h1">
+        <span class="typescale__label">Heading 1 / 700</span>
+        <span class="typescale__sample">PILTONG</span>
+        <span class="typescale__size">40–64px</span>
+      </li>
+      <li class="typescale__row typescale__row--h2">
+        <span class="typescale__label">Heading 2 / 700</span>
+        <span class="typescale__sample">PILTONG</span>
+        <span class="typescale__size">28–36px</span>
+      </li>
+      <li class="typescale__row typescale__row--body">
+        <span class="typescale__label">Body / 500</span>
+        <span class="typescale__sample">PILTONG</span>
+        <span class="typescale__size">16–18px</span>
+      </li>
+      <li class="typescale__row typescale__row--caption">
+        <span class="typescale__label">Caption / 500 Mono</span>
+        <span class="typescale__sample">PILTONG</span>
+        <span class="typescale__size">11–12px</span>
+      </li>
+    </ul>
+  </section>
+
+  ===== 12 Mockup =====
+  <section id="mockup" class="frame frame--paper frame--auto mockupsec">
+    <div class="frame__head reveal">
+      <span class="index">06</span>
+      <h2 class="title">Mockup</h2>
+      <p class="sub">실제 자산이 없는 항목은 브랜드 규칙 기반의 목업으로 대체했습니다.</p>
+    </div>
+    <div class="mockups">
+      <div class="mockup mockup--browser reveal">
+        <div class="mockup__bar"><span></span><span></span><span></span></div>
+        <div class="mockup__browser-body">
+          <div class="mockup__nav">
+            <img src="images/mark.svg" alt="" width="16" height="16">
+            <span>PILTONG</span>
+          </div>
+          <div class="mockup__browser-hero">
+            <p>가장 적절한<br>해결책.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mockup mockup--card reveal">
+        <div class="card card--front">
+          <img src="images/mark.svg" alt="" class="card__mark">
+        </div>
+        <div class="card card--back">
+          <span class="card__word">PILTONG</span>
+          <span class="card__sub">Digital Solution Partner</span>
+        </div>
+      </div>
+
+      <div class="mockup mockup--tiles reveal">
+        <div class="tile tile--ink"><img src="images/mark.svg" alt=""></div>
+        <div class="tile tile--paper"><img src="images/mark.svg" alt=""></div>
+        <div class="tile tile--signal"><img src="images/mark.svg" alt=""></div>
+        <div class="tile tile--outline"><img src="images/mark.svg" alt=""></div>
+      </div>
+
+      <div class="mockup mockup--phone reveal">
+        <div class="phone">
+          <div class="phone__notch"></div>
+          <div class="phone__screen">
+            <img src="images/mark.svg" alt="" class="phone__icon">
+            <span>PILTONG</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  ===== 13 Closing =====
+  <section id="closing" class="frame frame--ink frame--auto closing">
+    <div class="closing__row reveal">
+      <div class="closing__brand">
+        <img src="images/mark.svg" alt="" class="closing__mark">
+        <span>PILTONG BRAND SYSTEM</span>
+        <span class="closing__year">2026</span>
+      </div>
+      <div class="closing__contact">
+        <span class="caption">Contact</span>
+        <a href="mailto:hello@piltong.com" class="closing__mail">hello@piltong.com</a>
+        <p class="closing__note">* 연락처는 예시이며, 실제 채널로 교체해 주세요.</p>
+      </div>
+    </div>
+    <div class="closing__bottom">
+      <span>&copy; 2026 PILTONG. All rights reserved.</span>
+      <span>Structure over decoration.</span>
+    </div>
+  </section>
+  ===== end 01 Philosophy → end (parked) ===== -->
+
+</main>
+
+<!-- Background music toggle: a direct child of <body>, not <main> —
+     position:fixed only tracks the real viewport as long as no
+     ancestor carries a CSS transform, and several sections deep inside
+     <main> do get one from JS (initStatementStickyPress etc.); sitting
+     outside <main> entirely sidesteps that regardless of which section
+     is on screen. Bars switch between ink/paper depending on what's
+     actually behind the button as it scrolls (initContrastSwitchers,
+     main.js, shared with the back-to-top mark below) — ink on light
+     sections, paper on dark ones, on request ("밝은 섹션일때는...
+     잉크색으로... 어두운 섹션에서는 페이퍼색으로"). -->
+<button class="music-toggle" id="musicToggle" type="button" aria-pressed="false" aria-label="배경음 재생">
+  <span class="music-toggle__bar"></span>
+  <span class="music-toggle__bar"></span>
+  <span class="music-toggle__bar"></span>
+  <span class="music-toggle__bar"></span>
+</button>
+<audio id="bgMusic" loop preload="none">
+  <source src="music/Quiet%20Innovation.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Inertial smooth scrolling. Lenis drives the real window scroll
+     rather than transforming a wrapper, so every existing scroll
+     listener and getBoundingClientRect read on this page keeps
+     working unchanged. -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<script src="js/main.js?v=2026080544"></script>
+</body>
+</html>

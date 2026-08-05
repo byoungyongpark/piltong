@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="piltong_ink">#181C23</color>
+  <color name="piltong_paper">#F7F5F0</color>
+  <color name="piltong_white">#FFFFFF</color>
+  <color name="piltong_signal_100">#F24E1B</color>
+  <color name="piltong_signal_surface">#E75B35</color>
+  <color name="piltong_signal_soft">#F7D8CC</color>
+</resources>
