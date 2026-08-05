@@ -5131,18 +5131,34 @@
       const s = Math.cbrt(.0883024619 * r + .2817188376 * g + .6299787005 * b);
       return .2104542553 * l + .7936177850 * m - .0040720468 * s;
     }
-    // "to top": position 0% is the curtain's own BOTTOM edge — the part
-    // that enters the viewport first as it rises — and that's where the
-    // pure, unmixed colour sits (i=0). Moving up the gradient (toward
-    // 100%, the curtain's own top edge, the part that leaves last) steps
-    // through the same ladder Color Story uses, away from whichever end
-    // Paper already sits near (it's close to white, so this steps down
-    // toward black — there's nowhere left to go lighter).
+    // "to top": position 0% is the curtain's own BOTTOM edge, which —
+    // because translateY(%) is resolved against the element's OWN
+    // height, not the viewport — is what's still on screen LAST, right
+    // before the box clears the top at t=1 (verified: its viewport
+    // position is exactly 2(1-t)*viewportH, reaching 0 only there).
+    // That's where the pure, unmixed colour sits (i=0), so Paper is
+    // what the sweep actually ends on, not the ladder's darkest step
+    // ("페이퍼색이 마지막을 차지하면 더 자연스러울것 같아" — already
+    // true; the band SIZES below are what changed).
+    //
+    // Bands are no longer equal fifths. Weighted (STEPS - i), so band 0
+    // (the true colour, at the edge that reads last) gets the biggest
+    // share and each darker step narrows — reading as Paper with a
+    // graduated dark accent trailing off, rather than uniform stripes
+    // ("커튼의 높이도 명도단계처럼 점진적으로 표현되면").
     function curtainRamp(color) {
       probe.style.color = color;
       const base = curtainLightness(getComputedStyle(probe).color);
       const away = base > .5 ? -1 : 1;
+      const weights = [];
+      let totalWeight = 0;
+      for (let i = 0; i < CURTAIN_STEPS; i++) {
+        const w = CURTAIN_STEPS - i;
+        weights.push(w);
+        totalWeight += w;
+      }
       const stops = [];
+      let acc = 0;
       for (let i = 0; i < CURTAIN_STEPS; i++) {
         const target = Math.min(.97, Math.max(.06, base + away * i * CURTAIN_STEP_L));
         let band = color;
@@ -5152,8 +5168,11 @@
             : ((target - base) / (1 - base)) * 100;
           band = `color-mix(in oklab, ${color}, ${away < 0 ? 'black' : 'white'} ${p.toFixed(2)}%)`;
         }
-        stops.push(`${band} ${(i / CURTAIN_STEPS * 100).toFixed(2)}%`);
-        stops.push(`${band} ${((i + 1) / CURTAIN_STEPS * 100).toFixed(2)}%`);
+        const startPct = (acc / totalWeight) * 100;
+        acc += weights[i];
+        const endPct = (acc / totalWeight) * 100;
+        stops.push(`${band} ${startPct.toFixed(2)}%`);
+        stops.push(`${band} ${endPct.toFixed(2)}%`);
       }
       return `linear-gradient(to top, ${stops.join(', ')})`;
     }
