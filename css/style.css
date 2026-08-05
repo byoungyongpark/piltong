@@ -4452,7 +4452,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--paper);
-  transform: translateY(calc(-1 * var(--ticker, 0) * 100%));
+  transform: translateY(calc(-1 * var(--ticker, 0) * var(--loop-mark-window-h, 100%)));
 }
 
 /* Empty scroll the pinned plate travels through — see the note on
@@ -4642,9 +4642,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      opens up above it, where nothing is anchored to see it. */
   position: absolute;
   left: 0;
-  /* --ticker is 0 while it holds and 1 once it has rolled out; the two
-     children move by the same amount, which is one window each. */
-  transform: translateY(calc(-1 * var(--ticker, 0) * 100%));
+  /* --ticker is 0 while it holds and 1 once it has rolled out. Both
+     children must travel by the SAME distance — one full window height
+     — so neither is left behind by the other. Using the slot's own
+     height variable rather than 100%, because 100% in a transform
+     resolves to the element's OWN height, and the mark (90px) and the
+     next (157px) are different sizes. That mismatch was the bug: the
+     mark only moved 90px while the window is 157px, so it never fully
+     left and APPLICATIONS arrived on top of it ("뉴스티커처럼 보이는곳
+     깨지네"). */
+  transform: translateY(calc(-1 * var(--ticker, 0) * var(--loop-mark-window-h, 100%)));
   width: var(--loop-mark-w, 40%);
   height: auto;
   display: block;

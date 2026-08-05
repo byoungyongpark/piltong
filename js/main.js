@@ -4435,7 +4435,7 @@
       // .10 read as too tight once it was actually closed ("지금은 너무
       // 좁아졌다 지금보단 조금 넉넉히") — the title needs air under it
       // even at its closest, not to sit flush on the next line.
-      const GAP = vh * .16;
+      const GAP = vh * .28;
       const pull = Math.min(0, (vh / 2 + markH / 2 + GAP) - (stickyTop + plateH));
       document.documentElement.style.setProperty('--apps-pull', `${pull.toFixed(1)}px`);
 
