@@ -5224,16 +5224,21 @@
 
       // The title ducks under the curtain rather than riding visibly
       // above it the whole way through — it fades out before the flap
-      // arrives (curtain covers the full viewport around t=.5) and
-      // back in a beat before the colour finishes settling, not at the
-      // exact instant it does, so the reappearance reads as its own
-      // moment rather than tied to the crossfade's own finish
-      // ("잠시 사라졌다가 색이 다 전환되기 약간 이전에 자연스럽게 다시
-      // 나타나게"). Opacity only — the dock's own translateY (below)
-      // still owns intro's transform, so this stays on a different
-      // property to avoid the two fighting over it.
+      // arrives (curtain covers the full viewport around t=.5), stays
+      // hidden through the sweep, and comes back right as the curtain's
+      // OWN LAST face is about to clear the top of the screen, not
+      // partway through ("나타나는 시점은 커튼의 마지막 면이 상단에
+      // 닿기 직전 즈음으로"). That last face is the pure-Paper band —
+      // the gradient's "to top" direction puts it at the curtain box's
+      // own BOTTOM edge (0%), which is what's still visible last, right
+      // before the box fully clears the viewport top at t=1 (its
+      // bottom-edge viewport position is exactly 2(1-t)*viewportH,
+      // reaching 0 there). So the reappear window sits right up against
+      // t=1, not mid-sweep. Opacity only — the dock's own translateY
+      // (below) still owns intro's transform, so this stays on a
+      // different property to avoid the two fighting over it.
       const INTRO_OUT = [.20, .42];
-      const INTRO_IN = [.60, .85];
+      const INTRO_IN = [.88, .97];
       // Gated on t > INTRO_OUT[0], not written every frame — before
       // that, .apps__intro's OWN entrance rise/fade
       // (initApplicationsEntrance) is still what should be driving its
