@@ -5198,23 +5198,12 @@
       preroll = window.innerHeight * .6;
     }
 
-    // How much of the runway the curtain sweep + colour settle (t)
-    // actually spend, leaving the rest for the title's own appear-
-    // then-hold beat: curtain fully clear, THEN the title appears, THEN
-    // a short hold before the dock takes over ("커튼이 다 쳐지고
-    // 글자그룹이 나타나고 아주 살짝 홀딩"). The runway itself was
-    // lengthened (60->80svh, see style.css) so this doesn't compress
-    // the sweep's own pace to make room — sweepPx below still equals
-    // the OLD runway's full 60svh.
-    const SWEEP_END = .75;
-
     let ticking = false;
     function update() {
       ticking = false;
       if (runPx <= 0) return;
       const raw = pinOffset - sec.getBoundingClientRect().top;
-      const sweepPx = runPx * SWEEP_END;
-      const t = smootherstep(clamp01((raw + preroll) / (sweepPx + preroll)));
+      const t = smootherstep(clamp01((raw + preroll) / (runPx + preroll)));
       // Only touches the ground once the hold has actually begun — at
       // t=0 it would otherwise force opacity to 1 on every page load,
       // stomping the separate fade-IN initClosingHandoff drives during
@@ -5235,12 +5224,21 @@
 
       // The title ducks under the curtain rather than riding visibly
       // above it the whole way through — it fades out before the flap
-      // arrives (curtain covers the full viewport around t=.5) and
-      // stays hidden through the rest of the sweep. Opacity only — the
-      // dock's own translateY (below) still owns intro's transform, so
-      // this stays on a different property to avoid the two fighting
-      // over it.
+      // arrives (curtain covers the full viewport around t=.5), stays
+      // hidden through the sweep, and comes back right as the curtain's
+      // OWN LAST face is about to clear the top of the screen, not
+      // partway through ("나타나는 시점은 커튼의 마지막 면이 상단에
+      // 닿기 직전 즈음으로"). That last face is the pure-Paper band —
+      // the gradient's "to top" direction puts it at the curtain box's
+      // own BOTTOM edge (0%), which is what's still visible last, right
+      // before the box fully clears the viewport top at t=1 (its
+      // bottom-edge viewport position is exactly 2(1-t)*viewportH,
+      // reaching 0 there). So the reappear window sits right up against
+      // t=1, not mid-sweep. Opacity only — the dock's own translateY
+      // (below) still owns intro's transform, so this stays on a
+      // different property to avoid the two fighting over it.
       const INTRO_OUT = [.20, .42];
+      const INTRO_IN = [.88, .97];
       // Gated on t > INTRO_OUT[0], not written every frame — before
       // that, .apps__intro's OWN entrance rise/fade
       // (initApplicationsEntrance) is still what should be driving its
@@ -5248,21 +5246,7 @@
       // t=.058, well ahead of .20, so nothing is cut short by handing
       // control over here.
       if (t > INTRO_OUT[0]) {
-        // The reappear (and the hold after it) is timed off rawFrac —
-        // progress across the FULL runway — not off t, which saturates
-        // at 1 once the sweep itself finishes at SWEEP_END. Using t
-        // here would have no room left to place a reappear AFTER the
-        // sweep is done; rawFrac still has the rest of the runway to
-        // work with.
-        const rawFrac = clamp01(raw / runPx);
-        const APPEAR = [.82, .90];
-        // .82 sits a beat past SWEEP_END(.75) so the curtain's last
-        // face has actually cleared the top before anything reappears
-        // ("커튼이 다 쳐지고 글자그룹이 나타나고"); .90 finishes the
-        // appear with .10 of the runway (8svh) left over as a held,
-        // unanimated beat before the dock starts at rawFrac=1
-        // ("아주 살짝 홀딩").
-        const introVisible = clamp01(1 - win(t, INTRO_OUT[0], INTRO_OUT[1]) + win(rawFrac, APPEAR[0], APPEAR[1]));
+        const introVisible = clamp01(1 - win(t, INTRO_OUT[0], INTRO_OUT[1]) + win(t, INTRO_IN[0], INTRO_IN[1]));
         intro.style.opacity = introVisible.toFixed(3);
       }
 

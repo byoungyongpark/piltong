@@ -4609,13 +4609,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .apps__runway {
   flex: 0 0 auto;
   width: 100%;
-  /* 60 -> 80svh: the curtain sweep + colour settle only spend the
-     first 75% of this now (initApplicationsGroundFade's SWEEP_END),
-     freeing up the tail for the title's own appear-then-hold beat
-     before the dock takes over. Lengthened rather than compressing the
-     sweep into the old 60svh, so the sweep itself keeps its pace —
-     the extra 20svh is genuinely new scroll, not time borrowed from it. */
-  height: 80svh;
+  height: 60svh;
   pointer-events: none;
 }
 /* Full browser width, not just the section's own content box ("브라우저
