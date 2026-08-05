@@ -4566,6 +4566,24 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   opacity: 0;
   pointer-events: none;
 }
+/* A single flap the height of the viewport, sweeping straight through
+   it once — off-screen below at rest (t=0), off-screen above once the
+   hold ends (t=1). background-image is the value-ladder gradient
+   (initApplicationsGroundFade), painted "to top": pure Paper at its
+   own bottom edge (the part that enters the screen FIRST as it rises),
+   stepping toward black at its own top edge (the part that leaves
+   LAST) — same convention as the Color Story curtain's leading-edge/
+   trailing-ladder split (initColorStory), just turned 90 degrees.
+   Fixed and z-index:0 like .apps__ground, painted after it in the DOM
+   so it sweeps OVER the fading photo while staying under the title
+   (.apps__intro's z-index:1). */
+.apps__curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transform: translateY(100%);
+}
 /* Title left, copy right, filling the whole width the section's own
    margins leave — no max-width of its own any more ("현재 컨텐츠 폭
    고정된듯 한데 풀로 풀고"). Its containing block is left as .apps
