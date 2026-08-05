@@ -154,7 +154,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   opacity: 0;
   transition: opacity 300ms var(--ease);
 }
-.custom-cursor-line polygon {
+.custom-cursor-line path {
   fill: var(--signal-100);
 }
 .custom-cursor-dot.is-active,
@@ -4356,18 +4356,24 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   background: linear-gradient(
     to bottom,
     var(--loop-ceiling) 0,
-    var(--loop-ceiling) var(--loop-band-top),
-    var(--loop-floor) calc(100% - var(--loop-band-bottom)),
+    var(--loop-ceiling) calc(50% - var(--loop-ceiling-offset, 0px) / var(--plate-spread-y, 1)),
+    var(--loop-floor) calc(50% + var(--loop-floor-offset, 0px) / var(--plate-spread-y, 1)),
     var(--loop-floor) 100%);
   opacity: var(--plate-bg-opacity, 1);
   /* Stretched out to fill the screen during the handover, in step with
      the corner ticks being pulled outward — the lines lead and the
      surface follows them out. A scale rather than a growing inset: this
      runs every frame and a transform is composited, where inset would
-     relayout. It stretches the gradient's two bands as it goes, which is
-     harmless — they are 14 RGB apart and the dissolve is flattening them
-     to one tone anyway. Scaled about the centre, so it spreads in all
-     four directions at once. */
+     relayout. Scaled about the centre, so it spreads in all four
+     directions at once.
+     The two flat-color stops above are divided by --plate-spread-y (not
+     multiplied) so their RENDERED distance from centre stays put as the
+     scale grows: this element gets stretched by that same factor, so an
+     unscaled distance shrunk by 1/scale lands back at its original
+     on-screen position once the transform below applies. Without this,
+     the flat floor band drifts inward under scale and the fixed (non-
+     scaling) video/::after sitting right above it ends up sampling a
+     ceiling-mixed tone instead of pure --loop-floor. */
   transform: scale(var(--plate-spread-x, 1), var(--plate-spread-y, 1));
   transform-origin: center;
   pointer-events: none;
@@ -4452,7 +4458,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--paper);
-  transform: translateY(calc(-1 * var(--ticker, 0) * var(--loop-mark-window-h, 100%)));
+  /* Was continuously scroll-tied (translateY driven by --ticker, 0-1
+     across the roll's scroll window) — at a slow scroll speed that read
+     as never actually finishing, sitting part-rolled with both lines
+     visibly overlapping ("뉴스티커 휠 천천히 하면 여전히 한번에 안넘아가고
+     잔상남아"). initClosingHandoff now just flips .is-ticked once past a
+     single scroll threshold, and this transition carries it the rest of
+     the way over a fixed duration regardless of how fast or slow the
+     scroll that crossed it was — same idea as an actual ticker/flip
+     display, which commits once triggered rather than tracking a dial. */
+  transition: transform 420ms var(--ease);
+}
+.brandid__closing-slot.is-ticked .brandid__closing-next {
+  transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%)));
 }
 
 /* Empty scroll the pinned plate travels through — see the note on
@@ -4519,10 +4537,32 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      the top, so it fills the viewport at every size and the image's own
      top is what's kept. A version that panned the picture through this
      frame as you scrolled was tried and removed; the fill colour behind
-     it is only a fallback for the frame before the image decodes. */
-  background:
-    url("../images/bg.png") top center / cover no-repeat
-    var(--apps-fill);
+     it is only a fallback for the frame before the image decodes.
+
+     The photo's own dark regions band/show noise on a bright, high-
+     contrast monitor ("밝은 모니터서 보니까 일그러짐 및 노이즈가 심한데"
+     ) — it's almost entirely near-black already (see --apps-fill,
+     sampled at RGB 5-18), so a plain CSS gradient painted over the top
+     of it reads as smoother than the source file's own dark levels do.
+     Paints ON TOP of the photo (first background-image layer = topmost)
+     — transparent over the one lit streak (measured off the file: an
+     ellipse centred around 20% across, ~33% down the RAW image, which
+     lands around 20%/78-84% of a typical landscape viewport once
+     `cover`+`top center` crops it — this is calibrated for a common
+     16:9-16:10 desktop, not exact at every aspect ratio), opaque toward
+     --apps-fill everywhere else, on request ("빛이 비치는곳을 제외한
+     나머지는 배경과 비슷한색으로 그라데이션 딤처리"). */
+  background-image:
+    radial-gradient(ellipse 55% 34% at 20% 80%,
+      rgba(7, 7, 7, 0) 0%,
+      rgba(7, 7, 7, .45) 55%,
+      rgba(7, 7, 7, .82) 85%,
+      rgba(7, 7, 7, .92) 100%),
+    url("../images/bg.png");
+  background-position: center, top center;
+  background-size: 100% 100%, cover;
+  background-repeat: no-repeat, no-repeat;
+  background-color: var(--apps-fill);
   opacity: 0;
   pointer-events: none;
 }
@@ -4544,6 +4584,28 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: 60svh;
   pointer-events: none;
+}
+/* Placeholder content below the title group's own held space — the
+   runway above already IS that gap, so this lands directly on it with
+   no added margin of its own ("타이틀 그룹아래로 여백이 어느정도 있는
+   상태에서 타이틀 그룹을 넘치지 않고 거기에 딱 걸리길"). Full browser
+   width, not just the section's own content box ("브라우저 기준으로
+   100% 좌우 여백없이 풀로"). An <img> is a replaced element, so `width:
+   auto` + negative margins alone doesn't stretch it — that only shifts
+   an intrinsically-sized box, it doesn't grow one (tried first; measured
+   679px wide instead of the viewport's 1280). 100vw sets the actual
+   width; the negative left margin then cancels exactly .apps's own
+   horizontal padding so that width lands flush on the viewport's left
+   edge instead of the padded content box's. max-width overrides on top —
+   the global `img { max-width: 100% }` reset (top of file) was capping
+   this right back down to the content box regardless of the 100vw. */
+.apps__showcase {
+  flex: 0 0 auto;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
+  height: auto;
+  display: block;
 }
 /* The Korean-title measure the whole brand section settled on — same
    size, leading and tracking as "기준이 형태가 되는 순간". */
@@ -4641,9 +4703,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      slicing trick in .brandid__closing-mark exists to keep gapless. The
      first fix trimmed that too, pulling the visible cut 3px up off the
      true edge and reopening the exact gap that trick was for ("워드마크
-     배경과 이어져야하는데... 다시 벌어진"). Bottom stays 0 so that seam
-     is untouched; only the top, where the actual bleed was, moves. */
-  clip-path: inset(3px -100vw 0 -100vw);
+     배경과 이어져야하는데... 다시 벌어진").
+     Bottom was 0 (exactly on the true edge) — landing the ink exactly ON
+     the seam instead of past it left a 1px sliver of the plate's own
+     colour visible under the letters at ordinary rendering precision, on
+     request ("영상하단부 뒤에 깔린 배경 약간 벗어나야 이어져보일것 같은데
+     지금은 너무 딱맞아 약간 아래 1px정도 검은 배경라인이 그어진것 처럼
+     보여"). -1.5px opens the clip enough for the mark's own -1.5px
+     overshoot below to actually show instead of being cut off here. */
+  clip-path: inset(3px -100vw -1.5px -100vw);
   transform: translateX(-50%) translateY(calc(-1 * var(--mark-rise, 0px)));
   opacity: var(--mark-fade, 1);
   pointer-events: none;
@@ -4658,32 +4726,41 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      opens up above it, where nothing is anchored to see it. */
   position: absolute;
   left: 0;
-  /* --ticker is 0 while it holds and 1 once it has rolled out. Both
-     children must travel by the SAME distance — one full window height
-     — so neither is left behind by the other. Using the slot's own
-     height variable rather than 100%, because 100% in a transform
-     resolves to the element's OWN height, and the mark (90px) and the
-     next (157px) are different sizes. That mismatch was the bug: the
-     mark only moved 90px while the window is 157px, so it never fully
-     left and APPLICATIONS arrived on top of it ("뉴스티커처럼 보이는곳
-     깨지네"). */
-  transform: translateY(calc(-1 * var(--ticker, 0) * var(--loop-mark-window-h, 100%)));
+  /* Both lines travel by the SAME distance — one full window height —
+     so neither is left behind by the other. Using the slot's own height
+     variable rather than 100%, because 100% in a transform resolves to
+     the element's OWN height, and the mark (90px) and the next (157px)
+     are different sizes. That mismatch was the bug: the mark only moved
+     90px while the window is 157px, so it never fully left and
+     APPLICATIONS arrived on top of it ("뉴스티커처럼 보이는곳 깨지네").
+     Was continuously scroll-tied via --ticker (see .brandid__closing-next
+     for why that's gone) — .is-ticked + this transition now drive it
+     instead. */
+  transition: transform 420ms var(--ease);
   width: var(--loop-mark-w, 40%);
   height: auto;
   display: block;
   fill: var(--paper);
-  /* The slice, and only while there is an edge to be sliced by. Done by
-     pushing the mark DOWN past the slot's bottom so the slot's own clip
-     takes the overshoot off — not by insetting the mark's own clip,
-     which was the bug: that shortened the letters instead of slicing
-     them, leaving a hairline of background between their feet and the
-     block's edge ("워드마크도 살짝 배경과 안이어지게 조금 떨어진것
-     같던데"). Full depth by default (initClosingFit sets --mark-cut-max
-     from the mark's own size); initClosingHandoff eases --mark-cut to
-     zero as the plate's surface dissolves, so the letters are whole once
-     they are standing on bg.png instead. */
-  bottom: calc(-1 * var(--mark-cut, var(--mark-cut-max, 0px)));
+  /* No slice any more. The mark used to be pushed down past the slot's
+     own bottom edge by --mark-cut so the slot's clip trimmed off the
+     overshoot, reading as "joined to the plate's edge" instead of
+     floating above it with a gap — but that read as the letters
+     themselves looking cut/damaged, on request ("워드마커가 잘린것처럼
+     보이면 안되"). Left flush at 0 instead and relying on the spread
+     (initClosingHandoff) to have already grown the plate past the mark
+     by the time it's visible — "그냥 영상보다 아래에 위치해서 배경과
+     이어지다가 확대되면 배경이 커지니까 자연스럽게 안잘리고 보이는".
+     0 landed the ink exactly ON the plate's own bottom edge rather than
+     past it — an exact seam is fragile at ordinary rendering precision
+     and showed as a 1px sliver of the plate's colour under the letters.
+     -1.5px overlaps the ink slightly onto whatever is past the plate's
+     edge instead of abutting it (the slot's own clip-path, above, was
+     opened by the same amount so this isn't cut off). */
+  bottom: -1.5px;
   pointer-events: none;
+}
+.brandid__closing-slot.is-ticked .brandid__closing-mark {
+  transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%)));
 }
 .brandid__closing-loop {
   /* Narrower than the block and centred in it, so the symbol reads
@@ -4707,21 +4784,109 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
      ---- */
-  /* Two feathers, intersected: the vertical pair has its stops set by
+  /* Three feathers, intersected: the vertical pair has its stops set by
      initClosingFit from the room left around the symbol after cropping,
      so it can never reach the mark; the horizontal pair is what lets the
      narrowed picture end without an edge. Intersect rather than stack —
-     each layer has to be able to cut the other, which is the whole point
+     each layer has to be able to cut the others, which is the whole point
      of masking all four sides. The fallbacks are only for the frame
-     before the JS runs. */
+     before the JS runs.
+     The third, an ellipse, is the diagonal corners specifically — two
+     axis-aligned linear fades alone still leave a squared-off corner
+     (each one is fully opaque right up to the OTHER edge, so the actual
+     corner point never fades at all), on request ("영상 투명 그라데이션을
+     대각선 양사방으로도 줘서"). Sized past the symbol's own footprint so
+     it only ever touches the four corners, not the mark. */
   -webkit-mask-image:
     linear-gradient(to bottom, transparent 0, #000 var(--loop-mask-top, 7%), #000 var(--loop-mask-bottom, 94%), transparent 100%),
-    linear-gradient(to right, transparent 0, #000 var(--loop-mask-left, 12%), #000 var(--loop-mask-right, 88%), transparent 100%);
+    linear-gradient(to right, transparent 0, #000 var(--loop-mask-left, 12%), #000 var(--loop-mask-right, 88%), transparent 100%),
+    radial-gradient(ellipse 78% 78% at center, #000 65%, transparent 100%);
   mask-image:
     linear-gradient(to bottom, transparent 0, #000 var(--loop-mask-top, 7%), #000 var(--loop-mask-bottom, 94%), transparent 100%),
-    linear-gradient(to right, transparent 0, #000 var(--loop-mask-left, 12%), #000 var(--loop-mask-right, 88%), transparent 100%);
-  -webkit-mask-composite: source-in;
+    linear-gradient(to right, transparent 0, #000 var(--loop-mask-left, 12%), #000 var(--loop-mask-right, 88%), transparent 100%),
+    radial-gradient(ellipse 78% 78% at center, #000 65%, transparent 100%);
+  -webkit-mask-composite: source-in, source-in;
   mask-composite: intersect;
+}
+/* Dims the footage's own content toward the plate's ACTUAL background
+   colour everywhere except the centre (the symbol and its own
+   lighting), on request ("영상심볼 쪽엔 투명이고 양사방은 배경색으로
+   방사형 그라데이션 적용해봐줘"). Sized to match the video's own box
+   exactly (same --loop-video-w/-h, same centred position) so it tracks
+   it through every resize and through the plate's own scale entrance/
+   spread, since both live on the same element. A generous ellipse —
+   wider than the symbol's own 0.35-0.65 span — so it only dims the
+   footage genuinely near its edges, not the symbol or its glow.
+
+   The colour and the shape are split into two different properties now,
+   not one baked-in radial-gradient: `background` is a plain top-to-
+   bottom linear-gradient between --loop-ceiling and --loop-floor — the
+   EXACT gradient the wrapper's own ::before backdrop paints — so at any
+   given height within the video's box, this shows the SAME colour
+   that's actually behind it there, not a single flat tone (was
+   var(--loop-floor) throughout, which only matched near the very
+   bottom; toward the top of the video the real backdrop is closer to
+   --loop-ceiling and the flat floor colour read as a separate block,
+   on request ("방사형 그라디언트 바깥쪽 색상은 뒤에 깔려진 배경색이어야
+   한몸처럼 보일것 같네")). `mask-image` is what was previously baked
+   into the gradient's own stops — the same ellipse, transparent at the
+   symbol and opaque toward the edges — now just controlling how much of
+   that colour-matched linear gradient shows through. */
+.brandid__closing-loop-wrap::after {
+  content: '';
+  position: absolute;
+  top: var(--loop-band-top, 0px);
+  left: 50%;
+  /* Was translateX(-50%) scale(--plate-spread-x/-y) — tried making this
+     layer grow with the handover's spread ("한몸인채 확대되도 그대로
+     확대됬으면"), but the actual footage underneath it (the real
+     <video>) is NOT part of that spread — only the flat backdrop
+     (::before) is meant to expand to fill the screen during the
+     handover. Scaling this dimming layer along with it pulled it away
+     from the still-real-size video it's supposed to sit on, on request
+     ("확대됬을때 영상위에 그위치 그사이즈 그대로 놔두고 뒤에 깔려진
+     단색 배경만 확장되게"). Back to a plain translateX(-50%) — stays
+     locked to the video's own real position/size regardless of how far
+     the backdrop behind it has spread. */
+  transform: translateX(-50%);
+  width: var(--loop-video-w, 100%);
+  height: var(--loop-video-h, auto);
+  z-index: 1;
+  pointer-events: none;
+  /* Tied to the same fade the footage itself uses (initClosingHandoff
+     sets --footage-dim alongside video.style.opacity) so this leaves
+     with it as one body instead of lingering after the footage is gone,
+     on request ("영상이 사라지면 당연히 이것들도 같이 사라지는거고
+     한몸처럼 움직이게"). */
+  opacity: var(--footage-dim, 1);
+  background: linear-gradient(to bottom, var(--loop-ceiling, #17191E), var(--loop-floor, #25262A));
+  /* Was ellipse 46% 22%, first stop at 55% of that radius — a prior fix
+     compared that stop's distance from centre (12.1%) against the
+     SMALLER of the symbol's top/bottom clearances (12-14%) and called
+     it safe. Wrong comparison: the mask is radially symmetric, one
+     radius in every direction, so it has to clear whichever edge sits
+     FARTHER from centre (the symbol isn't itself centred — top
+     clearance 14.35%, bottom 12.01%, so the symbol's TOP edge is
+     actually the farther one at 35.65% of the box height from centre,
+     bottom edge at 37.99%) — using the smaller number left the mask
+     dimming well inside both edges regardless of which direction, at
+     every scale, on request ("작아지든 커지든 영상의 심볼을 가리지
+     않는 조건이야"). Radius set to 50% (reaches the box's own edge
+     exactly, so nothing is ever declared past what actually exists),
+     with the first stop at 80% of that — 40% of the box height from
+     centre, ~2% of height past the farther (bottom) edge at 37.99% as a
+     safety margin. Horizontal radius (46%) is untouched — this was
+     always a vertical-only problem. */
+  -webkit-mask-image: radial-gradient(ellipse 46% 50% at center,
+    transparent 0%,
+    transparent 80%,
+    rgba(0, 0, 0, .5) 92%,
+    #000 100%);
+  mask-image: radial-gradient(ellipse 46% 50% at center,
+    transparent 0%,
+    transparent 80%,
+    rgba(0, 0, 0, .5) 92%,
+    #000 100%);
 }
 
 @media (max-width: 900px) {

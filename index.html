@@ -13,7 +13,7 @@
 <!-- Archivo and Saira dropped with the switch to a single Latin face;
      IBM Plex Mono stays for the small labels, which are a separate role. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@100..900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026080572">
+<link rel="stylesheet" href="css/style.css?v=2026080594">
 </head>
 <body>
 
@@ -965,15 +965,34 @@
            be cut BY, permanently cropped letters just read as damaged
            ("워드마크 지금 애매하게 배경과 안이어진다"). -->
       <div class="brandid__closing-slot" aria-hidden="true">
-      <svg class="brandid__closing-mark" viewBox="99.66 20.10 229.55 30.66"
+      <!-- viewBox height grew from 30.66 to 32 (bottom edge from 50.76 to
+           52.1) — the P/I/T/O/N/G translate(0,1.5) nudge (below) pushed
+           their own bottom edge to ~51.98, past the OLD viewBox's bottom
+           boundary, and an <svg> clips to its viewBox by default, so
+           they were still getting cut off there even after the CSS
+           mark-cut trick was removed, on request ("여전히 워드마크 끝단
+           잘려보인다"). MARK_ASPECT in initClosingFit (main.js) reads
+           this same ratio and must change with it. -->
+      <svg class="brandid__closing-mark" viewBox="99.66 20.10 229.55 30.86"
            xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PILTONG">
-        <path d="M119.35,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-10.61h13.65c2.72,0,4.92-2.2,4.92-4.92v-9.9c0-2.72-2.2-4.92-4.92-4.92ZM118.22,31.84c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-3.72c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v3.72Z"/>
-        <path d="M138.44,20.11h4.08c1.09,0,1.97.88,1.97,1.97v28.39h-4.08c-1.09,0-1.97-.88-1.97-1.97v-28.39h0Z" transform="translate(282.93 70.58) rotate(-180)"/>
+        <!-- P/I/T/O/N/G nudged down to align exactly with L's own bottom
+             edge (L excluded, already at that depth). Each letter's own
+             MEASURED offset, not one flat guess (which was 1.5 — badly
+             overshot the ~0.28-0.30 actually needed, leaving L looking
+             detached/floating ABOVE the rest instead, on request
+             ("워드마크 L자 혼자 붕떠있어... 하단 끝이 다 동일하게
+             정렬")). Read directly off each path's own local bbox
+             against L's (getBBox with the transform removed) — P/I/N
+             0.29, T 0.28, O/G 0.30, all in viewBox units. Each letter's
+             own transform, so the mark's overall box/advance width is
+             untouched. -->
+        <path transform="translate(0,0.29)" d="M119.35,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-10.61h13.65c2.72,0,4.92-2.2,4.92-4.92v-9.9c0-2.72-2.2-4.92-4.92-4.92ZM118.22,31.84c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-3.72c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v3.72Z"/>
+        <path transform="translate(0,0.29) translate(282.93 70.58) rotate(-180)" d="M138.44,20.11h4.08c1.09,0,1.97.88,1.97,1.97v28.39h-4.08c-1.09,0-1.97-.88-1.97-1.97v-28.39h0Z"/>
         <path d="M181.31,44.71h-16.6v-22.63c0-1.09-.88-1.97-1.97-1.97h-4.08v28.68c0,1.09.88,1.97,1.97,1.97h22.65v-4.08c0-1.09-.88-1.97-1.97-1.97Z"/>
-        <path d="M201.59,20.11h-13.36v4.08c0,1.09.88,1.97,1.97,1.97h7.32v22.35c0,1.09.88,1.97,1.97,1.97h4.08v-24.32h9.28v-4.08c0-1.09-.88-1.97-1.97-1.97h-9.28Z"/>
-        <path d="M246.71,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-20.51c0-2.72-2.2-4.92-4.92-4.92ZM245.59,42.45c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v14.33Z"/>
-        <path d="M285.5,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-22.35c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v20.38c0,1.09.88,1.97,1.97,1.97h4.08v-25.44c0-2.72-2.2-4.92-4.92-4.92Z"/>
-        <path d="M309.52,20.11c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-11.23c0-1.09-.88-1.97-1.97-1.97h-10.34v4.08c0,1.09.88,1.97,1.97,1.97h4.29v4.06c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h16.6v-4.08c0-1.09-.88-1.97-1.97-1.97h-17.72Z"/>
+        <path transform="translate(0,0.28)" d="M201.59,20.11h-13.36v4.08c0,1.09.88,1.97,1.97,1.97h7.32v22.35c0,1.09.88,1.97,1.97,1.97h4.08v-24.32h9.28v-4.08c0-1.09-.88-1.97-1.97-1.97h-9.28Z"/>
+        <path transform="translate(0,0.3)" d="M246.71,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-20.51c0-2.72-2.2-4.92-4.92-4.92ZM245.59,42.45c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v14.33Z"/>
+        <path transform="translate(0,0.29)" d="M285.5,20.11h-14.77c-2.72,0-4.92,2.2-4.92,4.92v23.47c0,1.09.88,1.97,1.97,1.97h4.08v-22.35c0-1.09.88-1.97,1.97-1.97h8.59c1.09,0,1.97.88,1.97,1.97v20.38c0,1.09.88,1.97,1.97,1.97h4.08v-25.44c0-2.72-2.2-4.92-4.92-4.92Z"/>
+        <path transform="translate(0,0.3)" d="M309.52,20.11c-2.72,0-4.92,2.2-4.92,4.92v20.51c0,2.72,2.2,4.92,4.92,4.92h14.77c2.72,0,4.92-2.2,4.92-4.92v-11.23c0-1.09-.88-1.97-1.97-1.97h-10.34v4.08c0,1.09.88,1.97,1.97,1.97h4.29v4.06c0,1.09-.88,1.97-1.97,1.97h-8.59c-1.09,0-1.97-.88-1.97-1.97v-14.33c0-1.09.88-1.97,1.97-1.97h16.6v-4.08c0-1.09-.88-1.97-1.97-1.97h-17.72Z"/>
       </svg>
         <!-- The next title, sitting exactly one slot below so it rolls
              up into the wordmark's place — the slot's overflow is what
@@ -1017,6 +1036,7 @@
       <p class="apps__body">PILTONG의 아이덴티티는 로고에서 끝나지 않습니다.<br>웹사이트와 문서, 명함과 영상까지<br>같은 구조와 여백, 색의 원칙으로 일관된 경험을 만듭니다.</p>
     </div>
     <div class="apps__runway" aria-hidden="true"></div>
+    <img class="apps__showcase" src="images/bg_overview.png" alt="">
   </section>
 
   <!-- ===== 01 Philosophy → end — PARKED (hidden 일단, restore by removing this comment wrap) =====
@@ -1320,6 +1340,6 @@
      listener and getBoundingClientRect read on this page keeps
      working unchanged. -->
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-<script src="js/main.js?v=2026080544"></script>
+<script src="js/main.js?v=2026080573"></script>
 </body>
 </html>

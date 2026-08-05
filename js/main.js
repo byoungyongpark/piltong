@@ -66,8 +66,15 @@
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const tailSvg = document.createElementNS(SVG_NS, 'svg');
     tailSvg.setAttribute('class', 'custom-cursor-line');
-    const tailPoly = document.createElementNS(SVG_NS, 'polygon');
-    tailSvg.appendChild(tailPoly);
+    // <path> now, not <polygon> — a polygon's edges are dead straight
+    // between whatever points happen to be in the trail that frame, so
+    // a tight turn (circling the cursor) showed up as visibly faceted
+    // corners instead of a curve, on request ("커서 이리저리 돌릴때
+    // 다각형처럼 원형이 생성되는데"). smoothOutline (below) draws the
+    // same outline as a series of quadratic curves through those same
+    // points instead.
+    const tailPath = document.createElementNS(SVG_NS, 'path');
+    tailSvg.appendChild(tailPath);
     body.appendChild(tailSvg);
 
     let x = 0, y = 0; // eased position — trails the raw target with a
@@ -121,6 +128,29 @@
       if (started) setActive(true);
     });
 
+    // Draws the same closed outline a straight-edged polygon would have
+    // (the ribbon's left side, then its right side reversed), but as
+    // quadratic curves through the points instead of straight lines
+    // between them — a tight turn used to show up as visibly faceted
+    // corners rather than a curve. Standard "midpoint smoothing": each
+    // curve's control point is the actual recorded point, and it ends
+    // at the midpoint to the NEXT point rather than at that point
+    // itself, which is what removes the corner at every vertex except
+    // the very first and last (kept exact, so the tail still starts and
+    // ends precisely on the dot).
+    function smoothOutline(pts) {
+      if (pts.length < 2) return '';
+      let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const cx = pts[i][0], cy = pts[i][1];
+        const mx = (cx + pts[i + 1][0]) / 2, my = (cy + pts[i + 1][1]) / 2;
+        d += ` Q${cx.toFixed(1)},${cy.toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}`;
+      }
+      const last = pts[pts.length - 1];
+      d += ` L${last[0].toFixed(1)},${last[1].toFixed(1)} Z`;
+      return d;
+    }
+
     function frame() {
       x += (tx - x) * 0.22;
       y += (ty - y) * 0.22;
@@ -140,11 +170,14 @@
       // what lets a genuine zigzag or an up-down scribble show up as
       // one, instead of always reading as a single smooth bow no
       // matter how the mouse actually moved.
-      const HALF_W = 1.6;
-      const MIN_W = 0.2;
+      // Flat now — no taper at all, on request ("커서 끝 아예 굵기
+      // 다르지 않고 일정하게 해보고"). Was HALF_W(1.6) at the dot end
+      // narrowing to MIN_W(0.7, previously 0.2) at the tail's far end;
+      // now both ends use the same width.
+      const TAIL_W = 1.2;
       const n = trail.length;
       if (n < 2) {
-        tailPoly.setAttribute('points', '');
+        tailPath.setAttribute('d', '');
       } else {
         const left = [], right = [];
         for (let i = 0; i < n; i++) {
@@ -159,13 +192,12 @@
           const dx = next.x - prev.x, dy = next.y - prev.y;
           const dlen = Math.sqrt(dx * dx + dy * dy) || 1;
           const nx = -dy / dlen, ny = dx / dlen;
-          const t = i / (n - 1); // 0 at the oldest point, 1 at the dot
-          const w = Math.max(MIN_W, HALF_W * Math.pow(t, 0.9));
-          left.push(`${(pt.x + nx * w).toFixed(1)},${(pt.y + ny * w).toFixed(1)}`);
-          right.push(`${(pt.x - nx * w).toFixed(1)},${(pt.y - ny * w).toFixed(1)}`);
+          const w = TAIL_W;
+          left.push([pt.x + nx * w, pt.y + ny * w]);
+          right.push([pt.x - nx * w, pt.y - ny * w]);
         }
         right.reverse();
-        tailPoly.setAttribute('points', left.concat(right).join(' '));
+        tailPath.setAttribute('d', smoothOutline(left.concat(right)));
       }
 
       requestAnimationFrame(frame);
@@ -4217,14 +4249,17 @@
       // was the part that mattered.
       const LOCKUP_W_OVER_SYMBOL = 2.219;
       const LOCKUP_GAP_OVER_SYMBOL = .377;
-      // The mark's viewBox in index.html — the glyphs' own bbox.
-      const MARK_ASPECT = 229.55 / 30.66;
-      // How deep the slice is that makes the letters read as continuous
-      // with the plate's bottom edge rather than merely touching it.
-      // 0.30 of the viewBox's 30.66 units — the amount the L already sat
-      // deeper than the other six, which is what made it the only one
-      // that looked joined before any of this.
-      const MARK_CUT_FRAC = .30 / 30.66;
+      // The mark's viewBox in index.html — was 229.55/30.66, grew to
+      // 229.55/32 to stop a bad uniform per-letter offset from clipping
+      // (see the comment there), then measured again once the offsets
+      // were corrected to their real per-letter values: every letter's
+      // rendered bottom lands at 50.76 in viewBox units regardless, so
+      // 32's own bottom (52.10) was 1.34 units of pure dead air under the
+      // ink — the mark's own box (bottom:0 against the plate) was flush,
+      // but the glyphs inside it weren't, reading as a residual sliver of
+      // background left under the wordmark ("워드마크아래로 검은영역이
+      // 남아보이잖아"). 30.86 clears the ink by 0.1 and no more.
+      const MARK_ASPECT = 229.55 / 30.86;
       const SYMBOL_H_FRAC = .567;
       const SYMBOL_TOP_FRAC = .2105;
       const SYMBOL_BOTTOM_FRAC = .7775;
@@ -4263,8 +4298,17 @@
       // there is a lot of room; generous is better here because the
       // picture's side columns run up to 14 RGB darker than the band
       // behind them (measured), and a wide ramp is what keeps that from
-      // reading as an edge.
-      const FADE_SIDE = .12;
+      // reading as an edge. Was .12 — widened further on request
+      // ("영상 그라데이션 된 부분이 배경색이랑 이질감 차이가 너무
+      // 나서 티가 너무 나는데"): direct pixel sampling of the actual
+      // footage showed the measured colours already match the backdrop
+      // closely at every point checked (crop-line colours are identical
+      // to --loop-ceiling/--loop-floor; the old mask boundary reads
+      // within a few RGB of the gradient at that height), so the seam
+      // isn't a wrong colour — it's the ~12%-wide ramp still being too
+      // narrow to hide the video's own natural variation. Still well
+      // inside the symbol's own 0.35-0.65 span, so nothing gets clipped.
+      const FADE_SIDE = .18;
       // The feather at each end never reaches the symbol. It used to be
       // a flat 13%/34% of the box, which was fine at the original size
       // and stopped being fine as the crop tightened: at 18%/21% the
@@ -4287,13 +4331,24 @@
       // bottom edge. h_logo.svg does the same — its artwork stops on the
       // wordmark's own baseline with nothing below it.
       const MARK_FOOT = 0;
-      // Optical nudge, on request ("로고 약간 1~2정도 아래로 더"). Added
-      // to the band rather than to the mark's own offset: pushing the
-      // mark down past the block's edge would put its last rows on
-      // --paper, where a paper-coloured wordmark simply disappears.
-      // Deepening the band instead moves it down relative to the
-      // footage while keeping every pixel of it on the dark surface.
-      const MARK_DROP = 2;
+      // Optical nudge, on request ("로고 약간 1~2정도 아래로 더", then
+      // "영상 하단에서 3픽셀정도 떨어져보이는데 그이상 내려서", then
+      // "현재도 워드마크 배경이랑 안이어져 보인다 아래로 5~6정도
+      // 내려보자", then still not enough a third time — "워드마크
+      // 아래로 내려서 배경과 이어지게 다시 조정"). Added to the band
+      // rather than to the mark's own offset: pushing the mark down past
+      // the block's edge would put its last rows on --paper, where a
+      // paper-coloured wordmark simply disappears. Deepening the band
+      // instead moves it down relative to the footage while keeping
+      // every pixel of it on the dark surface.
+      // Was 12, then 20 ("still not enough") — both increases landed as
+      // only half their intended shift, because inkBottom (below) fed
+      // MARK_DROP into the same centring average that sets the plate's
+      // own sticky position, so raising it also nudged the plate itself
+      // up by half the amount, cancelling half the move (see inkBottom's
+      // own comment). Fixed now, so this step (was 20) should land in
+      // full ("약간 더 내려가야 이어져보일것 같아").
+      const MARK_DROP = 30;
 
       // videoW is the picture's own width — the block's, less the side
       // insets. fullH is the height it WOULD have uncropped at that
@@ -4340,11 +4395,6 @@
       wrap.style.setProperty('--loop-band-bottom', `${(markH + gapBelowVideo + MARK_DROP).toFixed(1)}px`);
       wrap.style.setProperty('--loop-mark-w', `${markW.toFixed(1)}px`);
       wrap.style.setProperty('--loop-mark-foot', `${MARK_FOOT}px`);
-      // The full slice depth at this size. initClosingHandoff eases it
-      // back to zero as the plate's surface goes, so the letters end up
-      // whole on the new ground.
-      wrap.style.setProperty('--mark-cut-max', `${(markH * MARK_CUT_FRAC).toFixed(2)}px`);
-
       // The ticker window's own height. It used to just be the
       // wordmark's height, since the slot's height was never set and
       // auto-resolved from its one in-flow child — which was the mark.
@@ -4393,8 +4443,38 @@
       const bandTopPx = parseFloat(getComputedStyle(wrap).paddingTop) || 0;
       const bandBottomPx = markH + gapBelowVideo + MARK_DROP;
       const plateH = bandTopPx + boxH + bandBottomPx;
+      // ::before's own flat ceiling/floor zones (style.css) used to sit
+      // at fixed pixel/percentage stops in the UNSCALED gradient — fine
+      // at rest, but the handover's spread scales that whole gradient
+      // up around its centre, which drags those flat zones outward
+      // faster than the video itself moves (the video, and this dimming
+      // layer with it, don't scale — see .brandid__closing-loop-wrap
+      // ::after). At the video's own real, fixed bottom edge, the
+      // backdrop's colour measurably drifted from pure floor (scale 1)
+      // toward a ceiling-mixed tone (28% off by scale 3), on request
+      // ("확대된 배경색은 방사형 가장자리랑 똑같은 색으로"). These two
+      // publish each flat zone's distance from the plate's own centre,
+      // in px — style.css divides them by --plate-spread-y (shrinking
+      // the unscaled distance so the transform's own scale multiplies
+      // it back to the original) so the zone's rendered (post-scale)
+      // position stays anchored at the same real screen distance from
+      // centre regardless of how far the backdrop has spread.
+      wrap.style.setProperty('--loop-ceiling-offset', `${(plateH / 2 - bandTopPx).toFixed(1)}px`);
+      wrap.style.setProperty('--loop-floor-offset', `${(plateH / 2 - bandBottomPx).toFixed(1)}px`);
       const inkTop = bandTopPx + (SYMBOL_TOP_FRAC - CROP_TOP) * fullH;
-      const inkBottom = plateH - MARK_FOOT;   // the wordmark's own baseline
+      // Was `plateH - MARK_FOOT`, i.e. including MARK_DROP — which meant
+      // every increase to that optical nudge (asked for four times over,
+      // each time reading as "still hasn't moved") shifted inkCentre
+      // down, which shifted stickyTop (below) up by HALF the same
+      // amount to keep this centred on screen. The video moved up by
+      // that half, the mark moved down by the other half — the GAP
+      // between them did grow by the full nudge, but the mark's own
+      // on-screen position only ever moved by half of it, which is why
+      // repeated increases kept reading as barely anything happened.
+      // Excluding MARK_DROP here means growing it no longer shifts the
+      // centring point at all — the plate (and the video) stays exactly
+      // where it was, and the mark alone moves down by the full amount.
+      const inkBottom = plateH - MARK_DROP - MARK_FOOT;   // the wordmark's own baseline, nudge excluded
       const inkCentre = (inkTop + inkBottom) / 2;
       // Never so far up that the picture's own top leaves the screen —
       // the empty band above it is all that may be cut.
@@ -4660,6 +4740,7 @@
     const line = document.querySelector('.brandid__closing-line');
     const body = document.querySelector('.brandid__closing-body');
     const video = document.querySelector('.brandid__closing-loop');
+    const slot = document.querySelector('.brandid__closing-slot');
     const ticks = Array.from(document.querySelectorAll('.brandid__closing-tick'));
     const runway = document.querySelector('.brandid__closing-runway');
     const apps = document.querySelector('.apps');
@@ -4720,7 +4801,17 @@
     // covered the viewport, so it is invisible; it exists so the section
     // is still dark when the pin releases and the plate leaves.
     const FLOOD = [.22, .38];
-    const DISSOLVE = [.22, .44];
+    // Was [.22,.44] — overlapped the tail of SPREAD ([.04,.26]) by 4
+    // points, so the plate's ceiling colour (mix(CEILING,FLOOR,dissolve))
+    // was already ~10% of the way toward FLOOR by the moment the spread
+    // itself finished growing — the surface's colour had visibly shifted
+    // by the time it was done expanding, on request ("확대됬을때
+    // 확대되기전이랑 배경색이 조금 차이가 나는것 같은데 확대 되기 전에
+    // 배경색 그대로 유지해서"). Starting it exactly where SPREAD ends
+    // (matching FOOTAGE_OUT, which already does this) means the colour
+    // is untouched for the entire zoom and only begins changing once
+    // it's finished.
+    const DISSOLVE = [.26, .44];
     // The footage goes FIRST, while it is still standing on the surface
     // its edge fades were matched to. The other order was the bug: with
     // the surface dissolving at 50-66% the picture was still 78% opaque
@@ -4742,17 +4833,28 @@
     // layer, so the image is hidden until the surface starts leaving and
     // the two read as one cross-fade, on request ("워드마크가 중앙으로
     // 옮겨갈즈음 bg.png 이 배경을 전체적으로 깔아서").
-    const GROUND_IN = [.40, .52];
+    // Was its own [.40,.52] window — a shorter span than FOOTAGE_OUT's
+    // .16, so bg.png rose faster than the footage fell. Matched to
+    // FOOTAGE_OUT directly (same span, same start) so the ground comes in
+    // at exactly the footage's own fade-out rate ("영상이 사라질때도
+    // 방사형이랑 같은속도로") — it stays invisible regardless, hidden
+    // under the still-opaque plate until PLATE_BG_OUT clears at .42.
+    const GROUND_IN = FOOTAGE_OUT;
     // With the footage gone, the wordmark walks up off the plate's
     // bottom edge to the middle of the screen ("영상 심볼이 사라지고
     // 아래에 있던 워드마크가 브라우저 기준 중앙으로 자연스럽게 이동").
     const MARK_TO_CENTRE = [.42, .56];
     // Then everything stops, .56 to .66 ("여기서 약간 홀딩됬다가").
-    // A few notches on, the wordmark rolls up out of its slot and
-    // APPLICATIONS rolls up into it — one window, two lines, like a
-    // ticker ("마우스 휠 동작 몇번하면... 워드마크 자리에 뉴스티커 처럼
-    // 바뀌게").
-    const TICKER = [.66, .76];
+    // The roll itself: was a continuous scroll-tied range ([.66,.76],
+    // later narrowed to [.66,.70]) — at a slow scroll it just tracked
+    // that dial slowly, sitting part-rolled with both lines visibly
+    // overlapping for as long as the reader stayed in the window, on
+    // request ("뉴스티커 휠 천천히 하면 여전히 한번에 안넘아가고
+    // 잔상남아"). A single threshold now (see .is-ticked below) — once
+    // scroll crosses it, however fast or slow that crossing was, the
+    // CSS transition on .brandid__closing-mark/-next (style.css) carries
+    // the roll to completion over its own fixed duration.
+    const TICKER_AT = .68;
     // ...and then it stops AGAIN, .76 to 1, so the new title gets its own
     // beat to be read — and it is during that beat that the Applications
     // copy rises into place behind it from the bottom of the screen,
@@ -4875,13 +4977,19 @@
       put('ceiling', mix(CEILING, FLOOR, dissolve), v => {
         wrap.style.setProperty('--loop-ceiling', v);
       });
-      if (video) put('footage', (1 - out).toFixed(3), v => { video.style.opacity = v; });
+      // Also drives the video's own dim overlay (::after, style.css) —
+      // it's a separate pseudo-element, not a child of <video>, so it
+      // doesn't inherit the footage's own opacity automatically; without
+      // this it would stay fully visible even after the footage had
+      // faded out, on request ("영상이 사라지면 당연히 이것들도 같이
+      // 사라지는거고 한몸처럼 움직이게").
+      if (video) put('footage', (1 - out).toFixed(3), v => {
+        video.style.opacity = v;
+        wrap.style.setProperty('--footage-dim', v);
+      });
       const plateGone = win(t, PLATE_BG_OUT[0], PLATE_BG_OUT[1]);
       put('plateBg', (1 - plateGone).toFixed(3),
         v => { wrap.style.setProperty('--plate-bg-opacity', v); });
-      // Letters released as the edge that justified cutting them goes.
-      put('markCut', `calc(var(--mark-cut-max, 0px) * ${(1 - plateGone).toFixed(3)})`,
-        v => { wrap.style.setProperty('--mark-cut', v); });
       // Up to the middle, and held there. Nothing carries it further —
       // past this the pin releases and the plate takes it up on its own.
       put('markRise',
@@ -4896,8 +5004,7 @@
       put('markFade',
         clamp01((markY - FADE_TO * vh) / ((FADE_FROM - FADE_TO) * vh)).toFixed(3),
         v => { wrap.style.setProperty('--mark-fade', v); });
-      put('ticker', win(t, TICKER[0], TICKER[1]).toFixed(4),
-        v => { wrap.style.setProperty('--ticker', v); });
+      if (slot) put('ticker', t >= TICKER_AT, v => { slot.classList.toggle('is-ticked', v); });
       if (ground) put('ground', win(t, GROUND_IN[0], GROUND_IN[1]).toFixed(3),
         v => { ground.style.opacity = v; });
 
