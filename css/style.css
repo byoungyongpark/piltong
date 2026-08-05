@@ -4491,10 +4491,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin-top: var(--apps-pull, 0px);
   /* Side margins of about 300, and the content fills everything between
      them ("좌우 여백이 300정도 남겨두고 꽉 채워서") — clamped so it
-     collapses to the page's own --edge on anything narrow. No top
-     padding at all: the gap above the copy is set by the pull above,
-     measured from the title itself rather than added on top of it. */
-  padding: clamp(120px, 18vh, 280px) clamp(var(--edge), 24vw, 300px) clamp(120px, 18vh, 240px);
+     collapses to the page's own --edge on anything narrow. */
+  padding: clamp(90px, 13vh, 200px) clamp(var(--edge), 24vw, 300px) clamp(120px, 18vh, 240px);
   background-color: var(--apps-fill);
   color: var(--paper);
   display: flex;
@@ -4533,7 +4531,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    고정된듯 한데 풀로 풀고"). */
 .apps__intro {
   position: sticky;
-  top: clamp(120px, 18vh, 280px);
+  top: clamp(90px, 13vh, 200px);
   z-index: 1;
   width: 100%;
   display: flex;
@@ -4631,17 +4629,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      wider than the wordmark it replaces, and overflow:hidden would have
      shaved its ends off. inset() with negative side values clips the top
      and bottom on the box and leaves the sides open.
-     The top/bottom value is +3px, not 0 — trimmed slightly INWARD, not
-     out. At ticker=1 the mark's bottom edge lands exactly flush with the
+     Four values now, not two — top trimmed 3px INWARD, bottom left at
+     0. At ticker=1 the mark's bottom edge lands exactly flush with the
      slot's own top edge (both derived from the same window height), so
-     with a 0px clip that seam sat precisely on the clip boundary and the
-     letters' own anti-aliased edge pixels — P I L T O N G's descenders —
-     bled through as a row of dashes ("어플리케이션 위로 잔상"). Trimming
-     3px inside the box clips well past those pixels. Safe: the slot's
-     own height carries 20% headroom over what APPLICATIONS actually
-     needs (13px clear top and bottom, measured), so 3px never touches
-     the title's own glyphs. */
-  clip-path: inset(3px -100vw);
+     a 0px top clip sat precisely on that seam and the letters' own
+     anti-aliased pixels — P I L T O N G's descenders — bled through as
+     a row of dashes ("어플리케이션 위로 잔상"). The shorthand two-value
+     form trims top AND bottom together, though, and the bottom edge is
+     a different seam entirely — the wordmark's OWN flush landing on the
+     block's bottom at rest (ticker=0), the thing the bottom-offset
+     slicing trick in .brandid__closing-mark exists to keep gapless. The
+     first fix trimmed that too, pulling the visible cut 3px up off the
+     true edge and reopening the exact gap that trick was for ("워드마크
+     배경과 이어져야하는데... 다시 벌어진"). Bottom stays 0 so that seam
+     is untouched; only the top, where the actual bleed was, moves. */
+  clip-path: inset(3px -100vw 0 -100vw);
   transform: translateX(-50%) translateY(calc(-1 * var(--mark-rise, 0px)));
   opacity: var(--mark-fade, 1);
   pointer-events: none;
