@@ -4032,7 +4032,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   position: absolute;
   left: 14%;
   top: 0;
-  bottom: 0;
+  /* Was 0 (spanning the full viewport, centring its own content at a
+     dead 50%) — matched to .brandid__colorstory-card's own vertical
+     centre (48.25%) instead, on request ("왼쪽 텍스트 그룹도 카드
+     세로기준 중앙정렬로"). justify-content:center below centres within
+     whatever box top/bottom define, so trimming bottom by twice the
+     card's own 1.75% offset from 50% pulls this box's centre up to
+     match it: a box spanning 0-96.5% centres at 48.25%. */
+  bottom: 3.5%;
   width: min(480px, 40%);
   display: flex;
   flex-direction: column;
