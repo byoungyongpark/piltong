@@ -4583,6 +4583,44 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (prefers-reduced-motion: reduce) {
   .apps__ground { animation: none; }
 }
+/* A second, much bolder pass at the same lit patch — the drift above
+   moves the dimming gradient's OWN position, but that gradient's
+   background-size matches the container exactly (no intrinsic ratio on
+   a plain gradient, so `cover`/`auto` both collapse to "fill the box"),
+   which leaves no slack for background-position to actually shift
+   anything by. Rather than resize that layer — risking pulling its
+   cutout off the photo's real bright spot, which it has to stay
+   aligned with to avoid a visible seam — this is a SEPARATE, freely
+   movable warm highlight glow layered on top via mix-blend-mode:screen
+   (only ever brightens, never re-darkens what's under it), driven by
+   transform the same way .hwt::before's own light sweep is: guaranteed
+   to actually move, on request ("조금더 육안적으로 확 느낄 수 있게
+   크게 빛이 물결처럼 일렁이는 느낌도 추가"). Oversized (inset -20%) so
+   the drift and scale never uncover an edge. Roughly over the same
+   spot the base gradient's cutout sits at, translated into this
+   layer's own (20% larger each side) coordinate space. */
+.apps__ground::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background: radial-gradient(ellipse 30% 20% at 29% 71%,
+    rgba(255, 232, 189, .55) 0%,
+    rgba(255, 214, 156, .26) 45%,
+    transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: groundGlowWave 9s ease-in-out infinite;
+}
+@keyframes groundGlowWave {
+  0%   { opacity: 0;   transform: translate3d(0, 0, 0) scale(1); }
+  30%  { opacity: .8;  transform: translate3d(1.6%, -1.1%, 0) scale(1.08); }
+  60%  { opacity: .32; transform: translate3d(-1.1%, 1.3%, 0) scale(.96); }
+  100% { opacity: 0;   transform: translate3d(0, 0, 0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .apps__ground::before { animation: none; opacity: 0; }
+}
 /* Title left, copy right, filling the whole width the section's own
    margins leave — no max-width of its own any more ("현재 컨텐츠 폭
    고정된듯 한데 풀로 풀고"). Its containing block is left as .apps
