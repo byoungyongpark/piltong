@@ -4525,8 +4525,16 @@
       // plate's bottom edge, so this is the distance from that to the
       // middle — published here because only this function knows both.
       const vh = window.innerHeight;
+      // Not dead-centre — mathematically exact centring here reads as
+      // sitting slightly LOW, the empty band above it looking wider than
+      // the one below, on request ("위쪽 여백이 넓어보이고 아래가
+      // 좁아보이는 느낌"). A few percent of viewport height higher
+      // corrects it; the same fraction is used for
+      // .brandid__colorstory-card's own centring in style.css, since the
+      // user flagged it as the identical optical issue there.
+      const OPTICAL_CENTRE_FRAC = .465;
       const markCentre = stickyTopInk + plateH - MARK_FOOT - markH / 2;
-      const toCentre = Math.max(0, markCentre - vh / 2);
+      const toCentre = Math.max(0, markCentre - vh * OPTICAL_CENTRE_FRAC);
       wrap.style.setProperty('--mark-to-centre', `${toCentre.toFixed(1)}px`);
       // Where the mark's own centre ends up INSIDE the plate once that
       // move is done — the handover needs it to work out where the mark

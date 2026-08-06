@@ -3982,7 +3982,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    1920×1080 frame. */
 .brandid__colorstory-card {
   position: absolute;
-  top: 50%;
+  /* Not dead-centre — mathematically exact centring reads as sitting
+     slightly low, the empty band above the card looking wider than the
+     one below it, on request ("위쪽 여백이 넓어보이고 아래가
+     좁아보이는 느낌... 컬러스토리 컬러 카드에서도 똑같은 현상"). Same
+     fraction as the closing wordmark's own optical-centre correction
+     (OPTICAL_CENTRE_FRAC in initClosingFit, main.js). */
+  top: 46.5%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: clamp(280px, 26vw, 460px);
