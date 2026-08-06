@@ -1898,8 +1898,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      narrow-viewport override; confirmed via measurement that flattening
      this to a shared rem overflowed the mobile viewport ("Essential"
      rendered ~13% wider than a 375px-equivalent screen). Its own vw
-     curve already keeps it safe at every width. */
-  font-size: clamp(76px, 15vw, 300px);
+     curve already keeps it safe at every width.
+     15vw reached its 300px ceiling as early as 2000px width, so
+     between 2000-2135px the word stayed flat at 300px while its
+     available row width (viewport minus .acycle__step's own padding)
+     kept shrinking — the longest words ("Appropriate", "Sustainable")
+     wrapped to two lines there, confirmed at 1920px specifically. The
+     lower 11.72vw coefficient hits the same 300px only exactly at
+     2560px (still the same size there, unchanged), so it keeps
+     shrinking gradually through that whole band instead of going flat
+     early — confirmed by measurement to clear every word's natural
+     width at every point up to 2560px. */
+  font-size: clamp(76px, 11.72vw, 300px);
   line-height: .95;
   /* 380, not a plain 300 or a full step up to 400 — Outfit is loaded
      as a variable font, so a value between named weights is valid and
@@ -2071,9 +2081,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   white-space: nowrap;
   /* Matches .acycle__word (OUR APPROACH's "Essential" etc.) exactly,
      rather than its own independent scale — including staying on its
-     own vw clamp rather than the html-rem scale, for the same reason
-     (see .acycle__word). */
-  font-size: clamp(76px, 15vw, 300px);
+     own vw clamp rather than the html-rem scale, and the 11.72vw
+     coefficient (see .acycle__word for why). */
+  font-size: clamp(76px, 11.72vw, 300px);
   line-height: 1;
 }
 .whyp__row--solid .whyp__track { color: var(--ink); }
