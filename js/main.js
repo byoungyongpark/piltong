@@ -5150,6 +5150,22 @@
     if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasure, { once: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', remeasure, { passive: true });
+    // The loadedmetadata trigger above still didn't fully fix a
+    // refresh landing mid-handoff ("새로고침시 문제 해결안된것 같아") —
+    // the browser's OWN scroll-restoration (a reload, unlike a fresh
+    // navigation, is restored to its old scrollY automatically) can
+    // land the page at a non-zero scroll position without ever firing
+    // a 'scroll' event to trigger onScroll/update, so `t`/spread/the
+    // mark's position stay computed for scrollY=0 even though the page
+    // is visibly scrolled. Two rAFs (not one — the first can still
+    // land before the browser's own restoration and later layout
+    // settle) force a re-sync against wherever the page actually ended
+    // up, regardless of whether anything else ever fired.
+    requestAnimationFrame(() => requestAnimationFrame(remeasure));
+    // Also covers back/forward-cache restores, which don't re-run this
+    // script at all — 'pageshow' fires again on both a fresh load and
+    // a bfcache restore, unlike 'load' (bfcache) or DOMContentLoaded.
+    window.addEventListener('pageshow', remeasure);
   }
 
   initClosingHandoff();
