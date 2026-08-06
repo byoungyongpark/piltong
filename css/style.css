@@ -4727,7 +4727,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      보여"). -1.5px opens the clip enough for the mark's own -1.5px
      overshoot below to actually show instead of being cut off here. */
   clip-path: inset(3px -100vw -1.5px -100vw);
-  transform: translateX(-50%) translateY(calc(-1 * var(--mark-rise, 0px)));
+  /* --plate-content-lift is the same box-centred-to-ink-centred settle
+     as the video (initClosingFit/initClosingHandoff) — the wordmark is
+     part of that same "video + mark" bundle, so it rides along with it
+     as the handover's spread plays out, then --mark-rise takes over for
+     the later walk-to-centre. */
+  transform: translateX(-50%) translateY(calc(-1 * var(--mark-rise, 0px) + var(--plate-content-lift, 0px)));
   opacity: var(--mark-fade, 1);
   pointer-events: none;
 }
@@ -4786,6 +4791,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: var(--loop-video-w, 100%);
   margin-inline: auto;
   height: var(--loop-video-h, auto);
+  /* Settles from the box-centred rest position onto its own true
+     ink-centred spot as the handover's spread plays out — see
+     --plate-content-lift-target in initClosingFit. .brandid__closing-
+     loop-wrap::after (the dimming layer sized to match this box
+     exactly) carries the same offset so it doesn't drift off the
+     footage while this moves. */
+  transform: translateY(var(--plate-content-lift, 0px));
   object-fit: cover;
   object-position: center var(--loop-video-pos, 50%);
   display: block;
@@ -4862,8 +4874,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      ("확대됬을때 영상위에 그위치 그사이즈 그대로 놔두고 뒤에 깔려진
      단색 배경만 확장되게"). Back to a plain translateX(-50%) — stays
      locked to the video's own real position/size regardless of how far
-     the backdrop behind it has spread. */
-  transform: translateX(-50%);
+     the backdrop behind it has spread.
+     translateY(--plate-content-lift) added on top so this still tracks
+     the real <video>'s settle from box-centred to ink-centred — same
+     variable, same reason as on .brandid__closing-loop itself. */
+  transform: translateX(-50%) translateY(var(--plate-content-lift, 0px));
   width: var(--loop-video-w, 100%);
   height: var(--loop-video-h, auto);
   z-index: 1;

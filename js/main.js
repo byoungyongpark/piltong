@@ -4429,17 +4429,35 @@
       // Where the plate pins during the handover to Applications. Set
       // here rather than in CSS because it depends on everything above.
       //
-      // Pinned on its INK, not on its box. The top band is empty colour
-      // and the bottom edge is the wordmark, so the symbol and mark
-      // together sit ~87px below the box's midpoint at 1440 — centre the
-      // box and the pair read low. Centring what can actually be seen
-      // puts them on the screen's middle.
+      // Pinned on its BOX now, not its ink — the box itself is what
+      // holds dead centre on the browser the instant it catches
+      // ("플레이트 박스 자체는 중앙에 홀딩"), background and corner
+      // ticks included, with nothing faked. The top band is empty
+      // colour and the bottom edge is the wordmark, so with the box
+      // centred the symbol+mark pair reads a bit LOW at rest — that gap
+      // is closed afterward by initClosingHandoff, which lifts just the
+      // video+mark bundle (not the box, not the background) up onto
+      // their own ink-centred spot over the same window the backdrop
+      // spreads in ("영상 + 워드마크만... 베이스라인에 맞게끔").
       //
-      // This was briefly done as a lift instead, pinning on the box
-      // centre and raising the plate during the handover. It was
-      // reverted: a pinned plate is otherwise perfectly still, so any
-      // per-frame movement on it reads as judder ("영상이 달달거리는").
-      // Arriving in the right place costs nothing and moves nothing.
+      // A version of this was tried the other way round — pin on the
+      // ink centre (this comment used to explain exactly that) and fake
+      // a box-centred LOOK with a counter-transform on the content
+      // alone. It didn't work: the background and corner ticks are
+      // attached to the box's own real position, which was still
+      // ink-centred the whole time, so nothing about the plate as a
+      // whole ever actually held on the screen's true middle — only the
+      // small video+mark portion faked it, and everything else read as
+      // off-centre regardless ("전체 플레이트 자체가... 정중앙에서
+      // 홀딩 먼저 되고"). Pinning on the box for real, and lifting the
+      // content afterward instead of before, is what that needed.
+      //
+      // Doesn't reintroduce the per-frame-movement judder a straight
+      // lift-while-pinned once caused ("영상이 달달거리는") — the box's
+      // own sticky top here is set ONCE, at fit time, and never touched
+      // again; only the content's transform animates, and only across
+      // the same already-scripted spread window, not on an otherwise-
+      // still element.
       const bandTopPx = parseFloat(getComputedStyle(wrap).paddingTop) || 0;
       const bandBottomPx = markH + gapBelowVideo + MARK_DROP;
       const plateH = bandTopPx + boxH + bandBottomPx;
@@ -4476,16 +4494,38 @@
       // where it was, and the mark alone moves down by the full amount.
       const inkBottom = plateH - MARK_DROP - MARK_FOOT;   // the wordmark's own baseline, nudge excluded
       const inkCentre = (inkTop + inkBottom) / 2;
+      // The plate's REAL pin — its own box, centred on the browser.
       // Never so far up that the picture's own top leaves the screen —
       // the empty band above it is all that may be cut.
-      const stickyTop = Math.max(-bandTopPx, window.innerHeight / 2 - inkCentre);
-      wrap.style.setProperty('--plate-sticky-top', `${stickyTop.toFixed(1)}px`);
+      const stickyTopBox = Math.max(-bandTopPx, (window.innerHeight - plateH) / 2);
+      wrap.style.setProperty('--plate-sticky-top', `${stickyTopBox.toFixed(1)}px`);
+      // Where the box WOULD have to pin for the ink to read centred
+      // instead — no longer published as the real sticky top, but still
+      // the reference frame every downstream measurement below
+      // (markCentre, toCentre, the Applications pull) already assumes,
+      // since all of them describe the plate once it has FINISHED
+      // settling, i.e. once the content-lift below has fully resolved
+      // and the two are visually equivalent again.
+      const stickyTopInk = Math.max(-bandTopPx, window.innerHeight / 2 - inkCentre);
+      // The lift itself: how far the video+mark bundle (not the box, not
+      // the background) has to travel, negative being up, to go from
+      // sitting wherever the now box-centred layout puts them to that
+      // same ink-centred spot. initClosingHandoff eases this in from 0
+      // as the backdrop's own spread plays out — see .brandid__closing-
+      // loop/-slot and .brandid__closing-loop-wrap::after in style.css
+      // for where it's applied, and the note above --plate-sticky-top
+      // for why pinning on the box and lifting the content afterward,
+      // not the other way round, is what actually holds the whole plate
+      // centred at rest.
+      const contentLiftTarget = stickyTopInk - stickyTopBox;
+      wrap.style.setProperty('--plate-content-lift-target', `${contentLiftTarget.toFixed(1)}px`);
+      wrap.style.setProperty('--plate-content-lift', '0px');
       // How far the wordmark has to travel to sit on the screen's own
       // centre once the footage above it is gone. It starts on the
       // plate's bottom edge, so this is the distance from that to the
       // middle — published here because only this function knows both.
       const vh = window.innerHeight;
-      const markCentre = stickyTop + plateH - MARK_FOOT - markH / 2;
+      const markCentre = stickyTopInk + plateH - MARK_FOOT - markH / 2;
       const toCentre = Math.max(0, markCentre - vh / 2);
       wrap.style.setProperty('--mark-to-centre', `${toCentre.toFixed(1)}px`);
       // Where the mark's own centre ends up INSIDE the plate once that
@@ -4516,7 +4556,7 @@
       // 좁아졌다 지금보단 조금 넉넉히") — the title needs air under it
       // even at its closest, not to sit flush on the next line.
       const GAP = vh * .28;
-      const pull = Math.min(0, (vh / 2 + markH / 2 + GAP) - (stickyTop + plateH));
+      const pull = Math.min(0, (vh / 2 + markH / 2 + GAP) - (stickyTopInk + plateH));
       document.documentElement.style.setProperty('--apps-pull', `${pull.toFixed(1)}px`);
 
       // The ticker's incoming word is sized entirely in CSS now, from
@@ -4899,7 +4939,7 @@
     // handlers on this element both reading and writing it turns into
     // read-write-read thrash — which is what the footage was juddering
     // on ("영상이 달달거리는 느낌").
-    let runPx = 0, plateStaticTop = 0, stickyTop = 0, markCentreInPlate = 0;
+    let runPx = 0, plateStaticTop = 0, stickyTop = 0, markCentreInPlate = 0, contentLiftTarget = 0;
     // How far the spread has to go, worked out from where the plate sits
     // once pinned rather than guessed: what it takes for the surface to
     // reach every edge of the screen, plus a margin so it never lands
@@ -4919,6 +4959,10 @@
       // the plate's top on screen it gives the mark's position, which is
       // what drives the fade after the pin lets go.
       markCentreInPlate = parseFloat(wcs.getPropertyValue('--mark-centre-in-plate')) || 0;
+      // Published by initClosingFit — the video+mark bundle's own travel
+      // from the box-centred layout position to the ink-centred one,
+      // eased in below over the same window the backdrop spreads in.
+      contentLiftTarget = parseFloat(wcs.getPropertyValue('--plate-content-lift-target')) || 0;
 
       const vw = window.innerWidth, vh = window.innerHeight;
       const pw = wrap.offsetWidth, ph = wrap.offsetHeight;
@@ -4959,6 +5003,13 @@
         v => { wrap.style.setProperty('--corner-dx', v); });
       put('cornerDy', `${((sy - 1) * wrap.offsetHeight / 2).toFixed(1)}px`,
         v => { wrap.style.setProperty('--corner-dy', v); });
+      // The video+mark bundle settles from its box-centred rest position
+      // up onto the ink-centred spot over the SAME spread window — see
+      // the note by --plate-content-lift-target in initClosingFit for
+      // why the box itself pins for real instead of this being faked
+      // with a counter-offset the other way round.
+      put('contentLift', `${(contentLiftTarget * spread).toFixed(1)}px`,
+        v => { wrap.style.setProperty('--plate-content-lift', v); });
 
       put('bg', mix(PAPER, GROUND, flood), v => { section.style.backgroundColor = v; });
       // The copy has to invert with the ground or it goes invisible
@@ -5000,7 +5051,11 @@
       // scroll past that point moves it — and the mark with it — up the
       // screen one for one.
       const vh = window.innerHeight;
-      const markY = stickyTop - Math.max(0, raw - runPx) + markCentreInPlate;
+      // stickyTop is the box's own pin now, not the mark's resting
+      // frame — contentLiftTarget is what closes that gap (fully
+      // resolved by here; the spread it eases in over finishes long
+      // before the dock ever starts).
+      const markY = stickyTop + contentLiftTarget - Math.max(0, raw - runPx) + markCentreInPlate;
       put('markFade',
         clamp01((markY - FADE_TO * vh) / ((FADE_FROM - FADE_TO) * vh)).toFixed(3),
         v => { wrap.style.setProperty('--mark-fade', v); });
