@@ -4886,6 +4886,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   height: 100%;
   object-fit: cover;
 }
+/* Photos are added one at a time in order (m_5.jpg before m_6.jpg
+   exists, say) — a pair's second half is routinely missing for a
+   while, not just a permanent gap. initApplicationsPhotoStack
+   (main.js) adds one of these two modifiers instead of hiding the
+   whole row whenever exactly one side is still missing, so whichever
+   photo HAS been dropped in shows immediately at full width. */
+.apps__gallery--left-only .apps__gallery-img:first-child { width: 100%; }
+.apps__gallery--left-only .apps__gallery-img:last-child { display: none; }
+.apps__gallery--right-only .apps__gallery-img:first-child { display: none; }
+.apps__gallery--right-only .apps__gallery-img:last-child {
+  position: static;
+  width: 100%;
+  height: auto;
+}
 /* The Korean-title measure the whole brand section settled on — same
    size, leading and tracking as "기준이 형태가 되는 순간". */
 .apps__lead {

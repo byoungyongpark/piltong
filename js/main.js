@@ -5438,17 +5438,26 @@
       img.addEventListener('error', () => { img.style.display = 'none'; }, { once: true });
     });
 
-    // A pair needs both images to make sense (the right one crops to
-    // match the left one's own height) — if either is missing, the
-    // whole row hides rather than showing one photo alone or a crop
-    // with nothing to match.
+    // Photos land one at a time in order, so a pair's second half is
+    // routinely just not-there-yet rather than a permanent gap
+    // ("m_5.jpg 안나오는데" — only m_5 existed, m_6 didn't, and the
+    // first version of this hid the whole row until BOTH arrived).
+    // Whichever side HAS a real image now shows immediately at full
+    // width (see .apps__gallery--left-only/--right-only in
+    // style.css); only hide the row outright once neither side has
+    // anything.
     galleries.forEach(gallery => {
-      const imgs = Array.from(gallery.querySelectorAll('.apps__gallery-img'));
-      const hideIfEitherBroken = () => {
-        if (imgs.some(isBroken)) gallery.style.display = 'none';
+      const [left, right] = gallery.querySelectorAll('.apps__gallery-img');
+      const update = () => {
+        const leftOk = !isBroken(left);
+        const rightOk = !isBroken(right);
+        gallery.classList.toggle('apps__gallery--left-only', leftOk && !rightOk);
+        gallery.classList.toggle('apps__gallery--right-only', rightOk && !leftOk);
+        gallery.style.display = (leftOk || rightOk) ? '' : 'none';
       };
-      imgs.forEach(img => img.addEventListener('error', hideIfEitherBroken, { once: true }));
-      hideIfEitherBroken();
+      left.addEventListener('error', update, { once: true });
+      right.addEventListener('error', update, { once: true });
+      update();
     });
   }
 
