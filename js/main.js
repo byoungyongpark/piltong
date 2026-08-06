@@ -5,6 +5,17 @@
 
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Wheel-paced pin-and-cycle scroll animation doesn't map to touch
+  // gestures, so at tablet width and below every pinned section drops
+  // its pin and every scroll-driven text effect drops its motion —
+  // same "just show the resting state" goal prefersReduced already
+  // serves, just gated on viewport width instead of an OS setting. A
+  // function, not a cached const like prefersReduced, because width
+  // (unlike an OS motion preference) routinely changes mid-session —
+  // devtools resize, tablet rotation — and callers check it live, every
+  // scroll/resize tick, not just once at setup.
+  const isCompact = () => window.innerWidth <= 1024;
+
   // .brandid__blueprint-stage and .brandid__color-stage are ONE element
   // carrying both class names: the symbol diagram, the wordmark, the
   // mark redrawing itself, and Color Principle all run inside a single
@@ -4046,6 +4057,22 @@
 
     function update() {
       ticking = false;
+      if (isCompact()) {
+        // All 3 panels stack in normal flow instead (see the
+        // max-width:1024px block in style.css) — nothing here to
+        // drive, just clear whatever the wide-viewport pass last set
+        // so CSS's own resting values (opacity:1, no filter/transform)
+        // are in full control on every panel and both curtains.
+        panels.forEach(panel => {
+          panel.style.opacity = '';
+          panel.style.filter = '';
+          const copy = panel.querySelector('.brandid__colorstory-copy');
+          if (copy) { copy.style.opacity = ''; copy.style.transform = ''; }
+        });
+        if (curtainLeft) curtainLeft.style.transform = '';
+        if (curtainRight) curtainRight.style.transform = '';
+        return;
+      }
       const r = sec.getBoundingClientRect();
       const runway = r.height - window.innerHeight;
       const p = runway <= 0 ? 0 : clamp01(-r.top / runway);
@@ -5268,6 +5295,7 @@
     let ticking = false;
     function update() {
       ticking = false;
+      if (isCompact()) { intro.style.opacity = ''; intro.style.transform = ''; return; }
       const vh = window.innerHeight;
       const top = sec.getBoundingClientRect().top;
       const p = smootherstep(clamp01((vh - top) / (vh * .55)));
@@ -5367,6 +5395,14 @@
     let ticking = false;
     function update() {
       ticking = false;
+      if (isCompact()) {
+        ground.style.opacity = '';
+        sec.style.backgroundColor = '';
+        if (lead) lead.style.color = '';
+        if (body) body.style.color = '';
+        intro.style.transform = '';
+        return;
+      }
       if (runPx <= 0) return;
       const raw = pinOffset - sec.getBoundingClientRect().top;
       const t = smootherstep(clamp01((raw + preroll) / (runPx + preroll)));

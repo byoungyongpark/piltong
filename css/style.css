@@ -4239,6 +4239,41 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
 }
 
+/* Sticky pin + curtain-wipe cross-fade both depend on scroll-linked
+   positioning that doesn't map to touch scroll (request: "휠로
+   작동해서 제자리에서 확인했던 구조들은 단순한 터치스크롤로") —
+   unpinned here, same "show every state, normal stacked flow" pattern
+   Shape DNA already uses at 900px (see .brandid__dna-sticky). All 3
+   panels become plain stacked blocks: photo (its own natural ratio,
+   not the desktop cover-crop scale/shift — that zoom only made sense
+   pinned full-bleed behind an overlaid card), then card, then copy,
+   no overlay. initColorStory (main.js) stops touching any of this
+   past 1024px and just clears its inline styles so these are the
+   only rules in effect. */
+@media (max-width: 1024px) {
+  .brandid__colorstory { height: auto; }
+  .brandid__colorstory-sticky {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .brandid__colorstory-panel {
+    position: static;
+    opacity: 1;
+    height: auto;
+    margin-bottom: clamp(48px, 10vw, 96px);
+  }
+  .brandid__colorstory-panel:last-child { margin-bottom: 0; }
+  .brandid__colorstory-img {
+    position: static;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1672 / 941;
+    transform: none;
+  }
+  .brandid__colorstory-curtain { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .brandid__colorstory-panel[data-panel="0"] { opacity: 1; }
 }
@@ -4973,6 +5008,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     flex-direction: column;
     gap: clamp(16px, 3vw, 28px);
   }
+}
+/* No more hold-then-dock — the title just sits in normal flow and the
+   runway (pure scroll distance for the pin) collapses to nothing,
+   since there's no pin left for it to feed (request: "휠로 작동해서
+   제자리에서 확인했던 구조들은 단순한 터치스크롤로"). initApplicationsEntrance/
+   -GroundFade (main.js) stop touching any of this past 1024px and
+   just clear their inline styles so these are the only rules in
+   effect — .apps__lead/-body's own base color (paper, against the
+   section's own base --apps-fill) is already the correct resting
+   contrast with no transition needed. */
+@media (max-width: 1024px) {
+  .apps__intro {
+    position: static;
+    top: auto;
+  }
+  .apps__runway { height: 0; }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
