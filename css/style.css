@@ -4817,9 +4817,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      colour visible under the letters at ordinary rendering precision, on
      request ("영상하단부 뒤에 깔린 배경 약간 벗어나야 이어져보일것 같은데
      지금은 너무 딱맞아 약간 아래 1px정도 검은 배경라인이 그어진것 처럼
-     보여"). -1.5px opens the clip enough for the mark's own -1.5px
-     overshoot below to actually show instead of being cut off here. */
-  clip-path: inset(3px -100vw -1.5px -100vw);
+     보여"). Was a fixed -1.5px, just enough for the mark's own -1.5px
+     overshoot below to actually show instead of being cut off here —
+     --slot-clip-bottom (initClosingFit) widens that as needed for
+     APPLICATIONS' own optical-centring offset too (--next-optical-
+     offset), which needs more room than the mark ever did. Widening it
+     doesn't cost the mark anything: its own ink never reaches the
+     extra space, so nothing about how IT renders changes. */
+  clip-path: inset(3px -100vw calc(-1 * var(--slot-clip-bottom, 1.5px)) -100vw);
   /* --plate-content-lift is the same box-centred-to-ink-centred settle
      as the video (initClosingFit/initClosingHandoff) — the wordmark is
      part of that same "video + mark" bundle, so it rides along with it

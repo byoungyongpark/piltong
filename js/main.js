@@ -4439,24 +4439,23 @@
       // 약간 위로 치우쳐보인다"). Half the window/mark height
       // difference is what closes that gap — pushes APPLICATIONS down
       // just enough that its own centre lands where the mark's does.
-      //
-      // Capped, though — the ideal offset can push APPLICATIONS' own
-      // ink past the slot's shared clip-path (style.css), which has to
-      // stay tight at the bottom for the MARK's own overshoot trick.
-      // Growing the window doesn't create headroom against this: the
-      // ideal offset and the room the window itself provides both scale
-      // with windowH at the same rate, so a taller window never closes
-      // the gap between them — confirmed measured letters clipping at
-      // the bottom regardless ("어플리케이션 철자중 일부가 하단이
-      // 잘려보인다"). What DOES bound it is textH vs windowH directly:
-      // the same clip margin (1.5px) the mark's own overshoot uses is
-      // reused here as the floor. Past that point exact centring gives
-      // way to "as close as fits" rather than clipping the letters.
-      const CLIP_MARGIN = 1.5;
       const idealOffset = (windowH - markH) / 2;
-      const maxSafeOffset = Math.max(0, (windowH - textH) / 2 + CLIP_MARGIN);
-      const nextOpticalOffset = Math.min(idealOffset, maxSafeOffset);
-      wrap.style.setProperty('--next-optical-offset', `${nextOpticalOffset.toFixed(1)}px`);
+      wrap.style.setProperty('--next-optical-offset', `${idealOffset.toFixed(1)}px`);
+      // Capping the offset instead (tried first) still read as "약간
+      // 위쪽에 치우쳐" — a partial fix rather than a real one, since
+      // giving APPLICATIONS the FULL offset needs more room at the
+      // bottom than the slot's clip-path (style.css) allowed. That clip
+      // was tuned tight (-1.5px) specifically for the MARK's own
+      // overshoot trick, but widening it doesn't cost the mark
+      // anything — its own ink never reaches the extra room, so nothing
+      // about how it renders changes. --slot-clip-bottom is that
+      // widened margin: however much APPLICATIONS' full offset actually
+      // needs, with a few px to spare, replacing the old fixed -1.5px
+      // (which only the mark actually required) so the ideal offset
+      // above no longer has anywhere to be capped against.
+      const SLOT_CLIP_MARGIN = 1.5;
+      const slotClipBottom = Math.max(SLOT_CLIP_MARGIN, idealOffset - (windowH - textH) / 2 + SLOT_CLIP_MARGIN);
+      wrap.style.setProperty('--slot-clip-bottom', `${slotClipBottom.toFixed(1)}px`);
 
       // Where the plate pins during the handover to Applications. Set
       // here rather than in CSS because it depends on everything above.
