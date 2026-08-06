@@ -5157,6 +5157,25 @@
     // sat wrong ("어플리케이션은 어느정도 홀딩되다보니 그상태에서
     // 새로고침하면 아래로 내려와 치우쳐보이는게 조금 거슬리네").
     [50, 150, 350, 700, 1200].forEach(ms => setTimeout(remeasure, ms));
+    // Still not it, per further testing — the wrong position held
+    // through scrolling UP, only correcting once scroll passed BACK
+    // OVER the spread window and returned ("위로 스크롤 하면 그
+    // 치우친게 유지됬다가... 플레이트 확장 시점을 지나게 위로 올라갔다가
+    // 다시 내려오면 의도했던 위치로"). That's not a readiness-timing
+    // symptom — plateStaticTop/runPx (measure(), below) come from
+    // runway.offsetTop, which depends on the layout of EVERYTHING
+    // above this section, not just this section's own geometry. Any of
+    // the many other <img>s on the page finishing decode AFTER this
+    // component's own measure() runs reflows everything below it,
+    // silently invalidating the cached plateStaticTop/runPx — nothing
+    // above was listening for that at all, so scrolling back down only
+    // "looked like" a fix insofar as it happened to land after that
+    // reflow had already settled. Listening to every image directly
+    // (not just the footage) closes that gap regardless of how long
+    // any one of them takes.
+    Array.from(document.images).forEach(img => {
+      if (!img.complete) img.addEventListener('load', remeasure, { once: true });
+    });
   }
 
   initClosingHandoff();
