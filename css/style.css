@@ -4566,30 +4566,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   opacity: 0;
   pointer-events: none;
 }
-/* A single flap the height of the viewport, sweeping straight through
-   it once — off-screen below at rest (t=0), off-screen above once the
-   hold ends (t=1). background-image is the value-ladder gradient
-   (initApplicationsGroundFade), painted "to top": pure Paper at its own
-   BOTTOM edge, darkest band at its own TOP edge. Because translateY(%)
-   resolves against the element's OWN height, the top edge is what
-   enters the screen first as it rises (visible near the bottom of the
-   viewport from t=0), and the bottom edge — Paper — is what's still
-   on screen last, right before the box clears the top at t=1. Same
-   convention as the Color Story curtain's leading-edge/trailing-ladder
-   split (initColorStory), just turned 90 degrees.
-   z-index ABOVE .apps__intro's (1) on purpose — it physically covers
-   the title as it sweeps rather than the title fading out on its own
-   opacity, on request ("페이드 되는 효과... 없애고... 커튼이 물리적
-   으로 가려서/드러내서"). initApplicationsGroundFade no longer touches
-   intro's opacity at all; whatever hides or reveals it is this
-   occlusion, not a timed fade. */
-.apps__curtain {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  transform: translateY(100%);
-}
 /* Title left, copy right, filling the whole width the section's own
    margins leave — no max-width of its own any more ("현재 컨텐츠 폭
    고정된듯 한데 풀로 풀고"). Its containing block is left as .apps

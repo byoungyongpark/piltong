@@ -5075,12 +5075,11 @@
   function initApplicationsGroundFade() {
     const sec = document.querySelector('.apps');
     const ground = document.querySelector('.apps__ground');
-    const curtain = document.querySelector('.apps__curtain');
     const intro = document.querySelector('.apps__intro');
     const runway = document.querySelector('.apps__runway');
     const lead = document.querySelector('.apps__lead');
     const body = document.querySelector('.apps__body');
-    if (!sec || !ground || !curtain || !intro || !runway || prefersReduced) return;
+    if (!sec || !ground || !intro || !runway || prefersReduced) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smootherstep = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10);
@@ -5110,56 +5109,6 @@
     const PAPER_70 = parseColor(readVar('--paper-70'));
     const INK = parseColor(readVar('--ink'));
     const INK_70 = parseColor(readVar('--ink-70'));
-
-    // The curtain's own value-ladder gradient — same technique as the
-    // Color Story curtain (initColorStory's curtainRamp), kept as its
-    // own copy rather than shared since the colour here never varies
-    // (always Paper). Built once: it's a static gradient, only the
-    // element's transform moves per frame.
-    const CURTAIN_STEPS = 4;
-    const CURTAIN_STEP_L = .085;
-    const probe = document.createElement('span');
-    probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:0;height:0';
-    document.body.appendChild(probe);
-    function curtainLightness(rgbStr) {
-      const [r, g, b] = rgbStr.match(/[\d.]+/g).slice(0, 3)
-        .map(Number).map(v => v / 255)
-        .map(v => v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4));
-      const l = Math.cbrt(.4122214708 * r + .5363325363 * g + .0514459929 * b);
-      const m = Math.cbrt(.2119034982 * r + .6806995451 * g + .1073969566 * b);
-      const s = Math.cbrt(.0883024619 * r + .2817188376 * g + .6299787005 * b);
-      return .2104542553 * l + .7936177850 * m - .0040720468 * s;
-    }
-    // "to top": position 0% is the curtain's own BOTTOM edge, which —
-    // because translateY(%) is resolved against the element's OWN
-    // height, not the viewport — is what's still on screen LAST, right
-    // before the box clears the top at t=1 (verified: its viewport
-    // position is exactly 2(1-t)*viewportH, reaching 0 only there).
-    // That's where the pure, unmixed colour sits (i=0), so Paper is
-    // what the sweep actually ends on ("밴드의 마지막이 페이퍼색이
-    // 되고"). Equal bands again — the graduated weighting tried here
-    // was reverted on request ("밴드폭은 원래대로 돌리자").
-    function curtainRamp(color) {
-      probe.style.color = color;
-      const base = curtainLightness(getComputedStyle(probe).color);
-      const away = base > .5 ? -1 : 1;
-      const stops = [];
-      for (let i = 0; i < CURTAIN_STEPS; i++) {
-        const target = Math.min(.97, Math.max(.06, base + away * i * CURTAIN_STEP_L));
-        let band = color;
-        if (i > 0) {
-          const p = away < 0
-            ? (1 - target / base) * 100
-            : ((target - base) / (1 - base)) * 100;
-          band = `color-mix(in oklab, ${color}, ${away < 0 ? 'black' : 'white'} ${p.toFixed(2)}%)`;
-        }
-        stops.push(`${band} ${(i / CURTAIN_STEPS * 100).toFixed(2)}%`);
-        stops.push(`${band} ${((i + 1) / CURTAIN_STEPS * 100).toFixed(2)}%`);
-      }
-      return `linear-gradient(to top, ${stops.join(', ')})`;
-    }
-    curtain.style.backgroundImage = curtainRamp('var(--paper)');
-    probe.remove();
 
     // The hold itself IS the transition's window — the runway is empty
     // scroll that exists only so .apps__intro (sticky) reads as pinned
@@ -5210,28 +5159,12 @@
       // stomping the separate fade-IN initClosingHandoff drives during
       // the handover itself (which runs long before the hold begins).
       if (t > 0) ground.style.opacity = (1 - t).toFixed(3);
-      // Sweeps straight through the viewport once as t runs 0->1: fully
-      // below (100%) to fully above (-100%). What's left once it's
-      // passed is solid Paper, from sec's own background-color below —
-      // the curtain is a transient flourish on top of that settle, not
-      // what the page is left resting on ("커튼이 밀려서 나오는 느낌").
-      curtain.style.transform = `translateY(${(100 - 200 * t).toFixed(2)}%)`;
       sec.style.backgroundColor = mix(APPS_FILL, PAPER, t);
       // The copy has to invert with the ground or it goes invisible
       // against Paper — same reasoning as the closing section's own
       // flood (initClosingHandoff).
       if (lead) lead.style.color = mix(PAPER, INK, t);
       if (body) body.style.color = mix(PAPER_70, INK_70, t);
-
-      // The title is no longer faded by script at all — it ducks under
-      // the curtain and comes back by simple occlusion instead, the
-      // curtain's z-index sitting above .apps__intro's (see
-      // .apps__curtain in style.css). A timed opacity fade read as its
-      // own separate effect layered on top of the sweep rather than the
-      // sweep itself doing the hiding ("페이드 되는 효과... 없애고
-      // 싶은건데... 커튼이 물리적으로 가려서/드러내서"). Nothing to
-      // drive here any more; intro.style.opacity is left to whatever
-      // initApplicationsEntrance set once its own entrance finishes.
 
       // The dock: once the hold is spent (raw past runPx), the title is
       // carried up by exactly the scroll past that point instead of
