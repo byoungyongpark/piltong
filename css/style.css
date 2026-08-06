@@ -4741,11 +4741,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .apps__body {
   flex: 1 1 auto;
   min-width: 0;
-  /* Bottom-aligned against .apps__lead on request ("우측 본문내용 바껴진
-     텍스트 그룹은 하단 정렬") — the row's own align-items:flex-start
-     (.apps__intro) still governs the lead, this just opts the body out
-     of it. */
-  align-self: flex-end;
+  /* Back to top-aligned (the row's own align-items:flex-start,
+     .apps__intro) — the flex-end override was reverted on request
+     ("우측 본문 위쪽 정렬로 다시"). */
   margin: 0;
   font-size: clamp(16px, 1.6vw, 24px);
   line-height: 1.4;
