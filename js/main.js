@@ -4417,11 +4417,12 @@
       const WINDOW_HEADROOM = 1.2;
       const next = document.querySelector('.brandid__closing-next');
       let windowH = markH;
+      let textH = markH;
       if (next) {
         const ncs = getComputedStyle(next);
         measureCtx.font = `${ncs.fontStyle} ${ncs.fontWeight} ${ncs.fontSize} ${ncs.fontFamily}`;
         const m = measureCtx.measureText('APPLICATIONS');
-        const textH = (m.fontBoundingBoxAscent || 0) + (m.fontBoundingBoxDescent || 0);
+        textH = (m.fontBoundingBoxAscent || 0) + (m.fontBoundingBoxDescent || 0);
         windowH = Math.max(markH, textH * WINDOW_HEADROOM);
       }
       wrap.style.setProperty('--loop-mark-window-h', `${windowH.toFixed(1)}px`);
@@ -4438,7 +4439,24 @@
       // 약간 위로 치우쳐보인다"). Half the window/mark height
       // difference is what closes that gap — pushes APPLICATIONS down
       // just enough that its own centre lands where the mark's does.
-      wrap.style.setProperty('--next-optical-offset', `${((windowH - markH) / 2).toFixed(1)}px`);
+      //
+      // Capped, though — the ideal offset can push APPLICATIONS' own
+      // ink past the slot's shared clip-path (style.css), which has to
+      // stay tight at the bottom for the MARK's own overshoot trick.
+      // Growing the window doesn't create headroom against this: the
+      // ideal offset and the room the window itself provides both scale
+      // with windowH at the same rate, so a taller window never closes
+      // the gap between them — confirmed measured letters clipping at
+      // the bottom regardless ("어플리케이션 철자중 일부가 하단이
+      // 잘려보인다"). What DOES bound it is textH vs windowH directly:
+      // the same clip margin (1.5px) the mark's own overshoot uses is
+      // reused here as the floor. Past that point exact centring gives
+      // way to "as close as fits" rather than clipping the letters.
+      const CLIP_MARGIN = 1.5;
+      const idealOffset = (windowH - markH) / 2;
+      const maxSafeOffset = Math.max(0, (windowH - textH) / 2 + CLIP_MARGIN);
+      const nextOpticalOffset = Math.min(idealOffset, maxSafeOffset);
+      wrap.style.setProperty('--next-optical-offset', `${nextOpticalOffset.toFixed(1)}px`);
 
       // Where the plate pins during the handover to Applications. Set
       // here rather than in CSS because it depends on everything above.
