@@ -4024,6 +4024,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   align-items: center;
   justify-content: center;
   opacity: 0;
+  /* Shared between -card and -copy below (a custom property set here
+     is visible to both, being their common parent — set on -card
+     itself it would only reach ITS OWN descendants, not its sibling
+     -copy) so the gap between them tracks the card's own width at
+     every viewport instead of drifting out of sync with it. */
+  --colorstory-card-w: clamp(280px, 26vw, 460px);
 }
 /* Back to a plain full-bleed cover fill — the native-size/contain
    approach (previous comment here) is gone, on request ("컬러스토리섹션
@@ -4075,7 +4081,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   top: 48.25%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(280px, 26vw, 460px);
+  width: var(--colorstory-card-w);
   background: #fff;
   /* Thicker white frame (was 16/16/28), on request ("사진 프레임은
      좀더 두꺼워야할것 같아") — a proper Polaroid border reads more
@@ -4125,7 +4131,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      card's own 1.75% offset from 50% pulls this box's centre up to
      match it: a box spanning 0-96.5% centres at 48.25%. */
   bottom: 3.5%;
-  width: min(480px, 40%);
+  /* Was min(480px, 40%) — a fixed box width, not tied to where the
+     card actually sits. Panel 0's longer body line filled that box
+     right up to its own edge (9px clear of the card at 1920px)
+     while panels 1/2's shorter copy happened to fall well short of
+     it (~110-116px clear) — same box, only the gap LOOKED different
+     because it depended on how much of the box each panel's own text
+     happened to fill, on request ("컬러카드랑 왼쪽 타이틀간 여백은
+     넉넉히... 두세번째 컬러 기준 정도로 통일"). Sized off the card's
+     own left edge instead (50vw - card-w/2), less a fixed 110px
+     clearance matching what panels 1/2 already measured — now every
+     panel keeps the same real gap regardless of its own text length,
+     at every viewport, not just the one this was measured at. */
+  width: min(480px, calc(36vw - var(--colorstory-card-w) / 2 - 110px));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -4197,8 +4215,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__colorstory-curtain--left { left: 0; transform: translateX(-100%); }
 .brandid__colorstory-curtain--right { right: 0; transform: translateX(100%); }
 
-@media (max-width: 900px) {
-  .brandid__colorstory-copy { left: 0; width: 100%; padding: 0 var(--edge); box-sizing: border-box; }
+/* Side-by-side runs out of room below here (the gap formula above
+   would start crowding the card) — copy moves under the card instead
+   of squeezing beside it, on request ("점점 좁아져서 왼쪽 타이틀
+   공간이 협소해지면 자연스럽게 카드 아래로 글자가 내려와야할듯").
+   Covers the old ≤900px case too (folded in below), so that
+   panel-specific override is gone rather than fighting this one. The
+   image becomes its own absolute background layer so the flex column
+   here only has to stack the two things that actually need stacking. */
+@media (max-width: 1600px) {
+  .brandid__colorstory-panel { flex-direction: column; }
+  .brandid__colorstory-img { position: absolute; inset: 0; }
+  .brandid__colorstory-card {
+    position: static;
+    transform: none;
+    margin: 0 auto;
+  }
+  .brandid__colorstory-copy {
+    position: static;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    width: min(480px, calc(100% - var(--edge) * 2));
+    margin: 24px auto 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
