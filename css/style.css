@@ -4591,7 +4591,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .apps__runway {
   flex: 0 0 auto;
   width: 100%;
-  height: 60svh;
+  /* 60 -> 40svh: shortens the hold so the showcase image arrives with
+     less scrolling ("건물 이미지가 조금 일찍 당겨오게") — the dock
+     itself (initApplicationsGroundFade) reads this element's own
+     height at runtime, so nothing else needed adjusting. */
+  height: 40svh;
   pointer-events: none;
 }
 /* Full browser width, not just the section's own content box ("브라우저
