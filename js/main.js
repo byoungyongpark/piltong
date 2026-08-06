@@ -4480,30 +4480,6 @@
       // the empty band above it is all that may be cut.
       const stickyTop = Math.max(-bandTopPx, window.innerHeight / 2 - inkCentre);
       wrap.style.setProperty('--plate-sticky-top', `${stickyTop.toFixed(1)}px`);
-      // The plate PINS on this ink-centred top, same as always — nothing
-      // about where or when it sticks has changed, so the copy row above
-      // it still scrolls away exactly as before. What's new is how it
-      // LOOKS the moment it catches: the box itself now reads as centred
-      // on the plain geometric middle of the screen at rest, with the
-      // content (symbol + mark) only settling onto the ink-centred spot
-      // — a bit higher, since the wordmark near the bottom pulls the
-      // average down and the true centring point up — as the SAME
-      // handover spread that grows the backdrop plays out ("플레이트
-      // 박스 자체는 중앙에 홀딩되고... 화면이 커짐과 동시에... ink
-      // centre로 자연스럽게 옮겨달란"). Solved as a counter-offset
-      // instead of touching stickyTop itself: touching stickyTop would
-      // have meant re-deriving markCentre/toCentre/the spread's own
-      // sizing/the Applications pull below, all of which assume the
-      // plate's ACTUAL layout position is exactly this ink-centred
-      // value. A transform on just the video/mark/dimming layer needs
-      // none of that — it starts at the full delta below (looking
-      // box-centred) and eases to 0 (initClosingHandoff, tied to the
-      // same `spread` progress), landing exactly back on this same
-      // ink-centred position everything else already assumes.
-      const stickyTopBox = Math.max(-bandTopPx, window.innerHeight / 2 - plateH / 2);
-      const contentLiftTarget = stickyTopBox - stickyTop;
-      wrap.style.setProperty('--plate-content-lift-target', `${contentLiftTarget.toFixed(1)}px`);
-      wrap.style.setProperty('--plate-content-lift', `${contentLiftTarget.toFixed(1)}px`);
       // How far the wordmark has to travel to sit on the screen's own
       // centre once the footage above it is gone. It starts on the
       // plate's bottom edge, so this is the distance from that to the
@@ -4923,7 +4899,7 @@
     // handlers on this element both reading and writing it turns into
     // read-write-read thrash — which is what the footage was juddering
     // on ("영상이 달달거리는 느낌").
-    let runPx = 0, plateStaticTop = 0, stickyTop = 0, markCentreInPlate = 0, contentLiftTarget = 0;
+    let runPx = 0, plateStaticTop = 0, stickyTop = 0, markCentreInPlate = 0;
     // How far the spread has to go, worked out from where the plate sits
     // once pinned rather than guessed: what it takes for the surface to
     // reach every edge of the screen, plus a margin so it never lands
@@ -4943,9 +4919,6 @@
       // the plate's top on screen it gives the mark's position, which is
       // what drives the fade after the pin lets go.
       markCentreInPlate = parseFloat(wcs.getPropertyValue('--mark-centre-in-plate')) || 0;
-      // Published by initClosingFit — the full box-centred-to-ink-
-      // centred offset, eased out to 0 below as SPREAD plays out.
-      contentLiftTarget = parseFloat(wcs.getPropertyValue('--plate-content-lift-target')) || 0;
 
       const vw = window.innerWidth, vh = window.innerHeight;
       const pw = wrap.offsetWidth, ph = wrap.offsetHeight;
@@ -4986,13 +4959,6 @@
         v => { wrap.style.setProperty('--corner-dx', v); });
       put('cornerDy', `${((sy - 1) * wrap.offsetHeight / 2).toFixed(1)}px`,
         v => { wrap.style.setProperty('--corner-dy', v); });
-      // The video+mark bundle settles from "box centred" to "ink
-      // centred" over the SAME spread — see the note by
-      // --plate-content-lift-target in initClosingFit for why this is a
-      // counter-offset on the content rather than a change to the
-      // plate's own sticky top.
-      put('contentLift', `${(contentLiftTarget * (1 - spread)).toFixed(1)}px`,
-        v => { wrap.style.setProperty('--plate-content-lift', v); });
 
       put('bg', mix(PAPER, GROUND, flood), v => { section.style.backgroundColor = v; });
       // The copy has to invert with the ground or it goes invisible
