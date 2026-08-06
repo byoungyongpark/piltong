@@ -5417,6 +5417,43 @@
 
   initApplicationsGroundFade();
 
+  /* ---------- Applications: hide any not-yet-added photo in the stack ---------- */
+
+  // .apps__photo/.apps__gallery-img slots are written out ~30 numbers
+  // ahead (m_1.jpg … m_30.jpg, see index.html) so dropping the next
+  // file straight into images/ makes it appear with no HTML changes —
+  // on request ("이미지도 순서대로 m_1.jpg m_2.jpg 이미지폴더에 넣으면
+  // 자동으로 나오게"). Whichever numbers don't exist yet 404; this
+  // hides those specific elements (display:none removes them from
+  // flow entirely, so no broken-image icon and no stray gap from an
+  // empty slot's own margin/gap) rather than leaving them visible.
+  function initApplicationsPhotoStack() {
+    const solos = Array.from(document.querySelectorAll('.apps__photo'));
+    const galleries = Array.from(document.querySelectorAll('.apps__gallery'));
+
+    const isBroken = img => img.complete && img.naturalWidth === 0;
+
+    solos.forEach(img => {
+      if (isBroken(img)) { img.style.display = 'none'; return; }
+      img.addEventListener('error', () => { img.style.display = 'none'; }, { once: true });
+    });
+
+    // A pair needs both images to make sense (the right one crops to
+    // match the left one's own height) — if either is missing, the
+    // whole row hides rather than showing one photo alone or a crop
+    // with nothing to match.
+    galleries.forEach(gallery => {
+      const imgs = Array.from(gallery.querySelectorAll('.apps__gallery-img'));
+      const hideIfEitherBroken = () => {
+        if (imgs.some(isBroken)) gallery.style.display = 'none';
+      };
+      imgs.forEach(img => img.addEventListener('error', hideIfEitherBroken, { once: true }));
+      hideIfEitherBroken();
+    });
+  }
+
+  initApplicationsPhotoStack();
+
   // The ground used to pan through its own length here — the image is
   // 1800x2601, far taller than any viewport once it covers the width, so
   // it travelled upward through a fixed window as you scrolled. Removed
