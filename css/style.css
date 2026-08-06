@@ -4193,12 +4193,28 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    image becomes its own absolute background layer so the flex column
    here only has to stack the two things that actually need stacking. */
 @media (max-width: 1600px) {
-  .brandid__colorstory-panel { flex-direction: column; }
+  .brandid__colorstory-panel {
+    flex-direction: column;
+    /* Was justify-content:center (inherited from the base rule, where it
+       is inert — the wide layout's only flex child, the image, already
+       fills 100% of the panel regardless). Centering the card+copy stack
+       here meant its resting position depended on the viewport's own
+       height: on anything short enough that the stack (card + gap + copy)
+       ran taller than the viewport, centering pushed the group's top
+       edge above 0 — and .brandid__colorstory-sticky clips at exactly
+       that edge (overflow:hidden), so the card (top of the stack) was
+       the part that vanished while the copy below it stayed on screen
+       ("텍스트 그룹이 아래로 떨어지는 구조일때 컬러 카드가 사라져서
+       안보이네"). Anchored from the top with a fixed margin instead, so
+       the card's position no longer depends on how tall the stack is
+       relative to the viewport. */
+    justify-content: flex-start;
+  }
   .brandid__colorstory-img { position: absolute; inset: 0; }
   .brandid__colorstory-card {
     position: static;
     transform: none;
-    margin: 0 auto;
+    margin: clamp(48px, 8vh, 96px) auto 0;
   }
   .brandid__colorstory-copy {
     position: static;
