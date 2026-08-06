@@ -4483,9 +4483,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      scroll that crossed it was — same idea as an actual ticker/flip
      display, which commits once triggered rather than tracking a dial. */
   transition: transform 420ms var(--ease);
+  /* --next-optical-offset (initClosingFit) nudges this DOWN from its
+     own flex-centred position to match where the wordmark's bottom-
+     anchored centre actually sits — the two would otherwise read at
+     different heights once swapped in, since this centres in the FULL
+     window while the mark sits flush to just its bottom (see the note
+     on --next-optical-offset for the measured gap). Present in both
+     states, ticked or not, so the 420ms transition between them
+     doesn't jump. */
+  transform: translateY(var(--next-optical-offset, 0px));
 }
 .brandid__closing-slot.is-ticked .brandid__closing-next {
-  transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%)));
+  transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%) + var(--next-optical-offset, 0px)));
 }
 
 /* Empty scroll the pinned plate travels through — see the note on

@@ -4425,6 +4425,20 @@
         windowH = Math.max(markH, textH * WINDOW_HEADROOM);
       }
       wrap.style.setProperty('--loop-mark-window-h', `${windowH.toFixed(1)}px`);
+      // APPLICATIONS centres in the FULL window (flex align-items:
+      // center), but the wordmark it swaps with sits flush to the
+      // window's own BOTTOM instead (.brandid__closing-mark's own
+      // bottom:-1.5px) — and the window is taller than the mark
+      // (WINDOW_HEADROOM, sized for APPLICATIONS' own bigger font), so
+      // the two references don't land on the same spot. Measured: with
+      // the mark's own centre as ground truth, APPLICATIONS' flex-
+      // centred ink came out ~29px higher, reading as pushed toward the
+      // top once the two are meant to be the same held, centred title
+      // ("워드마크는 중앙에 시각적으로 보정됬는데 어플리케이션 타이틀은
+      // 약간 위로 치우쳐보인다"). Half the window/mark height
+      // difference is what closes that gap — pushes APPLICATIONS down
+      // just enough that its own centre lands where the mark's does.
+      wrap.style.setProperty('--next-optical-offset', `${((windowH - markH) / 2).toFixed(1)}px`);
 
       // Where the plate pins during the handover to Applications. Set
       // here rather than in CSS because it depends on everything above.
