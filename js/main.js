@@ -4550,7 +4550,23 @@
       // centred at rest.
       const contentLiftTarget = stickyTopInk - stickyTopBox;
       wrap.style.setProperty('--plate-content-lift-target', `${contentLiftTarget.toFixed(1)}px`);
-      wrap.style.setProperty('--plate-content-lift', '0px');
+      // --plate-content-lift itself is NOT set here — found the actual
+      // cause of the refresh-position bug (all the timing fixes above
+      // were chasing a symptom): this function and initClosingHandoff's
+      // own update() were BOTH writing that property, this one always
+      // resetting it to '0px' (the rest state) on every fit() re-run,
+      // the other writing the correct scroll-driven value. Whichever
+      // ran LAST won, with no guaranteed order between them — if fit()
+      // re-ran (fonts/video loadedmetadata) AFTER initClosingHandoff
+      // had already applied the right value, it silently stomped it
+      // back to 0px, and nothing forced initClosingHandoff to run again
+      // afterward. Measured directly: measure() had already run 25
+      // times against the correct restored scrollY, yet
+      // --plate-content-lift stayed stuck at 0px regardless — the
+      // retries were never the problem. Leaving this property entirely
+      // to initClosingHandoff (CSS's own var(--plate-content-lift, 0px)
+      // fallback covers the instant before its first update() runs)
+      // removes the second writer outright.
       // How far the wordmark has to travel to sit on the screen's own
       // centre once the footage above it is gone. It starts on the
       // plate's bottom edge, so this is the distance from that to the
