@@ -4565,6 +4565,23 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   background-color: var(--apps-fill);
   opacity: 0;
   pointer-events: none;
+  /* A slow, barely-there drift on the lit ellipse only — the photo
+     layer's own position (second value, "top center") never moves —
+     so the one bright patch reads as gently alive rather than a flat,
+     static cutout, on request ("라이팅이 된 부분이 자연스럽게
+     무빙되면서 일렁이는 느낌"). Same technique as .vwipe__ground--to's
+     own drift: background-position is animatable directly, and a
+     different property from the opacity this element's fade is
+     already driven by (initClosingHandoff), so the two never fight
+     over the same inline style. */
+  animation: groundGlowDrift 22s ease-in-out infinite alternate;
+}
+@keyframes groundGlowDrift {
+  from { background-position: 47% 47%, top center; }
+  to   { background-position: 53% 53%, top center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .apps__ground { animation: none; }
 }
 /* Title left, copy right, filling the whole width the section's own
    margins leave — no max-width of its own any more ("현재 컨텐츠 폭
