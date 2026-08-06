@@ -4798,8 +4798,31 @@
     // same triggers initClosingFit re-runs on.
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
     window.addEventListener('load', remeasure);
+    const entranceVideo = document.querySelector('.brandid__closing-loop');
+    if (entranceVideo && entranceVideo.readyState < 1) {
+      entranceVideo.addEventListener('loadedmetadata', remeasure, { once: true });
+    }
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', remeasure, { passive: true });
+    // Same gap as initClosingHandoff had (see its own notes): this
+    // reads positions (topOf/staticTopOf, via measureTops) that depend
+    // on the layout of everything ABOVE this section, not just this
+    // component's own geometry, and its `p` (entrance progress) can
+    // land short of 1 on a refresh if any of that hasn't settled yet —
+    // which leaves scale()/translateY() short of their resting values
+    // too, not just a position offset. That reads as the whole plate
+    // sitting low AND slightly soft (a non-1 scale forces the browser
+    // to resample everything inside it), on request after a
+    // side-by-side comparison ("오른쪽이 새로고침했을때 상태인데 차이가
+    // 느껴져?" — lower, and visibly less crisp). Same fixes as
+    // initClosingHandoff: retry on a timer, and catch any other image
+    // on the page finishing decode late and reflowing this section's
+    // own position out from under the cached numbers.
+    window.addEventListener('pageshow', remeasure);
+    [50, 150, 350, 700, 1200].forEach(ms => setTimeout(remeasure, ms));
+    Array.from(document.images).forEach(img => {
+      if (!img.complete) img.addEventListener('load', remeasure, { once: true });
+    });
   }
 
   initClosingEntrance();
