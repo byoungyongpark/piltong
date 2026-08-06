@@ -4846,24 +4846,45 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    Also part of the repeating stack: pair up two `.apps__gallery-img`s
    inside a `.apps__gallery` wherever the pattern calls for a two-up
    row instead of a single full-width photo. */
+/* position:relative, not flex — flex's own align-items:stretch fights
+   the "left sets the height" requirement below (a flex line's cross
+   size is the MAX of every item's own hypothetical size, so a taller
+   right-hand photo would pull the row — and, once stretched, the left
+   photo too — up to ITS height instead of the other way around;
+   confirmed by measurement: the left photo rendered 79px taller than
+   its own 2560x1707 ratio actually calls for, visibly stretched). The
+   right image is taken out of flow entirely (position:absolute) so it
+   cannot influence this container's height at all — only the left
+   image, in normal flow, does. */
 .apps__gallery {
+  position: relative;
   flex: 0 0 auto;
   width: 100vw;
   margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
   margin-bottom: 10px;
-  display: flex;
-  gap: 10px;
 }
-.apps__gallery-img {
-  flex: 1 1 0;
-  width: 100%;
-  min-width: 0;
-  /* m_1.jpg/m_2.jpg are both 2560x1707 (3/2) — fixing both slots to
-     that ratio (object-fit:cover) keeps the row a single clean height
-     regardless of whatever the right-hand photo's own ratio is. */
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
+/* Left runs at its own true ratio, uncropped, full width of its half
+   ("좌측은... 원래 비율대로 꽉차게") — in normal flow, so its resolved
+   height (at the 50%-minus-half-gap width below) is what sets
+   .apps__gallery's own height. */
+.apps__gallery-img:first-child {
   display: block;
+  width: calc(50% - 5px);
+  height: auto;
+}
+/* Right has no ratio of its own to keep — pulled out of flow so it
+   can't affect the row's height, then sized to exactly fill whatever
+   height the left one just established (top:0/bottom:0 against this
+   now-settled container) and cropped to it, on request ("오른쪽
+   맞춰줘"). */
+.apps__gallery-img:last-child {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: calc(50% - 5px);
+  height: 100%;
+  object-fit: cover;
 }
 /* The Korean-title measure the whole brand section settled on — same
    size, leading and tracking as "기준이 형태가 되는 순간". */
