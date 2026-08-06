@@ -3985,10 +3985,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Not dead-centre — mathematically exact centring reads as sitting
      slightly low, the empty band above the card looking wider than the
      one below it, on request ("위쪽 여백이 넓어보이고 아래가
-     좁아보이는 느낌... 컬러스토리 컬러 카드에서도 똑같은 현상"). Same
-     fraction as the closing wordmark's own optical-centre correction
-     (OPTICAL_CENTRE_FRAC in initClosingFit, main.js). */
-  top: 46.5%;
+     좁아보이는 느낌... 컬러스토리 컬러 카드에서도 똑같은 현상"). Was
+     46.5%, matching the closing wordmark's own optical-centre
+     correction (OPTICAL_CENTRE_FRAC in initClosingFit) — overshot for
+     THIS element, reading as too high once actually applied ("지금은
+     너무 위로 치우쳐보인다"). Eased back roughly halfway toward 50%. */
+  top: 48.25%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: clamp(280px, 26vw, 460px);
