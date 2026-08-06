@@ -4007,7 +4007,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 .brandid__colorstory-swatch {
   width: 100%;
-  aspect-ratio: 465 / 395;
+  /* Was 465/395 (wider than tall). Stretched into a clear portrait —
+     "생각보다 넉넉히" (more generously than you'd expect) — rather than
+     a timid nudge, on request ("컬러카드 세로로 조금 길게 늘리자"). */
+  aspect-ratio: 465 / 620;
   margin-bottom: 22px;
 }
 .brandid__colorstory-hex,
