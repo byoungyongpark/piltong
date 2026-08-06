@@ -5003,6 +5003,14 @@
         v => { wrap.style.setProperty('--corner-dx', v); });
       put('cornerDy', `${((sy - 1) * wrap.offsetHeight / 2).toFixed(1)}px`,
         v => { wrap.style.setProperty('--corner-dy', v); });
+      // The ticks retract into their own corner over the SAME window
+      // they ride outward in — 1 at rest (full length), 0 once the
+      // spread completes (fully drawn in), reversing cleanly on the way
+      // back up since it's driven by the same scroll-tied `spread`
+      // ("배경이 확장되는 구간에... 감춰지는... 배경이 줄어들면 다시
+      // 뻗어나오고").
+      put('tickRetract', (1 - spread).toFixed(4),
+        v => { wrap.style.setProperty('--tick-retract', v); });
       // The video+mark bundle settles from its box-centred rest position
       // up onto the ink-centred spot over the SAME spread window — see
       // the note by --plate-content-lift-target in initClosingFit for

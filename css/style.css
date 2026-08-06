@@ -4406,12 +4406,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   --tick-w: 2px;
   position: absolute;
   /* Long enough for both runs; the translateX below slides it back so
-     the split falls on the corner. The length is fixed — a version that
-     stretched the lines out across the screen during the handover was
-     tried and dropped ("선이 확장되기보단 그위치 그대로"); they keep
-     their size and simply ride their own corner outward as the surface
-     spreads. */
-  width: calc(var(--tick-len) + var(--tick-in));
+     the split falls on the corner. The OUTWARD run's length is fixed at
+     rest — a version that stretched the lines out across the screen
+     during the handover was tried and dropped ("선이 확장되기보단
+     그위치 그대로"); they keep their size and simply ride their own
+     corner outward as the surface spreads.
+     --tick-retract (initClosingHandoff, tied to the same `spread` that
+     drives --corner-dx/dy) shrinks just that outward run back toward 0
+     over the SAME window the surface expands in, so the line appears
+     to get drawn into the corner as it rides outward, rather than
+     riding out at full length the whole time ("모서리쪽을 쑤욱 들어가서
+     감춰지는 동작"). --tick-in is deliberately left out of the multiply
+     — it's the inward overlap that closes the seam against the block's
+     own edge, not part of the visible reach, so it stays put regardless
+     of how far the visible run has retracted. */
+  width: calc(var(--tick-len) * var(--tick-retract, 1) + var(--tick-in));
   height: var(--tick-w);
   background: var(--loop-ceiling);
   transform-origin: 0 50%;
