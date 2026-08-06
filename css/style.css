@@ -4008,10 +4008,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__colorstory-swatch {
   width: 100%;
   /* 465/395 (wider than tall) originally, then stretched to 465/620 —
-     overshot, on request ("컬러카드 너무 길어졌다 적당히 다시
-     줄이자"). Settled roughly halfway between the two, closer to
-     square than the previous portrait stretch. */
-  aspect-ratio: 465 / 480;
+     overshot, then eased to 465/480, still slightly too tall
+     ("지금보단 아주 살짝만 더 줄이고"). */
+  aspect-ratio: 465 / 465;
   margin-bottom: 22px;
 }
 .brandid__colorstory-hex,

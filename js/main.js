@@ -5131,9 +5131,23 @@
     remeasure();
     // The plate's height, and so the sticky offset and the ink offset,
     // are only final once the footage's ratio and the fonts are in —
-    // the same triggers initClosingFit re-runs on.
+    // the same triggers initClosingFit re-runs on. Was missing the
+    // video's own loadedmetadata trigger specifically — initClosingFit
+    // has it (its fit() re-runs and republishes --plate-sticky-top,
+    // --mark-to-centre, --plate-content-lift-target etc. once the
+    // footage's real aspect ratio is known), but nothing here re-ran
+    // measure() afterward, so this kept using whatever it had cached
+    // BEFORE that update. Scrolling down normally masked it — by the
+    // time a visitor scrolls this far the video has long since loaded,
+    // so 'load'/fonts.ready already caught the final values — but
+    // landing here directly (a refresh restoring scroll position,
+    // nothing re-triggering a 'scroll' event) could leave it on the
+    // stale, pre-video-metadata geometry indefinitely, reading as
+    // sitting low ("새로고침하거나 하면 약간 아래에 치우쳐 보이는
+    // 위치로 돌아가는것 같은데").
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
     window.addEventListener('load', remeasure);
+    if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasure, { once: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', remeasure, { passive: true });
   }
