@@ -1560,6 +1560,18 @@
     // its neighbour splits exactly in half between exiting/entering.
     const KW_HOLD = .18;
     const KW_HALF = (1 - 2 * KW_HOLD) / 2;
+    // A neighbouring (non-keyword) beat's own HOLD+FADE reach (.18+.55
+    // = .73) used to run well past where the keywords beat starts
+    // revealing on ITS side (KW_HOLD+KW_HALF = .5) — both beats were
+    // live and legible at once for roughly p ∈ [.5, .73] either side of
+    // the keywords step, which is the "버그" (디자인/기술/AI/전략
+    // entering/leaving): the previous ghosted paragraph still faintly
+    // in frame, blurred, behind the words scattering in. Confirmed via
+    // static trace, not width-dependent. Only the two beats actually
+    // adjacent to keywords get the narrower fade — every other
+    // beat-to-beat handoff keeps the original .55 overlap.
+    const FADE_NEAR_KEYWORDS = (KW_HOLD + KW_HALF) - HOLD;
+    const keywordsIndex = steps.findIndex(s => s.classList.contains('whyp__keywords'));
     // .whyp__copy-bg's own fade-out — the fade-in is computed inline
     // below (against the section's pre-pin arrival, not this), but the
     // exit is still simplest as a plain pRaw threshold: held through
@@ -1701,9 +1713,15 @@
             });
           } else {
             // Reverted: original overlapping cross-blur, not the
-            // sequenced clip-path wipe.
+            // sequenced clip-path wipe. Narrower fade for the two beats
+            // adjacent to the keywords step (see FADE_NEAR_KEYWORDS
+            // above) so this beat is fully gone by the exact point the
+            // keywords step starts revealing on its side, instead of
+            // still being faintly visible while the words scatter in.
             const dist = Math.abs(p - i);
-            const presence = 1 - clamp01((dist - HOLD) / FADE);
+            const nearKeywords = keywordsIndex >= 0 && Math.abs(i - keywordsIndex) === 1;
+            const fade = nearKeywords ? FADE_NEAR_KEYWORDS : FADE;
+            const presence = 1 - clamp01((dist - HOLD) / fade);
             step.style.opacity = presence.toFixed(3);
             step.style.filter = `blur(${((1 - presence) * MAX_COPY_BLUR).toFixed(2)}px)`;
             step.style.clipPath = 'none';
@@ -1873,6 +1891,7 @@
     // transition, so it stays reversible by construction like the rest
     // of this section already is.
     const introLetters = [];
+    let introIdentityLine = null;
     (function setupIntroLetters() {
       const lines = Array.from(sec.querySelectorAll('.brandid__intro-index-line'));
       if (!lines.length) return;
@@ -1900,13 +1919,23 @@
       // of behind it (unlike the rest of IDENTITY, "D" included, which
       // stays hidden behind it) — fully opaque now, on request, not the
       // translucent overlap this had before.
-      const identityLine = lines[1];
-      if (identityLine) {
+      introIdentityLine = lines[1];
+      if (introIdentityLine) {
         [2, 3, 6, 7].forEach(i => { // E(2), N(3), kern-T(6), Y(7)
-          const el = identityLine.children[i];
+          const el = introIdentityLine.children[i];
           if (el) el.classList.add('brandid__intro-letter--front');
         });
       }
+    })();
+    // Scatter vectors depend on window.innerWidth/innerHeight and each
+    // letter's own rendered rect (via maxSx) — split out from DOM setup
+    // above so it can be re-run on resize (same debounced pattern as
+    // alignIntroWord/measurePhotoScale below) instead of only ever
+    // running once at load. A devtools viewport RESIZE without a full
+    // reload otherwise leaves every letter's travel distance keyed to
+    // whatever width the page happened to load at.
+    function computeIntroLetterVectors() {
+      if (!introLetters.length) return;
       const baseDX = window.innerWidth * 0.30;
       const baseDY = window.innerHeight * 0.30;
       const SAFE_MARGIN = 24;
@@ -1921,7 +1950,7 @@
         // reads as still carrying the upward motion of scrolling past
         // Brand Wall, on request — VISUAL keeps the original up-and-
         // right tumble (negative sy).
-        const isIdentity = span.parentElement === identityLine;
+        const isIdentity = span.parentElement === introIdentityLine;
         const sy = isIdentity
           ? baseDY * (1.0 + Math.abs(Math.cos(a * 0.8)) * 0.4)
           : -baseDY * (0.8 + Math.abs(Math.cos(a * 0.8)) * 0.4);
@@ -1932,7 +1961,13 @@
         span.dataset.sr = sr.toFixed(1);
         span.dataset.sscale = sscale.toFixed(3);
       });
-    })();
+    }
+    computeIntroLetterVectors();
+    let introVectorResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(introVectorResizeTimer);
+      introVectorResizeTimer = setTimeout(computeIntroLetterVectors, 120);
+    }, { passive: true });
 
     // VISUAL/IDENTITY's own horizontal placement — measured off the
     // real rendered rects rather than a fixed px offset, since the

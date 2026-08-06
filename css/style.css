@@ -4263,8 +4263,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      resolves to at 1467px and up, and a flat value would drift away from
      it at every width below that. Weight followed after ("폰트 굵기
      700이네") — was 600, the .brandid__lead measure this rule started
-     from, so the two titles now match on all four. */
-  font-size: 2.75rem;
+     from, so the two titles now match on all four.
+     Kept off the html-rem scale (this element's own rendered height
+     feeds initClosingFit's video-width/plate-height cascade — via
+     .brandid__closing-copy, whose height it drives — so a font-size
+     that shrinks below 2560px silently changes plateH/stickyTopInk/
+     --apps-pull downstream, which is the confirmed mechanism behind
+     "워드마크 애니메이션이 덜활성화... 스크롤 안되고 멈추네" at
+     1920px: this was the one geometry-critical element that got swept
+     into the site-wide rem conversion). */
+  font-size: clamp(28px, 3vw, 44px);
   font-weight: 700;
   line-height: 1.22;
   letter-spacing: -.04em;
