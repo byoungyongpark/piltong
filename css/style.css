@@ -108,6 +108,20 @@ html {
      2240 below are both unitless, so only the (100vw - 320px) term
      carries a unit. */
   font-size: clamp(10px, calc(10px + 6 * (100vw - 320px) / 2240), 16px);
+  /* Same reasoning as body's own overflow-x:clip (`hidden` would break
+     sticky) — but body's alone wasn't enough. On mobile, the browser
+     sizes its LAYOUT viewport (what window.innerWidth reports) off
+     whatever content on the page is widest, and that check runs against
+     <html> — the actual root scroller — not body; overflow:hidden deep
+     inside a component (e.g. .whyp__marquee-sticky, which clips its own
+     marquee track just fine on desktop) only contains PAINT, it doesn't
+     stop <html>'s own scrollWidth from reporting that width. The result
+     on a real phone: window.innerWidth read ~578 against a 360px screen
+     (visualViewport), so the entire page laid out 218px too wide and
+     only the left ~62% of every section was ever visible — nothing
+     scrolled to reach the rest, since the extra width was consumed
+     growing the layout, not scroll room. */
+  overflow-x: clip;
   scrollbar-width: none;
   scrollbar-color: transparent transparent;
   /* Native CSS scroll-snap (scroll-snap-type/-align) was here, but read
@@ -2255,7 +2269,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (max-width: 900px) {
   .whyp__media-label { font-size: clamp(18px, 4.4vw, 32px); }
 }
-
 /* ---- Copy stage: a second, separate scroll runway — its own pin, its
    own progress, entirely independent of the marquee stage above it.
    grid-area: 1/1 on every .whyp__step (below) is what stacks them into
