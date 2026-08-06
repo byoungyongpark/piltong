@@ -5128,34 +5128,35 @@
 
     function remeasure() { measure(); update(); }
 
-    // A rAF-deferred resync, chained AFTER remeasure — not run on its
-    // own. A standalone double-rAF fired on load was tried first
-    // (previous commit) to catch a reload's own scroll-restoration,
-    // which doesn't fire a 'scroll' event, so nothing was guaranteed to
-    // recompute against wherever the browser actually put the page. It
-    // over-corrected the wrong way: firing before fonts/the video's
-    // real metadata are in means it can measure() against PLACEHOLDER
-    // dimensions (initClosingFit's own fit() falls back to a guess
-    // until then) and lock that wrong geometry in, THEN jump again once
-    // fonts/video genuinely resolve — a visible drop where there used
-    // to just be a static, subtler wrongness ("새로고침하는 순간
-    // 워드마크랑 어플리케이션 타이틀이 생각보다 확 아래로 내려감").
-    // Chaining it onto the SAME readiness triggers instead means it
-    // only ever runs after a point where the geometry was already
-    // correct — it exists purely to catch a LATE scroll-restoration
-    // that might still land after that, not to race ahead of it.
-    function remeasureNextFrame() { requestAnimationFrame(() => requestAnimationFrame(remeasure)); }
-
     remeasure();
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasureNextFrame);
-    window.addEventListener('load', remeasureNextFrame);
-    if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasureNextFrame, { once: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
+    window.addEventListener('load', remeasure);
+    if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasure, { once: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', remeasure, { passive: true });
     // Covers back/forward-cache restores, which don't re-run this
     // script at all — 'pageshow' fires again on both a fresh load and
     // a bfcache restore, unlike 'load' (bfcache) or DOMContentLoaded.
-    window.addEventListener('pageshow', remeasureNextFrame);
+    window.addEventListener('pageshow', remeasure);
+    // None of the above reliably catches a reload's own scroll-
+    // restoration, which doesn't fire a 'scroll' event — tried chaining
+    // a rAF pair onto each readiness signal (previous commit), but that
+    // still assumed restoration happens BEFORE those signals resolve,
+    // which isn't a real guarantee either way (e.g. once fonts are
+    // browser-cached, fonts.ready can resolve near-instantly on a
+    // reload, well before restoration). No single event marks "the
+    // browser is done moving the page," so this just retries
+    // remeasure() a few times over the first second and a half instead
+    // of trying to out-guess the ordering — cheap (a few reads plus
+    // the put() guards below skip any write that hasn't actually
+    // changed) and self-correcting regardless of which trigger the
+    // browser's own restoration happens to land relative to. On
+    // request after the wordmark (mid-scroll, so any scroll self-heals
+    // it) still visibly settling late while a HELD state like
+    // APPLICATIONS' ticker hold — nothing left to scroll into — just
+    // sat wrong ("어플리케이션은 어느정도 홀딩되다보니 그상태에서
+    // 새로고침하면 아래로 내려와 치우쳐보이는게 조금 거슬리네").
+    [50, 150, 350, 700, 1200].forEach(ms => setTimeout(remeasure, ms));
   }
 
   initClosingHandoff();
