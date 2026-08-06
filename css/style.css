@@ -4733,6 +4733,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: -.04em;
   color: var(--paper);
   word-break: keep-all;
+  /* Right-aligned on request ("텍스트 정렬을 우측으로") — opts out of
+     .apps__intro's own text-align:left. */
+  text-align: right;
 }
 /* Same measure as .brandid__body, in paper rather than ink. */
 .apps__body {
