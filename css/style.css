@@ -76,21 +76,38 @@ html {
      down from it in lockstep, since they're all relative to THIS one
      number, rather than each running its own independent vw curve
      (the current clamp() approach elsewhere, which lets elements drift
-     out of proportion with each other as the viewport changes). No
-     floor yet — this is deliberately a pure linear scale down to any
-     width so the pilot section's true behaviour is visible; add one
-     once it's clear how small is too small.
+     out of proportion with each other as the viewport changes).
      transform/zoom on the root was ruled out even though it would
      scale everything (not just type) at once — this page's whole
      scroll-driven system reads real getBoundingClientRect()/offsetTop
      pixel values to time its sticky/pinned sections, and a transform
-     would throw all of that off without a much larger rewrite. */
-  /* calc() can only multiply a length by a unitless NUMBER, not by
-     another length — `* 16px` here made the whole expression invalid
-     (silently computed as 0, confirmed: calc(100vw / 2560 * 16px) gave
-     0px at every width tested). The trailing 16 is unitless; the vw
-     term alone carries the length. */
-  font-size: min(16px, calc(100vw / 2560 * 16));
+     would throw all of that off without a much larger rewrite.
+
+     A first pass (straight line through the origin — font-size =
+     100vw/2560 * 16px) was too aggressive: it starts shedding size the
+     instant the viewport drops below 2560 at the SAME rate all the way
+     down, so the common 1440-1920 desktop range — where the old
+     clamp()s were already sitting near their own max — read
+     noticeably smaller than today. Not the ask ("2560이하부터 점점
+     작아지는게 목적이 아니라 브라우저 크기에 따라 적절한 비율로
+     미세하게 자동으로 조절되길").
+
+     Standard fluid-type interpolation instead, between two measured
+     endpoints rather than one line through zero: 16px at 2560px width,
+     10px at 320px width (on request, "하한선은 320" — the width the
+     floor is reached at, not a font-size). 10px was picked to roughly
+     match the min/max ratio the old per-element clamp()s already used
+     (.apps__lead's was 28/44 = .636; this is 10/16 = .625) rather than
+     invented fresh. Slope is (16-10)/(2560-320), a small fraction of
+     the old formula's — at 1920px this now gives ~14.3px (89% of max)
+     instead of 12px (75%), reading as a gentle taper across the
+     common range and only compressing meaningfully as width
+     approaches the 320px floor. calc() can only multiply a length by
+     a unitless NUMBER, not by another length (a `* 16px` version of
+     this silently evaluated to 0px at every width, confirmed) — 6 and
+     2240 below are both unitless, so only the (100vw - 320px) term
+     carries a unit. */
+  font-size: clamp(10px, calc(10px + 6 * (100vw - 320px) / 2240), 16px);
   scrollbar-width: none;
   scrollbar-color: transparent transparent;
   /* Native CSS scroll-snap (scroll-snap-type/-align) was here, but read
