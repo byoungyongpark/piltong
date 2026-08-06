@@ -5205,37 +5205,23 @@
       if (runPx <= 0) return;
       const raw = pinOffset - sec.getBoundingClientRect().top;
       const t = smootherstep(clamp01((raw + preroll) / (runPx + preroll)));
-      // The ground/colour settle no longer eases at all — it snaps the
-      // moment t leaves 0. Tried easing it over a short window first
-      // (t=.05, then .12), but .apps__intro's OWN entrance fade
-      // (initApplicationsEntrance) turned out to complete almost
-      // immediately once t starts moving (measured entranceP already at
-      // .999 by t=.0086 — its own window is much narrower than this
-      // function's), so ANY eased ground/colour settle overlapped with
-      // the title sitting fully visible: bg.png's dark radial gradient,
-      // partway faded, bleeding through behind it as a muddy grey
-      // ("나타날때... 사라지는 시점에도... 반투명 검은색이 노출"). The
-      // curtain itself still carries the actual "arriving" motion — the
-      // ground snapping instantly underneath it isn't something there's
-      // room left to see happen gradually anyway.
-      const bgT = t > 0 ? 1 : 0;
       // Only touches the ground once the hold has actually begun — at
       // t=0 it would otherwise force opacity to 1 on every page load,
       // stomping the separate fade-IN initClosingHandoff drives during
       // the handover itself (which runs long before the hold begins).
-      if (t > 0) ground.style.opacity = (1 - bgT).toFixed(3);
+      if (t > 0) ground.style.opacity = (1 - t).toFixed(3);
       // Sweeps straight through the viewport once as t runs 0->1: fully
       // below (100%) to fully above (-100%). What's left once it's
       // passed is solid Paper, from sec's own background-color below —
       // the curtain is a transient flourish on top of that settle, not
       // what the page is left resting on ("커튼이 밀려서 나오는 느낌").
       curtain.style.transform = `translateY(${(100 - 200 * t).toFixed(2)}%)`;
-      sec.style.backgroundColor = mix(APPS_FILL, PAPER, bgT);
+      sec.style.backgroundColor = mix(APPS_FILL, PAPER, t);
       // The copy has to invert with the ground or it goes invisible
       // against Paper — same reasoning as the closing section's own
       // flood (initClosingHandoff).
-      if (lead) lead.style.color = mix(PAPER, INK, bgT);
-      if (body) body.style.color = mix(PAPER_70, INK_70, bgT);
+      if (lead) lead.style.color = mix(PAPER, INK, t);
+      if (body) body.style.color = mix(PAPER_70, INK_70, t);
 
       // The title is no longer faded by script at all — it ducks under
       // the curtain and comes back by simple occlusion instead, the
