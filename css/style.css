@@ -68,6 +68,29 @@ em { font-style: normal; color: var(--signal-100); }
    scrollbar-color/-width; everything Chromium/Safari-based reads the
    ::-webkit- pseudo-elements instead, so both are needed to cover it. */
 html {
+  /* PILOT — 2560 reference-width type scale (Applications intro only
+     for now, on request: "2560 해상도에서 보는 폰트를 1x 기준... 이
+     이상 해상도에서 2560 1x기준으로... 2560이하부터는... 비율 발란스
+     자간 기타 모든 느낌을 유지한채 브라우저 크기에 맞게... 반응형").
+     16px is the 1x/2560px value — every rem-sized element below scales
+     down from it in lockstep, since they're all relative to THIS one
+     number, rather than each running its own independent vw curve
+     (the current clamp() approach elsewhere, which lets elements drift
+     out of proportion with each other as the viewport changes). No
+     floor yet — this is deliberately a pure linear scale down to any
+     width so the pilot section's true behaviour is visible; add one
+     once it's clear how small is too small.
+     transform/zoom on the root was ruled out even though it would
+     scale everything (not just type) at once — this page's whole
+     scroll-driven system reads real getBoundingClientRect()/offsetTop
+     pixel values to time its sticky/pinned sections, and a transform
+     would throw all of that off without a much larger rewrite. */
+  /* calc() can only multiply a length by a unitless NUMBER, not by
+     another length — `* 16px` here made the whole expression invalid
+     (silently computed as 0, confirmed: calc(100vw / 2560 * 16px) gave
+     0px at every width tested). The trailing 16 is unitless; the vw
+     term alone carries the length. */
+  font-size: min(16px, calc(100vw / 2560 * 16));
   scrollbar-width: none;
   scrollbar-color: transparent transparent;
   /* Native CSS scroll-snap (scroll-snap-type/-align) was here, but read
@@ -4685,7 +4708,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   display: flex;
   align-items: flex-start;
-  gap: clamp(28px, 3.5vw, 64px);
+  /* rem, not clamp(vw) — PILOT of the 2560-reference type scale (see
+     html { font-size } at the top of this file). 64px was this gap's
+     own clamp() max, i.e. what it already showed above ~1829px
+     (64/3.5vw); 64/16 = 4rem keeps that exact value at 2560px and lets
+     it scale down from there instead of from its own, different
+     breakpoint. */
+  gap: 4rem;
   text-align: left;
 }
 .apps__runway {
@@ -4727,7 +4756,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .apps__lead {
   flex: 0 0 auto;
   margin: 0;
-  font-size: clamp(28px, 3vw, 44px);
+  /* rem, not clamp(vw) — PILOT of the 2560-reference type scale (see
+     html { font-size } at the top of this file). 44px was this rule's
+     own clamp() max; 44/16 = 2.75rem preserves that exact size at
+     2560px and scales down from there. letter-spacing is already in
+     em, so it scales with this automatically without its own change. */
+  font-size: 2.75rem;
   font-weight: 700;
   line-height: 1.22;
   letter-spacing: -.04em;
@@ -4745,7 +4779,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      .apps__intro) — the flex-end override was reverted on request
      ("우측 본문 위쪽 정렬로 다시"). */
   margin: 0;
-  font-size: clamp(16px, 1.6vw, 24px);
+  /* rem, not clamp(vw) — PILOT of the 2560-reference type scale (see
+     html { font-size } at the top of this file). 24px was this rule's
+     own clamp() max; 24/16 = 1.5rem preserves that exact size at
+     2560px and scales down from there. */
+  font-size: 1.5rem;
   line-height: 1.4;
   font-weight: 500;
   letter-spacing: -.015em;
