@@ -5128,44 +5128,34 @@
 
     function remeasure() { measure(); update(); }
 
+    // A rAF-deferred resync, chained AFTER remeasure — not run on its
+    // own. A standalone double-rAF fired on load was tried first
+    // (previous commit) to catch a reload's own scroll-restoration,
+    // which doesn't fire a 'scroll' event, so nothing was guaranteed to
+    // recompute against wherever the browser actually put the page. It
+    // over-corrected the wrong way: firing before fonts/the video's
+    // real metadata are in means it can measure() against PLACEHOLDER
+    // dimensions (initClosingFit's own fit() falls back to a guess
+    // until then) and lock that wrong geometry in, THEN jump again once
+    // fonts/video genuinely resolve — a visible drop where there used
+    // to just be a static, subtler wrongness ("새로고침하는 순간
+    // 워드마크랑 어플리케이션 타이틀이 생각보다 확 아래로 내려감").
+    // Chaining it onto the SAME readiness triggers instead means it
+    // only ever runs after a point where the geometry was already
+    // correct — it exists purely to catch a LATE scroll-restoration
+    // that might still land after that, not to race ahead of it.
+    function remeasureNextFrame() { requestAnimationFrame(() => requestAnimationFrame(remeasure)); }
+
     remeasure();
-    // The plate's height, and so the sticky offset and the ink offset,
-    // are only final once the footage's ratio and the fonts are in —
-    // the same triggers initClosingFit re-runs on. Was missing the
-    // video's own loadedmetadata trigger specifically — initClosingFit
-    // has it (its fit() re-runs and republishes --plate-sticky-top,
-    // --mark-to-centre, --plate-content-lift-target etc. once the
-    // footage's real aspect ratio is known), but nothing here re-ran
-    // measure() afterward, so this kept using whatever it had cached
-    // BEFORE that update. Scrolling down normally masked it — by the
-    // time a visitor scrolls this far the video has long since loaded,
-    // so 'load'/fonts.ready already caught the final values — but
-    // landing here directly (a refresh restoring scroll position,
-    // nothing re-triggering a 'scroll' event) could leave it on the
-    // stale, pre-video-metadata geometry indefinitely, reading as
-    // sitting low ("새로고침하거나 하면 약간 아래에 치우쳐 보이는
-    // 위치로 돌아가는것 같은데").
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
-    window.addEventListener('load', remeasure);
-    if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasure, { once: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasureNextFrame);
+    window.addEventListener('load', remeasureNextFrame);
+    if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasureNextFrame, { once: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', remeasure, { passive: true });
-    // The loadedmetadata trigger above still didn't fully fix a
-    // refresh landing mid-handoff ("새로고침시 문제 해결안된것 같아") —
-    // the browser's OWN scroll-restoration (a reload, unlike a fresh
-    // navigation, is restored to its old scrollY automatically) can
-    // land the page at a non-zero scroll position without ever firing
-    // a 'scroll' event to trigger onScroll/update, so `t`/spread/the
-    // mark's position stay computed for scrollY=0 even though the page
-    // is visibly scrolled. Two rAFs (not one — the first can still
-    // land before the browser's own restoration and later layout
-    // settle) force a re-sync against wherever the page actually ended
-    // up, regardless of whether anything else ever fired.
-    requestAnimationFrame(() => requestAnimationFrame(remeasure));
-    // Also covers back/forward-cache restores, which don't re-run this
+    // Covers back/forward-cache restores, which don't re-run this
     // script at all — 'pageshow' fires again on both a fresh load and
     // a bfcache restore, unlike 'load' (bfcache) or DOMContentLoaded.
-    window.addEventListener('pageshow', remeasure);
+    window.addEventListener('pageshow', remeasureNextFrame);
   }
 
   initClosingHandoff();
