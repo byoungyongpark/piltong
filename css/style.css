@@ -2109,6 +2109,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .acycle__ground, .acycle__scrim { transition: none; }
 }
 
+/* Touch scroll through the 4 steps (already normal document flow, no
+   change needed there) past a shorter, still-sticky/still-switching
+   background band instead of a full 100svh screen per step (request:
+   "아워 어프로치도 타이틀 고정하고 터치스크롤로 바꾸되 배경이
+   어느정도로 보이는 높이로 조정해서 터치스크롤하면 내용에 따라
+   배경도 같이 바뀌면 될것 같아") — initApproachActive (main.js) keeps
+   switching .acycle__ground's own .is-active class exactly as before,
+   the only thing that changes is how much of the screen the result
+   occupies. "OUR APPROACH" drops from its own dedicated full-screen
+   moment to a compact heading directly above the steps, so touch
+   scroll reaches real content sooner instead of spending a whole
+   screen on the title alone. */
+@media (max-width: 1024px) {
+  .acycle__bg {
+    height: 45vh;
+    margin-bottom: -45vh;
+  }
+  .acycle__intro {
+    min-height: 0;
+    padding: clamp(56px, 10vw, 96px) var(--edge) clamp(32px, 6vw, 48px);
+  }
+  .acycle__step { min-height: 0; padding-top: clamp(32px, 6vw, 48px); padding-bottom: clamp(32px, 6vw, 48px); }
+}
+
 /* ---------- Why Piltong: counter-marquee title, mark overlap, then a
    staged copy reveal — see initWhyPiltong in main.js for the
    scroll-driven half of this (mark scale/opacity, marquee blur, and

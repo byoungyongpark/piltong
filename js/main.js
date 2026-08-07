@@ -341,7 +341,11 @@
       });
       grounds.forEach((g, i) => g.classList.toggle('is-active', i === idx));
 
-      if (!prefersReduced) {
+      // The active-ground switch above stays live at every width — it's
+      // what makes the background follow whichever step is on screen
+      // under touch scroll too. Only this small cosmetic drift (in
+      // scope for "no motion" at compact widths) skips.
+      if (!prefersReduced && !isCompact()) {
         const r = sec.getBoundingClientRect();
         const runway = r.height - window.innerHeight;
         const progress = runway <= 0 ? 0 : Math.max(0, Math.min(1, -r.top / runway));
@@ -367,7 +371,14 @@
   /* ---------- Our Approach: copy clears out of a mist as it rises in ---------- */
 
   function initApproachTextFog() {
-    if (prefersReduced) return;
+    // Background-follows-content (initApproachActive) stays on at
+    // compact widths — it's just "which step's top has crossed the
+    // viewport centre," which works the same under touch as wheel, and
+    // is the whole point of "터치스크롤하면 내용에 따라 배경도 같이
+    // 바뀌면 될것 같아". This blur-clear/fade-in on the copy itself is
+    // a different thing — scroll-driven text motion, in scope for the
+    // standing "no text animation" rule — so it alone skips.
+    if (prefersReduced || isCompact()) return;
     const sec = document.getElementById('ourApproach');
     if (!sec) return;
     // Only the intro title and the first step (Essential) — the two
@@ -422,7 +433,10 @@
   /* ---------- Our Approach: each step's own reveal ---------- */
 
   function initApproachReveals() {
-    if (prefersReduced) return;
+    // Same reasoning as initApproachTextFog just above — this is the
+    // per-step rise-and-fade/letter-split text motion, not the
+    // background switch, so it alone skips at compact widths.
+    if (prefersReduced || isCompact()) return;
     const sec = document.getElementById('ourApproach');
     if (!sec) return;
     const steps = Array.from(sec.querySelectorAll('.acycle__step'));
