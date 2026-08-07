@@ -1807,7 +1807,13 @@
     // covered/uncovered value doesn't hold for both at once.
     const eqTarget = document.getElementById('musicToggle');
     const navLogoTarget = document.getElementById('heroLogo');
-    if (!sec || !bg || prefersReduced) return;
+    // isCompact() reuses the same @media(prefers-reduced-motion:reduce)
+    // fallback below (style.css) rather than a bespoke one — both want
+    // the identical end state (glyphs fully in, bg at rest scale, a
+    // solid fill behind it since nothing scrolls it to cover the
+    // section), on request ("와이필통 마지막에 나오는 브랜드월
+    // 섹션도 풀로 풀어서 위치시켜주고").
+    if (!sec || !bg || prefersReduced || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const lerp = (a, b, t) => a + (b - a) * t;

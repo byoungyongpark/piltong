@@ -1505,10 +1505,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     overflow: hidden;
     background: var(--ink);
     /* Top/bottom kept close but not equal (request: "섹션 위 아래
-       여백도 비슷하게... 아랫쪽만 조금 더넓게") — horizontal is 0:
-       the photo bleeds edge to edge, and both the title and the card
-       row carry their own horizontal inset already. */
-    padding: clamp(32px, 6vw, 56px) 0 clamp(48px, 9vw, 80px);
+       여백도 비슷하게... 아랫쪽만 조금 더넓게"; widened again on
+       request: "비전 상단 여백 지금보단 조금 더 먼저 넉넉히 확보한뒤
+       상하 전체 지금보다 조금더 넉넉히 넓혀줘" — top raised the most,
+       bottom raised along with it to stay proportionally the larger of
+       the two). horizontal is 0: the photo bleeds edge to edge, and
+       both the title and the card row carry their own horizontal inset
+       already. */
+    padding: clamp(48px, 8vw, 80px) 0 clamp(64px, 11vw, 112px);
   }
   .vwipe__stage {
     position: static;
@@ -2715,7 +2719,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandwall__bg { object-position: 8% center; }
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* Also (max-width: 1024px) — same resting state compact mode wants
+   (request: "브랜드월 섹션도 풀로 풀어서 위치시켜주고"), reusing this
+   rather than a second copy of it. */
+@media (prefers-reduced-motion: reduce), (max-width: 1024px) {
   .bw-glyph { opacity: 1; transform: none; }
   .brandwall__bg { transform: none; }
   /* No scroll-driven scale here to grow the video to cover the
