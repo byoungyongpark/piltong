@@ -4018,6 +4018,41 @@
 
   initColorSnap();
 
+  /* ---------- Horizontal scroll-snap rows: plain mouse-wheel fallback ----------
+     Every touch-scroll conversion this project made (.acycle__steps,
+     .vwipe__vision, .whyp__copy-sticky, .brandid__dna-items,
+     .brandid__color-caption) relies on a real horizontal drag/swipe
+     gesture — a genuine touchscreen already provides that natively, no
+     JS needed. A plain vertical mouse wheel/trackpad scroll over a
+     horizontal-only overflow:auto box does nothing in most browsers
+     (no gesture to translate), which reads as "touch-scrolling but
+     nothing changes" on exactly the desktop/DevTools setups this was
+     verified with all session (request, re: Color Principle
+     specifically: "컬러 프린서플 좌우로 터치 스크롤 하는데 컨텐츠가
+     안바뀌네"). This maps vertical wheel delta to scrollLeft instead,
+     same as any desktop horizontal-carousel widget — only when the
+     gesture is actually more vertical than horizontal, so a real
+     horizontal trackpad swipe (deltaX already dominant) still scrolls
+     natively untouched, and only at isCompact() widths, where these
+     rows exist at all. */
+  function enableWheelHorizontalScroll(el) {
+    if (!el) return;
+    el.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }, { passive: false });
+  }
+  if (isCompact()) {
+    [
+      '.acycle__steps',
+      '.vwipe__vision',
+      '.whyp__copy-sticky',
+      '.brandid__dna-items',
+      '.brandid__color-caption',
+    ].forEach(sel => enableWheelHorizontalScroll(document.querySelector(sel)));
+  }
+
   /* ---------- Color Story: three photos cross-fade with a curtain wipe, one pinned stage ---------- */
 
   function initColorStory() {

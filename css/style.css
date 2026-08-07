@@ -4738,6 +4738,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     margin-bottom: clamp(48px, 10vw, 96px);
   }
   .brandid__colorstory-panel:last-child { margin-bottom: 0; }
+  /* Fills the area the image's own top-edge fade leaves transparent —
+     each panel's own brand colour, the closest flat match to what its
+     photo is actually about, rather than the plain page paper colour
+     showing through there regardless of panel (request: "투명그라데이션
+     처리후 그 아래 배경과 가장 비슷한 단색으로 채워보자"). */
+  .brandid__colorstory-panel[data-panel="0"] { background: var(--paper); }
+  .brandid__colorstory-panel[data-panel="1"] { background: var(--ink); }
+  .brandid__colorstory-panel[data-panel="2"] { background: var(--signal-surface); }
   /* Was its own stacked block above the card/copy — moved behind them
      instead, anchored to the panel's bottom edge, on request ("컬러스토리는
      각 배경을 컨텐츠 텍스트 그룹 하단에 배치하여 상단쪽은 투명
@@ -4760,21 +4768,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
     mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
   }
-  .brandid__colorstory-card,
+  /* position:relative (needed so z-index can lift these above the now-
+     absolute image, below) reactivates .brandid__colorstory-card's own
+     BASE left:50% — inert under the ≤1600px tier's position:static
+     above, but position:relative respects left/top again, and that
+     alone (transform is already reset to none there) was shoving the
+     card 50% of the panel's own width to the right of its centred spot
+     ("컬러스토리 컬러 카드가... 오른쪽에 치우침"). left:auto here
+     cancels it back out. */
+  .brandid__colorstory-card {
+    position: relative;
+    left: auto;
+    z-index: 1;
+  }
   .brandid__colorstory-copy {
     position: relative;
     z-index: 1;
+    /* Generous run of the panel's own (now solid, see above) colour
+       below the text before the image band begins, on request
+       ("컨텐츠 텍스트 구룹 아래 여백도 어느정도 넉넉히 확보"). */
+    margin-bottom: clamp(40px, 8vw, 72px);
   }
-  /* Panel 1's copy is paper-coloured by default (.brandid__colorstory-
-     lead/-body base rules) for reading over its own dark photo — that
-     photo is now a faded-in band anchored to the bottom instead of a
-     full-bleed backdrop, so the copy above mostly sits over the plain
-     paper page colour instead. Forced to ink for all 3 panels here
-     (overriding both the base rule and the desktop-only --copy--ink
-     modifier, now redundant but harmless) so it stays legible regardless
-     of which panel or how much of the image happens to show behind it. */
-  .brandid__colorstory-lead { color: var(--ink); }
-  .brandid__colorstory-body { color: var(--ink-70); }
   .brandid__colorstory-curtain { display: none; }
 }
 
