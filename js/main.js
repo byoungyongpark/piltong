@@ -315,6 +315,12 @@
     const bg = sec.querySelector('.acycle__bg');
     const grounds = Array.from(sec.querySelectorAll('.acycle__ground'));
     const steps = Array.from(sec.querySelectorAll('.acycle__step'));
+    // The steps' own horizontal scroll container at compact widths (see
+    // .acycle__steps in style.css) — swiping through it doesn't fire a
+    // window 'scroll' event (element scroll doesn't bubble), so it needs
+    // its own listener, and "which step is active" becomes a horizontal
+    // centre test instead of the vertical one below.
+    const stepsWrap = sec.querySelector('.acycle__steps');
     if (!steps.length || !grounds.length) return;
 
     // Same "step whose top has crossed the viewport's centre line is the
@@ -333,7 +339,8 @@
     // so the drift never uncovers an edge.
     const PARALLAX_RANGE = 48; // px, total travel start to end of section
 
-    function update() {
+    // Desktop/vertical: page scroll position decides which step is active.
+    function updateVertical() {
       const line = window.innerHeight * 0.5;
       let idx = 0;
       steps.forEach((el, i) => {
@@ -341,17 +348,36 @@
       });
       grounds.forEach((g, i) => g.classList.toggle('is-active', i === idx));
 
-      // The active-ground switch above stays live at every width — it's
-      // what makes the background follow whichever step is on screen
-      // under touch scroll too. Only this small cosmetic drift (in
-      // scope for "no motion" at compact widths) skips.
-      if (!prefersReduced && !isCompact()) {
+      if (!prefersReduced) {
         const r = sec.getBoundingClientRect();
         const runway = r.height - window.innerHeight;
         const progress = runway <= 0 ? 0 : Math.max(0, Math.min(1, -r.top / runway));
         const y = (progress - 0.5) * PARALLAX_RANGE;
         bg.style.setProperty('--acycle-parallax', `${y.toFixed(2)}px`);
       }
+    }
+
+    // Compact/horizontal: .acycle__steps' own scrollLeft decides instead
+    // — request: "아워 어프로치 섹션 컨텐츠도 좌우로 터치스크롤 구조로
+    // 바꿔줘". Whichever step's own horizontal centre sits closest to
+    // the container's centre is active; no parallax (that's "no motion"
+    // scope, same as before).
+    function updateHorizontal() {
+      if (!stepsWrap) return;
+      const wrapRect = stepsWrap.getBoundingClientRect();
+      const center = wrapRect.left + wrapRect.width / 2;
+      let idx = 0, best = Infinity;
+      steps.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        const dist = Math.abs((r.left + r.width / 2) - center);
+        if (dist < best) { best = dist; idx = i; }
+      });
+      grounds.forEach((g, i) => g.classList.toggle('is-active', i === idx));
+    }
+
+    function update() {
+      if (isCompact()) updateHorizontal();
+      else updateVertical();
     }
 
     let ticking = false;
@@ -364,6 +390,7 @@
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+    if (stepsWrap) stepsWrap.addEventListener('scroll', onScroll, { passive: true });
   }
 
   initApproachActive();

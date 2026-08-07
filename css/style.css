@@ -2109,18 +2109,23 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .acycle__ground, .acycle__scrim { transition: none; }
 }
 
-/* Touch scroll through the 4 steps (already normal document flow, no
-   change needed there) past a shorter, still-sticky/still-switching
-   background band instead of a full 100svh screen per step (request:
-   "아워 어프로치도 타이틀 고정하고 터치스크롤로 바꾸되 배경이
-   어느정도로 보이는 높이로 조정해서 터치스크롤하면 내용에 따라
-   배경도 같이 바뀌면 될것 같아") — initApproachActive (main.js) keeps
-   switching .acycle__ground's own .is-active class exactly as before,
-   the only thing that changes is how much of the screen the result
-   occupies. "OUR APPROACH" drops from its own dedicated full-screen
-   moment to a compact heading directly above the steps, so touch
-   scroll reaches real content sooner instead of spending a whole
-   screen on the title alone. */
+/* Touch scroll past a shorter, still-sticky/still-switching background
+   band instead of a full 100svh screen per step (request: "아워
+   어프로치도 타이틀 고정하고 터치스크롤로 바꾸되 배경이 어느정도로
+   보이는 높이로 조정해서 터치스크롤하면 내용에 따라 배경도 같이
+   바뀌면 될것 같아") — initApproachActive (main.js) keeps switching
+   .acycle__ground's own .is-active class exactly as before, the only
+   thing that changes is how much of the screen the result occupies.
+   "OUR APPROACH" drops from its own dedicated full-screen moment to a
+   compact heading above the steps.
+   The 4 steps themselves are a horizontal scroll-snap row now, not a
+   vertical stack (request: "아워 어프로치 섹션 컨텐츠도 좌우로
+   터치스크롤 구조로 바꿔줘") — same card-per-swipe pattern
+   .vwipe__vision uses. initApproachActive switches to a horizontal
+   "closest to .acycle__steps' own centre" test for which step is
+   active at this width (updateHorizontal, main.js), since the steps
+   no longer move through the viewport on the page's own vertical
+   scroll. */
 @media (max-width: 1024px) {
   .acycle__bg {
     height: 45vh;
@@ -2130,7 +2135,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     min-height: 0;
     padding: clamp(56px, 10vw, 96px) var(--edge) clamp(32px, 6vw, 48px);
   }
-  .acycle__step { min-height: 0; padding-top: clamp(32px, 6vw, 48px); padding-bottom: clamp(32px, 6vw, 48px); }
+  .acycle__steps {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: clamp(16px, 4vw, 28px);
+    padding: 0 var(--edge) clamp(48px, 9vw, 80px);
+  }
+  .acycle__step {
+    min-height: 0;
+    min-width: 0;
+    /* .acycle__steps already insets both edges with its own padding
+       (above), so the card itself just fills that — no second edge
+       subtraction here (that produced narrower-than-intended, unevenly
+       sized cards, since .acycle__word's desktop-scale font then forced
+       whichever card held the longest word wider than the rest). */
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    padding-top: clamp(32px, 6vw, 48px);
+    padding-bottom: clamp(32px, 6vw, 48px);
+  }
+  /* Desktop's 11.72vw display scale (up to 300px) doesn't fit inside a
+     single card at this width — the longest words ("Appropriate",
+     "Sustainable") would force their card wider than the others despite
+     the shared flex-basis above. Capped down to a size every word fits
+     on one line within the card's own padding. */
+  .acycle__word {
+    font-size: clamp(40px, 8vw, 64px);
+  }
 }
 
 /* ---------- Why Piltong: counter-marquee title, mark overlap, then a
