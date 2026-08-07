@@ -1239,6 +1239,19 @@
 
     function update() {
       ticking = false;
+      if (isCompact()) {
+        // VISION's zoom, the ground's push-in and the vision-statement
+        // cross-blur all replaced by a plain static photo band + a
+        // horizontally swipeable statement row (see the max-width:1024px
+        // block in style.css) — nothing here to drive, just clear
+        // whatever the wide-viewport pass last set.
+        word.style.transform = ''; word.style.fontSize = ''; word.style.opacity = '';
+        to.style.opacity = ''; to.style.transform = '';
+        if (statementCol) statementCol.style.opacity = '';
+        sec.dataset.eqBg = 'dark';
+        vsteps.forEach(step => { step.style.opacity = ''; step.style.filter = ''; });
+        return;
+      }
       const r = sec.getBoundingClientRect();
       // What is left of the section once the sticky stage has filled the
       // screen — the actual pinned distance, so this stays correct if the

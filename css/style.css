@@ -1480,6 +1480,102 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .vwipe--static .vwipe__vstep { opacity: 0; filter: none; }
 .vwipe--static .vwipe__vstep:last-child { opacity: 1; }
 
+/* Sticky zoom-and-cross-blur doesn't map to touch scroll (request:
+   "비전섹션의 모션도 텍스트 확장되는 모션도 제거하고 여기도 풀화면
+   풀고 적절한 높이로 기존 배경 깔리고 터치스크롤로 좌우로 컨텐츠
+   확인할수 있게") — unpinned into a fixed-height photo band (the
+   existing .vwipe__ground--to photograph, held at rest instead of
+   zooming/panning in) with VISION as a plain static caption over it,
+   and the 3 vision statements below as a horizontally swipeable
+   scroll-snap row instead of cross-blurring in one spot. initVisionWipe
+   (main.js) stops touching any of this past 1024px and just clears its
+   inline styles so these are the only rules in effect. */
+@media (max-width: 1024px) {
+  .vwipe { height: auto; background: var(--ink); }
+  /* height:auto now (was the fixed 100svh the sticky pin needed) — it
+     has to grow to hold the vision row below the photo band too. The
+     ground/word band below is given its OWN explicit height instead
+     of inset:0, specifically so it stays a fixed 60vh regardless of
+     how tall this stage's real (grown) height ends up being — inset:0
+     would otherwise re-stretch it to match, pulling the photo down
+     behind the vision row instead of stopping above it. */
+  .vwipe__stage {
+    position: relative;
+    top: auto;
+    height: auto;
+    overflow: visible;
+    /* flow-root, not block — .vwipe__vision's margin-top (below) would
+       otherwise collapse straight through this element's own top edge
+       (a plain block with no border/padding doesn't contain a child's
+       margin), pushing the whole stage down inside .vwipe instead of
+       opening space for it INSIDE the stage — confirmed by
+       measurement: the stage's own height came back equal to just
+       .vwipe__vision's content height, with the photo band and vision
+       row still fully overlapping. flow-root establishes a block
+       formatting context with no other side effects (unlike
+       overflow:hidden, which would clip). */
+    display: flow-root;
+    place-items: unset;
+  }
+  .vwipe__ground--from { display: none; }
+  .vwipe__ground--to {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    height: 60vh;
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .vwipe__ground--to::before { animation: none; }
+  /* Same 60vh band as the photo (position:absolute here already takes
+     it out of normal flow, same reasoning as -to above), bottom-
+     aligned within it as a caption instead of centred/huge. */
+  .vwipe__word {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60vh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: clamp(20px, 5vw, 32px);
+    font-size: clamp(32px, 10vw, 56px);
+    white-space: normal;
+    text-align: center;
+    color: var(--paper);
+    mix-blend-mode: normal;
+    opacity: 1;
+    transform: none;
+  }
+  /* Normal flow (position:static), so it's what actually gives
+     .vwipe__stage its real height — margin-top clears the photo
+     band above it (ground/word are both absolute and don't otherwise
+     reserve any space for this to flow below). */
+  .vwipe__vision {
+    position: static;
+    inset: auto;
+    margin-top: 60vh;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: clamp(32px, 8vw, 56px) var(--edge);
+    gap: clamp(16px, 4vw, 28px);
+  }
+  .vwipe__vstep {
+    grid-column: auto;
+    grid-row: auto;
+    flex: 0 0 calc(100% - var(--edge) * 2);
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    opacity: 1;
+    filter: none;
+  }
+}
+
 /* Lands on the photograph the wipe brought up, so the two read as one
    continuous ground. */
 .overview--shot {
