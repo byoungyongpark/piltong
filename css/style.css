@@ -4410,12 +4410,28 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__color-flash,
   .brandid__color-seal,
   .brandid__color-symbol { display: none; }
+  /* background-color/color are synced to whichever card is centred
+     below (updateColorHeadSync, main.js) — flat none here is just the
+     pre-JS fallback. width:100% (not the parent's default shrink-to-
+     content) and the transition are both needed for that: this has to
+     span the full row for its background to actually read as a block,
+     and scroll-driven updates land in discrete jumps rather than a
+     continuous per-frame value, so the colour needs its own eased
+     hand-off between them instead of snapping. margin-top:0 (was a gap
+     down to the caption) — request: "위에 영문 타이틀 및 그 아래
+     내용뒷부분도 같이 포함해서... 한 구조인것처럼" — the two need to
+     touch for that to read as one block, not two separately-coloured
+     ones stacked with daylight between them. */
   .brandid__color-head {
     opacity: 1;
     transform: none;
     filter: none;
-    padding: 0 var(--edge);
-    margin-top: clamp(48px, 8vw, 96px);
+    width: 100%;
+    box-sizing: border-box;
+    padding: clamp(48px, 8vw, 96px) var(--edge) clamp(28px, 5vw, 44px);
+    margin-top: 0;
+    background-color: transparent;
+    transition: background-color 260ms var(--ease), color 260ms var(--ease);
   }
   .brandid__color-caption {
     position: relative;
@@ -4426,7 +4442,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    margin-top: clamp(32px, 6vw, 56px);
+    margin-top: 0;
   }
   .brandid__color-name {
     position: static;
@@ -4737,7 +4753,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     overflow: hidden;
     margin-bottom: clamp(48px, 10vw, 96px);
   }
-  .brandid__colorstory-panel:last-child { margin-bottom: 0; }
+  /* Neither :last-child nor :last-of-type actually reaches "the last
+     PANEL" here — .brandid__colorstory-sticky's real last children are
+     the two curtain divs (index.html), and :last-of-type matches by TAG
+     (div), which the curtains also are, so it still lands on the last
+     curtain rather than the last panel. Targeted directly by its own
+     data-panel value instead: the last panel kept its full margin-
+     bottom under both of those, showing as a stray gap before the next
+     section (request: "컬러스토리 섹션 하단부 갭 생긴건 없애고"). */
+  .brandid__colorstory-panel[data-panel="2"] { margin-bottom: 0; }
   /* Fills the area the image's own top-edge fade leaves transparent —
      each panel's own brand colour, the closest flat match to what its
      photo is actually about, rather than the plain page paper colour
@@ -4745,7 +4769,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      처리후 그 아래 배경과 가장 비슷한 단색으로 채워보자"). */
   .brandid__colorstory-panel[data-panel="0"] { background: var(--paper); }
   .brandid__colorstory-panel[data-panel="1"] { background: var(--ink); }
-  .brandid__colorstory-panel[data-panel="2"] { background: var(--signal-surface); }
+  /* Not the flat --signal-surface (a saturated orange-red, the swatch
+     card's own colour) — bg_color_03.png itself reads as a much softer,
+     warmer orange-beige, and the flat brand orange sat behind the fade
+     as a much harder, more saturated block than the photo above it
+     actually is (request: "시그널 서페이스는 배경 이미지의 색감은 약간의
+     주황빛 도는 베이지색이 주로 많아서 그걸로 해야할듯"). */
+  .brandid__colorstory-panel[data-panel="2"] { background: #D9B892; }
   /* Was its own stacked block above the card/copy — moved behind them
      instead, anchored to the panel's bottom edge, on request ("컬러스토리는
      각 배경을 컨텐츠 텍스트 그룹 하단에 배치하여 상단쪽은 투명

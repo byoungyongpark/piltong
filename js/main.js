@@ -2456,6 +2456,40 @@
     const colorCaption = colorStage ? colorStage.querySelector('.brandid__color-caption') : null;
     const colorFlash = colorStage ? colorStage.querySelector('.brandid__color-flash') : null;
     const colorNames = colorStage ? Array.from(colorStage.querySelectorAll('.brandid__color-name')) : [];
+
+    // Horizontal touch-scroll cards (style.css, ≤1024px) each carry
+    // their own flat colour, but .brandid__color-head (the shared
+    // "COLOR PRINCIPLE" title above the row) sat on its own fixed
+    // background regardless of which card was actually in view — on
+    // request ("위에 영문 타이틀 및 그 아래 내용뒷부분도 같이 포함해서
+    // 색상이 바뀌면 좋을것 같아 한 구조인것처럼"), it now copies
+    // whichever card is centred, so title and card always agree and
+    // read as one continuous block instead of a neutral header sitting
+    // above unrelated colour swatches. Copies the ACTIVE CARD's own
+    // computed colours directly rather than duplicating a colour table
+    // here — .brandid__color-name[data-color] in style.css is the one
+    // place these colours are defined, so head can never drift out of
+    // sync with it.
+    function updateColorHeadSync() {
+      if (!isCompact() || !colorCaption || !colorHead || !colorNames.length) return;
+      const wrapRect = colorCaption.getBoundingClientRect();
+      const center = wrapRect.left + wrapRect.width / 2;
+      let active = colorNames[0], best = Infinity;
+      colorNames.forEach(el => {
+        const r = el.getBoundingClientRect();
+        const dist = Math.abs((r.left + r.width / 2) - center);
+        if (dist < best) { best = dist; active = el; }
+      });
+      const cs = getComputedStyle(active);
+      colorHead.style.backgroundColor = cs.backgroundColor;
+      colorHead.style.color = cs.color;
+    }
+    if (isCompact()) {
+      updateColorHeadSync();
+      if (colorCaption) colorCaption.addEventListener('scroll', updateColorHeadSync, { passive: true });
+      window.addEventListener('resize', updateColorHeadSync, { passive: true });
+    }
+
     // The flat opacity flash (first pass) was still just a uniform
     // fade over everything — asked for more spectacle specifically on
     // "뒤에 색상 전체 깔리는" bit, on request ("화면전환이 화려하면
