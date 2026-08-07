@@ -1491,14 +1491,24 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    (main.js) stops touching any of this past 1024px and just clears its
    inline styles so these are the only rules in effect. */
 @media (max-width: 1024px) {
-  .vwipe { height: auto; background: var(--ink); }
+  .vwipe {
+    height: auto;
+    background: var(--ink);
+    /* One place for the photo band's height, referenced by -to/-word/
+       -vision's margin-top below so the three can't drift out of sync.
+       Was 60vh — read as too much empty photo above "VISION" itself
+       (request: "지금은 비전 타이틀 위로 여백이 너무많아"), eased down
+       to a band VISION's own line-height actually fills more of. */
+    --vwipe-band-h: 42vh;
+  }
   /* height:auto now (was the fixed 100svh the sticky pin needed) — it
      has to grow to hold the vision row below the photo band too. The
      ground/word band below is given its OWN explicit height instead
-     of inset:0, specifically so it stays a fixed 60vh regardless of
-     how tall this stage's real (grown) height ends up being — inset:0
-     would otherwise re-stretch it to match, pulling the photo down
-     behind the vision row instead of stopping above it. */
+     of inset:0, specifically so it stays a fixed --vwipe-band-h
+     regardless of how tall this stage's real (grown) height ends up
+     being — inset:0 would otherwise re-stretch it to match, pulling
+     the photo down behind the vision row instead of stopping above
+     it. */
   .vwipe__stage {
     position: relative;
     top: auto;
@@ -1518,26 +1528,37 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     place-items: unset;
   }
   .vwipe__ground--from { display: none; }
+  /* Same photograph the hero itself already shows at this width
+     (bg_m_hero.jpg, the light-beam frame with the 3D symbol cropped
+     out) instead of section 03's own photo, on request ("위의 빛이
+     나오는 그 배경으로 통일") — visual continuity between the two once
+     both are plain static bands rather than the hero's own blurred
+     entrance + breathing zoom (that motion stays hero-only; this is
+     just the same still frame). Same darkening gradient
+     .vwipe__ground--to already carried, so legibility is unchanged. */
   .vwipe__ground--to {
     top: 0;
     left: 0;
     right: 0;
     bottom: auto;
-    height: 60vh;
+    height: var(--vwipe-band-h);
+    background-image:
+      linear-gradient(180deg, rgba(10,10,10,.45) 0%, rgba(10,10,10,.55) 100%),
+      url('../images/bg_m_hero.jpg');
     opacity: 1;
     transform: none;
     animation: none;
   }
   .vwipe__ground--to::before { animation: none; }
-  /* Same 60vh band as the photo (position:absolute here already takes
-     it out of normal flow, same reasoning as -to above), bottom-
-     aligned within it as a caption instead of centred/huge. */
+  /* Same band as the photo (position:absolute here already takes it
+     out of normal flow, same reasoning as -to above), bottom-aligned
+     within it as a caption instead of centred/huge. */
   .vwipe__word {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 60vh;
+    height: var(--vwipe-band-h);
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -1553,16 +1574,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Normal flow (position:static), so it's what actually gives
      .vwipe__stage its real height — margin-top clears the photo
      band above it (ground/word are both absolute and don't otherwise
-     reserve any space for this to flow below). */
+     reserve any space for this to flow below). Top/bottom padding
+     split unevenly on purpose (request: "상단 하단 여백 비슷하게
+     조정하되 아랫쪽이 조금더 넓은 느낌으로") — top stays modest since
+     the photo band above already reads as a clean break from the
+     cards, bottom carries more to close out the section. */
   .vwipe__vision {
     position: static;
     inset: auto;
-    margin-top: 60vh;
+    margin-top: var(--vwipe-band-h);
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: clamp(32px, 8vw, 56px) var(--edge);
+    padding: clamp(24px, 5vw, 40px) var(--edge) clamp(40px, 9vw, 72px);
     gap: clamp(16px, 4vw, 28px);
   }
   .vwipe__vstep {
