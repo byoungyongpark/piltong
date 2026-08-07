@@ -14,7 +14,32 @@
   // (unlike an OS motion preference) routinely changes mid-session —
   // devtools resize, tablet rotation — and callers check it live, every
   // scroll/resize tick, not just once at setup.
-  const isCompact = () => window.innerWidth <= 1024;
+  const isCompact = () => window.innerWidth <= 1025;
+
+  // Every isCompact() branch across this file (and every max-width:
+  // 1025px rule in style.css) only evaluates once — at setup, not
+  // continuously as the window resizes. That's a deliberate tradeoff:
+  // checking it live inside every scroll tick was the direct cause of a
+  // severe scroll-jank regression earlier in this project, fixed by
+  // moving every check to before listener attachment instead. The
+  // tradeoff is that resizing PAST the boundary mid-session (dragging a
+  // desktop window's edge, rotating a tablet, devtools) leaves whichever
+  // functions already ran stuck on their old branch. On request
+  // ("브라우저 리사이징시에도 문제없게 처리해줘"), reloading the instant
+  // the boundary is actually crossed re-runs every init fresh against
+  // the new width — far simpler and more reliable than converting each
+  // of the ~15 already-converted functions to re-evaluate live, and it
+  // costs nothing while the window stays on one side of the line.
+  // Debounced so a window mid-drag across the boundary only reloads once
+  // it settles, not on every intermediate frame.
+  let lastIsCompact = isCompact();
+  let resizeReloadTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeReloadTimer);
+    resizeReloadTimer = setTimeout(() => {
+      if (isCompact() !== lastIsCompact) location.reload();
+    }, 200);
+  }, { passive: true });
 
   // .brandid__blueprint-stage and .brandid__color-stage are ONE element
   // carrying both class names: the symbol diagram, the wordmark, the
@@ -4008,7 +4033,16 @@
 
   function initColorSnap() {
     const stage = document.getElementById('colorPrinciple');
-    if (!stage || prefersReduced) return;
+    // A magnetic pull toward this stage's own top is exactly the kind of
+    // "가끔 탁탁 걸리는" catch a plain touch scroll shouldn't have — it
+    // only ever fires through Lenis (see trySnap below), and Lenis
+    // itself already skips coarse pointers, but a narrow desktop/
+    // DevTools window with a real mouse is isCompact() AND fine-pointer
+    // at once, where Lenis stays active and this could still fire. Gated
+    // outright rather than relying on that indirect skip (request:
+    // "약간씩 탁탁 걸리는 부분이 있던데... 뭔가 이상한 효과 들어가있으면
+    // 제거해줘").
+    if (!stage || prefersReduced || isCompact()) return;
 
     // Only within this band of .brandid__color-stage's own top crossing
     // the viewport top do we pull — far outside it, normal scroll (and
@@ -5709,6 +5743,63 @@
   }
 
   initApplicationsPhotoStack();
+
+  /* ---------- Horizontal touch-scroll rows: progress dots ----------
+     Every horizontal scroll-snap row this project built (Our Approach's
+     steps, Vision's statements, Why Piltong's beats, Shape DNA's
+     principles, Color Principle's caption) had no indication of how
+     many cards there are or which one you're on — on request ("터치스크롤
+     되는 부분엔 하단에 몇개가 작동되는 지 표시를 해주면 좋을것 같다").
+     One reusable implementation rather than five near-identical ones:
+     each row gets a small dot per card, injected after it, toggling
+     .is-active by the same "closest to the row's own centre" test
+     already used everywhere else in this project that needs to know
+     which card is active (initApproachActive's updateHorizontal,
+     updateColorHeadSync, etc). Colour/spacing are a plain, deliberately
+     minimal default (style.css) — left for further design pass. */
+  function initHorizontalScrollDots() {
+    if (!isCompact()) return;
+    const ROWS = [
+      { wrap: '.acycle__steps', item: '.acycle__step' },
+      { wrap: '.vwipe__vision', item: '.vwipe__vstep' },
+      { wrap: '.whyp__copy-sticky', item: '.whyp__step' },
+      { wrap: '.brandid__dna-items', item: '.brandid__dna-item' },
+      { wrap: '.brandid__color-caption', item: '.brandid__color-name' },
+    ];
+    ROWS.forEach(({ wrap, item }) => {
+      const el = document.querySelector(wrap);
+      if (!el) return;
+      const items = Array.from(el.querySelectorAll(item));
+      if (items.length < 2) return;
+      const dotsWrap = document.createElement('div');
+      dotsWrap.className = 'hscroll-dots';
+      dotsWrap.setAttribute('aria-hidden', 'true');
+      const dots = items.map(() => {
+        const d = document.createElement('span');
+        d.className = 'hscroll-dot';
+        dotsWrap.appendChild(d);
+        return d;
+      });
+      el.insertAdjacentElement('afterend', dotsWrap);
+
+      function update() {
+        const wrapRect = el.getBoundingClientRect();
+        const center = wrapRect.left + wrapRect.width / 2;
+        let idx = 0, best = Infinity;
+        items.forEach((it, i) => {
+          const r = it.getBoundingClientRect();
+          const dist = Math.abs((r.left + r.width / 2) - center);
+          if (dist < best) { best = dist; idx = i; }
+        });
+        dots.forEach((d, i) => d.classList.toggle('is-active', i === idx));
+      }
+      update();
+      el.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+    });
+  }
+
+  initHorizontalScrollDots();
 
   // The ground used to pan through its own length here — the image is
   // 1800x2601, far taller than any viewport once it covers the width, so

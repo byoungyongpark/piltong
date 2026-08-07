@@ -1490,7 +1490,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    scroll-snap row instead of cross-blurring in one spot. initVisionWipe
    (main.js) stops touching any of this past 1024px and just clears its
    inline styles so these are the only rules in effect. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   /* One continuous background behind title AND cards together, not a
      separate band above them (request: "타이틀이랑 아래 내용이 같은
      그룹으로 묶이고 그 바깥쪽 섹션쪽에 배경을 깔고... 같은 배경이
@@ -2126,7 +2126,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    active at this width (updateHorizontal, main.js), since the steps
    no longer move through the viewport on the page's own vertical
    scroll. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   /* Was position:sticky at a fixed 45svh "peek window" (matching the
      desktop 100svh version, just shorter) — confirmed by measurement
      that the pin RELEASES partway through .acycle__steps' own trailing
@@ -2818,10 +2818,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandwall__bg { object-position: 8% center; }
 }
 
-/* Also (max-width: 1024px) — same resting state compact mode wants
+/* Also (max-width: 1025px) — same resting state compact mode wants
    (request: "브랜드월 섹션도 풀로 풀어서 위치시켜주고"), reusing this
    rather than a second copy of it. */
-@media (prefers-reduced-motion: reduce), (max-width: 1024px) {
+@media (prefers-reduced-motion: reduce), (max-width: 1025px) {
   .bw-glyph { opacity: 1; transform: none; }
   .brandwall__bg { transform: none; }
   /* No scroll-driven scale here to grow the video to cover the
@@ -2837,7 +2837,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    needs, which widens the visible window back out — enough of the
    frame's right side returns into view without touching crop position
    itself (request: "배경의 우측 부분이 어느정도 보이는 높이로"). */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   /* 70svh (first pass) still read as too tall on request ("브랜드월
      섹션 높이도 확 줄여줘") — the logo lockup itself needs nowhere near
      that much room (its own height, at its clamp()'d width, comes out
@@ -3018,7 +3018,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    be permanently blank. .brandid__intro-photo needs no equivalent
    override — its resting transform is simply `none` (no scale/slide),
    already correct with nothing setting it. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   .brandid__intro-letter { opacity: 1; }
   .brandid__intro-row .brandid__reveal { opacity: 1; }
 }
@@ -3366,7 +3366,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    updateDna (main.js) already returns early at isCompact(), before any
    of the entrance/cross-fade/numeral-roll work below would otherwise
    run every scroll tick for nothing. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   .brandid__dna { min-height: auto; padding: 0 var(--edge); }
   .brandid__dna-sticky {
     position: static;
@@ -3639,7 +3639,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    autoplay loop from decoding/looping for a clip nobody can see) and
    makes the "hidden" intent explicit in CSS rather than implicit in an
    opacity value (request: "우측에 따라오던 영상클립도 안나타나게 숨김"). */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   .brandid__sizes-loop { display: none; }
 }
 
@@ -4385,7 +4385,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    background colour directly, so swiping between them needs no JS.
    initBlueprintDraw/initBlueprintTransition/initColorPinball/
    updateColor (main.js) all gain a matching isCompact() early return. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   .brandid__blueprint-wordmark-svg path { transition: none; }
   .brandid__blueprint-stage,
   .brandid__color-stage { height: auto; }
@@ -4738,30 +4738,32 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    no overlay. initColorStory (main.js) stops touching any of this
    past 1024px and just clears its inline styles so these are the
    only rules in effect. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   .brandid__colorstory { height: auto; }
   .brandid__colorstory-sticky {
     position: static;
     height: auto;
     overflow: visible;
   }
+  /* No gap between panels at all now — was clamp(48px,10vw,96px)
+     between every one of them, which read as three disconnected chunks
+     rather than one flowing section (request: "컬러 프린서플[사실상
+     컬러스토리] 섹션 구조가 위와 아래로 나뉜것 같은데 하나로 묶고...
+     참조사진 보면 여전히 중간에 여백이 존재해 저거 없애줘"). Panel N's
+     own solid background (below) now runs straight into panel N+1's,
+     so scrolling through reads as one continuous coloured strip with a
+     clean colour-to-colour handoff at each boundary, not a page-
+     coloured gap between them. (The earlier data-panel="2"-only
+     override this replaced was a narrower fix for the SAME underlying
+     margin — folded in here now that every panel drops it.) */
   .brandid__colorstory-panel {
     position: relative;
     opacity: 1;
     height: auto;
     min-height: clamp(360px, 72vw, 560px);
     overflow: hidden;
-    margin-bottom: clamp(48px, 10vw, 96px);
+    margin-bottom: 0;
   }
-  /* Neither :last-child nor :last-of-type actually reaches "the last
-     PANEL" here — .brandid__colorstory-sticky's real last children are
-     the two curtain divs (index.html), and :last-of-type matches by TAG
-     (div), which the curtains also are, so it still lands on the last
-     curtain rather than the last panel. Targeted directly by its own
-     data-panel value instead: the last panel kept its full margin-
-     bottom under both of those, showing as a stray gap before the next
-     section (request: "컬러스토리 섹션 하단부 갭 생긴건 없애고"). */
-  .brandid__colorstory-panel[data-panel="2"] { margin-bottom: 0; }
   /* Fills the area the image's own top-edge fade leaves transparent —
      each panel's own brand colour, the closest flat match to what its
      photo is actually about, rather than the plain page paper colour
@@ -5566,7 +5568,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    effect — .apps__lead/-body's own base color (paper, against the
    section's own base --apps-fill) is already the correct resting
    contrast with no transition needed. */
-@media (max-width: 1024px) {
+@media (max-width: 1025px) {
   .apps__intro {
     position: static;
     top: auto;
@@ -6251,5 +6253,38 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .music-toggle.is-playing .music-toggle__bar:nth-child(2) { height: 16px; }
   .music-toggle.is-playing .music-toggle__bar:nth-child(3) { height: 9px; }
   .music-toggle.is-playing .music-toggle__bar:nth-child(4) { height: 14px; }
+}
+
+/* ---- Horizontal touch-scroll rows: progress dots ----
+   Injected by initHorizontalScrollDots (main.js) right after each
+   scroll-snap row (.acycle__steps, .vwipe__vision, .whyp__copy-sticky,
+   .brandid__dna-items, .brandid__color-caption), one dot per card,
+   toggling .is-active as you swipe — request: "터치스크롤 되는 부분엔
+   하단에 몇개가 작동되는 지 표시를 해주면 좋을것 같다". Deliberately
+   plain/minimal for now (background: currentColor, so it follows
+   whatever text colour the row's own context already sets rather than
+   a hardcoded colour that would be wrong on half these sections' mixed
+   light/dark grounds) — explicitly left as a first pass, on request
+   ("전체 동일 배경색 및 기타 디자인 네 판단하에 적절하게 넣어주면 내가
+   알아서 나중에 고칠께"). */
+.hscroll-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0 4px;
+}
+.hscroll-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: .3;
+  transform: scale(1);
+  transition: opacity 220ms var(--ease), transform 220ms var(--ease);
+}
+.hscroll-dot.is-active {
+  opacity: 1;
+  transform: scale(1.3);
 }
 
