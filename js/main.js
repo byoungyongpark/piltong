@@ -1524,15 +1524,27 @@
 
     // No marquee loop, no scroll-driven mark/blur/cross-blur — see the
     // .whyp--static rules in style.css for what this actually changes.
-    // Also isCompact() — this section drives TWO independent pinned
-    // scroll listeners (marquee + copy stage), both skipped by the same
-    // early return, which is real weight off every compact-viewport
-    // scroll tick (reported: "휠로 컨텐츠 확인함에 있어 엄청 느리게
-    // 느려진다"). .whyp--static's own stacked/unpinned layout, already
-    // built for reduced-motion, is reused as-is rather than building a
-    // second bespoke touch layout for this section right now.
-    if (prefersReduced || isCompact()) {
+    if (prefersReduced) {
       sec.classList.add('whyp--static');
+      return;
+    }
+    // Separate from prefersReduced on purpose, not folded into the same
+    // branch — .whyp--static stops the marquee loop entirely, which is
+    // correct for reduced-motion but wasn't what compact wanted: the
+    // marquee is a plain CSS animation (not this function's own
+    // per-frame work) and reads fine keeping its motion on a touch
+    // device, only the two SCROLL-driven pins (marquee mark rise, copy
+    // cross-fade) needed to go (reported: "와이필통 타이틀 좌우로
+    // 흘러가는거 정지되어있는데 다시 돌아가게 해주고" — an earlier pass
+    // wrongly reused .whyp--static here and stopped it). .whyp--compact
+    // (style.css) leaves .whyp__row--solid/--outline's own animation
+    // untouched, unpins both stages into normal flow, and exposes
+    // .whyp__media in place instead of leaving it parked 90vh below the
+    // fold at its pre-scroll rest position (request: "흘러가는 타이틀
+    // 밑에 피시에서 달려오던 영상 그냥 노출해주고").
+    if (isCompact()) {
+      sec.classList.add('whyp--compact');
+      if (mediaVideo) mediaVideo.play().catch(() => {});
       return;
     }
 

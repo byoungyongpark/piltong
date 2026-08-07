@@ -2540,6 +2540,45 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 .whyp--static .whyp__keyword { transform: none; }
 
+/* Touch-scroll fallback (request: "와이필동도 풀화면 풀고... 다시
+   돌아가게 해주고") — deliberately NOT the same class as reduced
+   motion above: the marquee's own animation (.whyp__row--solid/
+   --outline) is left completely untouched here, still looping, since
+   it's plain decorative CSS motion rather than the scroll-jank source
+   (that was the two sticky pins below). Both stages unpin into normal
+   flow and .whyp__media — parked 90vh off-screen at rest, normally
+   only ever moved into view by scroll — gets pulled back into the
+   normal flow via position:static so it's simply visible in place. */
+.whyp--compact .whyp__marquee-stage { height: auto; }
+.whyp--compact .whyp__marquee-sticky {
+  position: static;
+  height: auto;
+  padding: clamp(56px, 10vw, 96px) 0 clamp(32px, 6vw, 48px);
+}
+.whyp--compact .whyp__media {
+  position: static;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin: 0 auto;
+}
+.whyp--compact .whyp__copy-stage { height: auto; }
+.whyp--compact .whyp__copy-sticky {
+  position: static;
+  height: auto;
+  display: block;
+  padding: clamp(48px, 9vw, 88px) var(--edge) clamp(72px, 11vw, 140px);
+}
+.whyp--compact .whyp__step {
+  position: static;
+  grid-area: auto;
+  opacity: 1;
+  filter: none;
+  clip-path: none;
+  margin: 0 auto clamp(32px, 5vw, 64px);
+}
+.whyp--compact .whyp__keyword { transform: none; }
+
 /* ---------- Brand wall: logo revealed on the concrete photo ---------- */
 
 .brandwall {
