@@ -2079,6 +2079,22 @@
       const brandLine = sec.querySelector('.brandid__intro-index-line--brand');
       const photoEl = sec.querySelector('.brandid__intro-photo');
       if (!identityLine || !brandLine || !photoEl) return;
+      // This alignment only means anything against the desktop layout
+      // (photo sitting beside/under the word at a specific measured
+      // spot) — updateIntro already skips the rest of this section's
+      // motion at compact widths (request: "비쥬얼 아이덴티티 섹션에
+      // 포함된 텍스트 애니매이션들도 일괄 제거... 스크롤에 따라오는
+      // 효과들도 마저 제거"), but this one isn't scroll-driven (it's a
+      // load/resize measurement) so it wasn't covered by that gate and
+      // was still shifting VISUAL/IDENTITY by a desktop-tuned offset
+      // even in the stacked compact layout. Clearing back to '' lets
+      // .brandid__intro-index-line--brand/--identity's own margin-left:
+      // 0 (style.css) hold instead.
+      if (isCompact()) {
+        identityLine.style.marginLeft = '';
+        brandLine.style.marginLeft = '';
+        return;
+      }
       const dEl = identityLine.children[1]; // I(0) D(1)
       const eEl = identityLine.children[2]; // E(2)
       const vEl = brandLine.children[0]; // V(0)
@@ -2341,6 +2357,25 @@
     // same shape updateColor below already uses for its pinned stage.
     function updateDna() {
       if (!dnaSection || !dnaItems.length) return;
+      // The whole sticky/cross-fade/entrance system below doesn't apply
+      // any more at this width — .brandid__dna-sticky unpins to normal
+      // flow and .brandid__dna-items becomes a horizontal touch-scroll
+      // row instead (style.css, request: "쉐입디엔에이 섹션의 타이틀
+      // 아래 컨텐츠들도 터치 스크롤로 좌우로 볼 수 있게 구조 변경"), so
+      // there's no active index to compute and nothing left to drive.
+      // Clearing inline styles (rather than just skipping the write)
+      // matters because a leftover value from BEFORE the viewport
+      // crossed 1024px would otherwise keep overriding the new CSS
+      // indefinitely — same reasoning as the >900px branch this
+      // replaces, just checked once up front instead of every frame.
+      if (isCompact()) {
+        if (dnaVideo) dnaVideo.style.transform = '';
+        if (dnaMedia) dnaMedia.style.paddingTop = '';
+        if (dnaIndexEl) { dnaIndexEl.style.opacity = ''; dnaIndexEl.style.transform = ''; }
+        if (dnaTitleEl) { dnaTitleEl.style.opacity = ''; dnaTitleEl.style.transform = ''; }
+        if (dnaDetailEl) { dnaDetailEl.style.opacity = ''; dnaDetailEl.style.transform = ''; }
+        return;
+      }
       const r = dnaSection.getBoundingClientRect();
       const runway = r.height - window.innerHeight;
       const p = runway <= 0 ? 0 : clamp01(-r.top / runway);
@@ -2375,51 +2410,41 @@
       const padTop = lerp(dnaPadMax(), DNA_MEDIA_PAD_REST, eased).toFixed(1) + 'px';
       if (dnaMedia) dnaMedia.style.paddingTop = padTop;
 
-      // Below 900px this whole entrance is off — .brandid__dna-detail-col
-      // switches to position:static there (style.css), where this
-      // function's own translate(-50%,-50%) (meant to pair with
-      // position:absolute centering) would misplace a static element by
-      // half its own size. Clearing the inline styles lets the mobile
-      // CSS rules apply cleanly instead of fighting inline styles that
-      // always win regardless of specificity.
-      if (window.innerWidth > 900) {
-        // Same rise value/curve for both, driven by `eased` (the FULL
-        // entryP 0-1 curve) rather than either element's own X/opacity
-        // segment — see the DNA_RISE_PX comment above. Only cleared to
-        // '' once eased itself hits 1 (entryP=1, both elements' own
-        // segments are guaranteed done too by then, since both end at
-        // or before entryP=1) — clearing per-element the moment ITS OWN
-        // segment finished would snap that one element's Y to 0 early
-        // while the other kept animating, breaking the "gap stays
-        // constant" guarantee this shared value exists for. A lingering
-        // inline transform: translate(0,0) keeps the element on its own
-        // composited layer, which was reading as faintly blurry text
-        // once settled — clearing it once truly done fixes that too, on
-        // request ("애니매이션 되고 안착됬을때 약간 흐리멍텅해보이는데").
-        const rise = lerp(DNA_RISE_PX, 0, eased).toFixed(2);
-        if (dnaIndexEl) {
-          const t = smoothstep(seg(entryP, DNA_IDX_SEG[0], DNA_IDX_SEG[1]));
-          dnaIndexEl.style.opacity = t.toFixed(3);
-          dnaIndexEl.style.transform = eased >= 1
-            ? ''
-            : `translate(${lerp(-DNA_IDX_HIDE_PX, 0, t).toFixed(2)}px, ${rise}px)`;
-        }
-        if (dnaTitleEl) {
-          const t = smoothstep(seg(entryP, DNA_TITLE_SEG[0], DNA_TITLE_SEG[1]));
-          dnaTitleEl.style.opacity = t.toFixed(3);
-          dnaTitleEl.style.transform = eased >= 1
-            ? ''
-            : `translate(${lerp(-DNA_TITLE_HIDE_PX, 0, t).toFixed(2)}px, ${rise}px)`;
-        }
-        if (dnaDetailEl) {
-          const s = lerp(DNA_DETAIL_SCALE_START, 1, eased);
-          dnaDetailEl.style.opacity = eased.toFixed(3);
-          dnaDetailEl.style.transform = `translate(-50%, -50%) scale(${s.toFixed(3)})`;
-        }
-      } else {
-        if (dnaIndexEl) { dnaIndexEl.style.opacity = ''; dnaIndexEl.style.transform = ''; }
-        if (dnaTitleEl) { dnaTitleEl.style.opacity = ''; dnaTitleEl.style.transform = ''; }
-        if (dnaDetailEl) { dnaDetailEl.style.opacity = ''; dnaDetailEl.style.transform = ''; }
+      // isCompact() already returned above, so past this point innerWidth
+      // is guaranteed > 1024 — .brandid__dna-detail-col is position:
+      // absolute (style.css) the way this translate(-50%,-50%) expects.
+      // Same rise value/curve for both, driven by `eased` (the FULL
+      // entryP 0-1 curve) rather than either element's own X/opacity
+      // segment — see the DNA_RISE_PX comment above. Only cleared to ''
+      // once eased itself hits 1 (entryP=1, both elements' own segments
+      // are guaranteed done too by then, since both end at or before
+      // entryP=1) — clearing per-element the moment ITS OWN segment
+      // finished would snap that one element's Y to 0 early while the
+      // other kept animating, breaking the "gap stays constant"
+      // guarantee this shared value exists for. A lingering inline
+      // transform: translate(0,0) keeps the element on its own
+      // composited layer, which was reading as faintly blurry text once
+      // settled — clearing it once truly done fixes that too, on request
+      // ("애니매이션 되고 안착됬을때 약간 흐리멍텅해보이는데").
+      const rise = lerp(DNA_RISE_PX, 0, eased).toFixed(2);
+      if (dnaIndexEl) {
+        const t = smoothstep(seg(entryP, DNA_IDX_SEG[0], DNA_IDX_SEG[1]));
+        dnaIndexEl.style.opacity = t.toFixed(3);
+        dnaIndexEl.style.transform = eased >= 1
+          ? ''
+          : `translate(${lerp(-DNA_IDX_HIDE_PX, 0, t).toFixed(2)}px, ${rise}px)`;
+      }
+      if (dnaTitleEl) {
+        const t = smoothstep(seg(entryP, DNA_TITLE_SEG[0], DNA_TITLE_SEG[1]));
+        dnaTitleEl.style.opacity = t.toFixed(3);
+        dnaTitleEl.style.transform = eased >= 1
+          ? ''
+          : `translate(${lerp(-DNA_TITLE_HIDE_PX, 0, t).toFixed(2)}px, ${rise}px)`;
+      }
+      if (dnaDetailEl) {
+        const s = lerp(DNA_DETAIL_SCALE_START, 1, eased);
+        dnaDetailEl.style.opacity = eased.toFixed(3);
+        dnaDetailEl.style.transform = `translate(-50%, -50%) scale(${s.toFixed(3)})`;
       }
     }
 
@@ -3169,7 +3194,15 @@
     const title = sec ? sec.querySelector('.brandid__construction-index') : null;
     const text = sec ? sec.querySelector('.brandid__construction-text') : null;
     const items = sec ? Array.from(sec.querySelectorAll('.brandid__sizes-item')) : [];
-    if (!sec || prefersReduced) return;
+    // Title/text/each logo's rise-fade, and the loop video's ride-along,
+    // all skip past this width (request: "심볼 워드마크 섹션 텍스트
+    // 애니매이션도 제거, 우측에 따라오던 영상클립도 안나타나게 숨김") —
+    // none of .brandid__construction-index/-text/.brandid__sizes-item
+    // carry their own opacity:0 in CSS (only .brandid__sizes-loop does),
+    // so with update() never called at all here, the text/logos simply
+    // render at their natural opacity:1/transform:none and the loop
+    // clip stays at its CSS resting opacity:0 — nothing left to clear.
+    if (!sec || prefersReduced || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const lerp = (a, b, t) => a + (b - a) * t;

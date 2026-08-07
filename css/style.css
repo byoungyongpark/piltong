@@ -2128,8 +2128,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    scroll. */
 @media (max-width: 1024px) {
   .acycle__bg {
-    height: 45vh;
-    margin-bottom: -45vh;
+    /* svh, not plain vh — matches this same element's own desktop rule
+       above (100svh/-100svh). Plain vh tracks the LARGE viewport (address
+       bar retracted); on a real phone with the bar showing, that overstates
+       the actually-visible height, and the sticky pin (measured against
+       the small/dynamic viewport at scroll time) can pull .acycle__list up
+       by more than what's really behind it — the paper-coloured .whyp
+       below hasn't scrolled up far enough yet to fill what got uncovered,
+       which reads as a black gap between the two sections. Invisible in
+       desktop devtools (no address bar to shrink/grow the viewport), which
+       is why static geometry checks here never caught it. */
+    height: 45svh;
+    margin-bottom: -45svh;
   }
   .acycle__intro {
     min-height: 0;
@@ -2623,21 +2633,44 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   left: auto;
   transform: none;
   margin: 0 auto;
+  /* Desktop's shadow (below) was tuned for a video floating alone in a
+     full screen — its 130px/-34px far layer reaches well past the
+     narrower 92vw box this becomes here, spilling into the copy stage
+     directly beneath it in normal flow. Scaled down roughly in step
+     with how much narrower the box itself gets, not just trimmed. */
+  box-shadow:
+    6px 10px 20px -14px rgba(24, 28, 35, .10),
+    12px 26px 48px -20px rgba(24, 28, 35, .12);
 }
 .whyp--compact .whyp__copy-stage { height: auto; }
+/* Horizontal scroll-snap row, not a vertical stack (request: "와이필통
+   아래 컨텐츠 그룹도 터치스크롤로 좌우로 컨텐츠 볼수 있게 구조 변경") —
+   same card-per-swipe pattern .acycle__steps/.vwipe__vision use. Still
+   flex (from the base rule's display:grid → this overrides to flex),
+   place-items:center inherited from the base rule still centres cards
+   vertically via its align-items half. */
 .whyp--compact .whyp__copy-sticky {
   position: static;
   height: auto;
-  display: block;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: clamp(16px, 4vw, 28px);
   padding: clamp(48px, 9vw, 88px) var(--edge) clamp(72px, 11vw, 140px);
 }
 .whyp--compact .whyp__step {
   position: static;
   grid-area: auto;
+  flex: 0 0 100%;
+  min-width: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
   opacity: 1;
   filter: none;
   clip-path: none;
-  margin: 0 auto clamp(32px, 5vw, 64px);
+  transform: none;
+  margin: 0 auto;
 }
 .whyp--compact .whyp__keyword { transform: none; }
 
@@ -2786,6 +2819,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* No scroll-driven scale here to grow the video to cover the
      section on its own, so the section needs its own solid fill. */
   .brandwall { background-color: #14151a; }
+}
+/* Full 100svh (inherited from .frame) meant a tall, narrow crop window
+   for a landscape video — `cover` had to scale it up so far to fill
+   that height that only a sliver near the left edge (object-position,
+   above) was ever shown, all the way past the section's own right edge.
+   Shrinking just the height (not reduced-motion's own concern, so its
+   own block, not the shared one above) lowers how much scale-up cover
+   needs, which widens the visible window back out — enough of the
+   frame's right side returns into view without touching crop position
+   itself (request: "배경의 우측 부분이 어느정도 보이는 높이로"). */
+@media (max-width: 1024px) {
+  .brandwall { min-height: 70svh; }
 }
 
 /* ---------- Brand Identity ----------
@@ -3294,6 +3339,92 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
 }
 
+/* Sticky pin only makes sense with the tall runway above driving it, and
+   the cross-fade only makes sense with a fixed viewport to cross-fade
+   IN — neither maps to touch scroll (site-wide ≤1024px rule). Video
+   moves to normal stacked flow above the text column (same shape the
+   video-on-top-then-text 900px tier already used, widened up to 1024 and
+   folded in here rather than kept as a separate near-duplicate tier),
+   and the four principles become a horizontal scroll-snap row instead of
+   the old below-900px vertical stack — same card-per-swipe pattern
+   .acycle__steps/.whyp__copy-sticky use (request: "쉐입디엔에이 섹션의
+   타이틀 아래 컨텐츠들도 터치 스크롤로 좌우로 볼 수 있게 구조 변경").
+   updateDna (main.js) already returns early at isCompact(), before any
+   of the entrance/cross-fade/numeral-roll work below would otherwise
+   run every scroll tick for nothing. */
+@media (max-width: 1024px) {
+  .brandid__dna { min-height: auto; padding: 0 var(--edge); }
+  .brandid__dna-sticky {
+    position: static;
+    height: auto;
+    max-width: none;
+    flex-direction: column;
+    gap: clamp(24px, 6vw, 40px);
+  }
+  .brandid__dna-media {
+    flex: none;
+    width: 100%;
+    height: 62vw;
+    padding-top: 0;
+    padding-left: 0;
+    padding-bottom: 0;
+  }
+  .brandid__dna-right {
+    flex: none;
+    width: 100%;
+    padding-top: clamp(40px, 10vw, 72px);
+    padding-left: 0;
+    padding-right: 0;
+    align-items: stretch;
+  }
+  .brandid__dna-group {
+    max-width: none;
+  }
+  /* One-line (white-space:nowrap, base rule) is a desktop-width thing —
+     at this width a single unbroken "형태를 만드는 네 가지 기준"/"SHAPE
+     DNA" would overflow, so wrapping comes back here. */
+  .brandid__dna-title {
+    max-width: none;
+    white-space: normal;
+    word-break: keep-all;
+  }
+  .brandid__dna-index {
+    font-size: clamp(32px, 12vw, 56px);
+    white-space: normal;
+  }
+  /* No longer viewport-centered via position:absolute at this width —
+     back in normal stacked flow, full width. */
+  .brandid__dna-detail-col {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: clamp(24px, 6vw, 40px);
+  }
+  .brandid__dna-items {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: clamp(16px, 4vw, 28px);
+  }
+  .brandid__dna-item {
+    position: static;
+    grid-area: auto;
+    flex: 0 0 100%;
+    min-width: 0;
+    max-width: none;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    opacity: 1;
+    transform: none;
+  }
+  .brandid__dna-name, .brandid__dna-copy { opacity: 1; }
+  /* .brandid__dna-item is position:static here — the num's
+     position:absolute would escape to the wrong containing block, so
+     it's simplest just hidden at this width. */
+  .brandid__dna-num { display: none; }
+}
+
 /* ---- Symbol Construction ---- */
 /* .frame--auto's own padding-top (clamp(72,11vw,140)) overridden here
    to a generous run of paper above this title group, on request ("이
@@ -3488,6 +3619,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    is scrolled into view rather than all at once, on request ("심볼들은
    차례 차례로 스크롤 할때마다 위로 스르륵 등장"). */
 .brandid__sizes-item { width: 100%; }
+/* initSymbolConstruction (main.js) already skips this element entirely
+   at this width, so it never leaves its CSS resting opacity:0 — display:
+   none on top of that is just belt-and-suspenders (stops the muted
+   autoplay loop from decoding/looping for a clip nobody can see) and
+   makes the "hidden" intent explicit in CSS rather than implicit in an
+   opacity value (request: "우측에 따라오던 영상클립도 안나타나게 숨김"). */
+@media (max-width: 1024px) {
+  .brandid__sizes-loop { display: none; }
+}
 
 /* Loop clip that rides the bottom of the screen through the logo run.
    Absolutely placed and driven from JS rather than position:sticky.
@@ -5538,75 +5678,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (max-width: 900px) {
   .brandid__intro-row { flex-direction: column; gap: clamp(20px, 4vw, 32px); }
   .brandid__intro-title { margin-left: 0; }
-  .brandid__dna { min-height: auto; padding: 0 var(--edge); }
-  /* Sticky pin only makes sense with the tall runway above driving it —
-     switch to normal stacked flow: video on top (its own height, not
-     the 40/60 split), then the text column below, full-width. */
-  .brandid__dna-sticky {
-    position: static;
-    height: auto;
-    max-width: none;
-    flex-direction: column;
-    gap: clamp(24px, 6vw, 40px);
-  }
-  /* !important — updateDna (main.js) still sets .brandid__dna-media's
-     padding-top inline every frame (the animate-to-0 entrance), which
-     as an inline style would otherwise always beat a plain class rule
-     here. .brandid__dna-right's own padding is a plain CSS value now
-     (no longer JS-driven), so it just needs a normal override. */
-  .brandid__dna-media {
-    flex: none;
-    width: 100%;
-    height: 62vw;
-    padding-top: 0 !important;
-    padding-left: 0;
-    padding-bottom: 0;
-  }
-  .brandid__dna-right {
-    flex: none;
-    width: 100%;
-    padding-top: clamp(40px, 10vw, 72px);
-    padding-left: 0;
-    padding-right: 0;
-    align-items: stretch;
-  }
-  .brandid__dna-group {
-    max-width: none;
-  }
-  /* One-line (white-space:nowrap, base rule) is a desktop-width thing —
-     at phone widths a single unbroken "형태를 만드는 네 가지 기준"
-     would overflow the viewport, so wrapping comes back here. */
-  .brandid__dna-title {
-    max-width: none;
-    white-space: normal;
-    word-break: keep-all;
-  }
-  .brandid__dna-index {
-    font-size: clamp(32px, 12vw, 56px);
-    white-space: normal;
-  }
-  /* No longer viewport-centered via position:absolute at this width —
-     back in normal stacked flow, full width, matching how every other
-     Shape DNA piece degrades below 900px. */
-  .brandid__dna-detail-col {
-    position: static;
-    transform: none;
-    width: 100%;
-    margin-top: clamp(24px, 6vw, 40px);
-  }
-  /* Sticky pinning + cross-fade both depend on scroll-linked positioning
-     that's off on narrow viewports (see .brandid__dna-sticky above) —
-     all four principles just show at once, normal stacked flow, rather
-     than sitting invisibly on top of each other with nothing left to
-     trigger the swap. */
-  .brandid__dna-items { display: block; }
-  .brandid__dna-item { position: static; opacity: 1; margin-bottom: clamp(24px, 6vw, 40px); }
-  .brandid__dna-item:last-child { margin-bottom: 0; }
-  .brandid__dna-name, .brandid__dna-copy { opacity: 1; }
-  /* .brandid__dna-item is position:static here — the num's
-     position:absolute would escape to the wrong containing block, so
-     it's simplest just hidden at this width. */
-  .brandid__dna-num { display: none; }
+  /* Shape DNA's own sticky-unpin/stacked-layout/horizontal-scroll rules
+     (including its title/index wrap treatment) moved to the shared
+     max-width:1024px block near its base rules — this 900px tier no
+     longer carries anything DNA-specific. */
   /* 200px fixed inset is a desktop-width assumption — falls back to the
      section's own normal edge padding here instead; title/text stack
      instead of sitting side by side. */
