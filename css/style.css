@@ -2892,6 +2892,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    page) — only the group's POSITION moved, not its own alignment. */
 .brandid__intro-copy { flex: 0 1 auto; min-width: 0; }
 
+/* VISUAL/IDENTITY's letter-scatter-pour, the photo's scale/slide-in
+   and the Korean row's rise-and-fade all skip past 1024px now
+   (updateIntro, main.js, request: "비쥬얼 아이덴티티 섹션의 타이틀
+   및 애니매이션들도 일단 제거") — both classes below default to
+   opacity:0 with nothing else ever writing their inline opacity once
+   the JS bails, so without this the whole title+copy group would just
+   be permanently blank. .brandid__intro-photo needs no equivalent
+   override — its resting transform is simply `none` (no scale/slide),
+   already correct with nothing setting it. */
+@media (max-width: 1024px) {
+  .brandid__intro-letter { opacity: 1; }
+  .brandid__intro-row .brandid__reveal { opacity: 1; }
+}
+
 /* ---- Shape DNA ---- */
 /* One tall runway for the whole section — same "tall outer, sticky
    stage inside it" shape .brandid__color-stage / .brandid__color-sticky

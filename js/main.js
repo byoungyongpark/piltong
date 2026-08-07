@@ -2172,6 +2172,15 @@
     }, { passive: true });
 
     function updateIntro() {
+      // VISUAL/IDENTITY's letter-scatter-pour, the photo's scale/slide
+      // and the Korean row's own rise-and-fade all removed for now at
+      // compact widths (request: "그아래 비쥬얼 아이덴티티 섹션의
+      // 타이틀 및 애니매이션들도 일단 제거") — .brandid__intro-letter
+      // and .brandid__reveal both default to opacity:0 with everything
+      // else JS-driven, so style.css's max-width:1024px block forces
+      // them visible directly rather than leaving this section
+      // permanently blank once nothing writes their inline styles.
+      if (isCompact()) return;
       const r = sec.getBoundingClientRect();
       // Anchored to when the SECTION actually starts entering the
       // viewport (r.top === innerHeight), not to a point ENTRY_SPAN_MULT
