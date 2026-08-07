@@ -620,11 +620,10 @@
     const sec = document.querySelector('.statement');
     if (!sec) return;
     const frames = Array.from(sec.querySelectorAll('.statement__img'));
-    if (frames.length < 2) return;
+    if (frames.length < 2 || isCompact()) return;
 
     let shown = 0;
     function update() {
-      if (isCompact()) return;
       const r = sec.getBoundingClientRect();
       // How far the section has travelled past the viewport's midline,
       // normalised over its own height plus one screen so the last
@@ -658,7 +657,7 @@
   /* ---------- Statement: the photograph rises into place as the section arrives ---------- */
 
   function initStatementParallax() {
-    if (prefersReduced) return;
+    if (prefersReduced || isCompact()) return;
     const media = document.getElementById('statementMedia');
     if (!media) return;
 
@@ -691,7 +690,6 @@
 
     function update() {
       ticking = false;
-      if (isCompact()) { if (applied !== 0) { media.style.transform = ''; applied = 0; } return; }
       const r = media.getBoundingClientRect();
       const top = r.top - applied;
       // -1 with the frame a screen below the fold, 0 as it crosses the
@@ -1180,6 +1178,17 @@
     const word = sec.querySelector('.vwipe__word');
     const to = sec.querySelector('.vwipe__ground--to');
     if (!word || !to) return;
+    // Checked before any setup/listener below, not live inside update()
+    // — a scroll listener that only ever bails after being invoked
+    // still costs a requestAnimationFrame callback and a full
+    // getBoundingClientRect/update pass every single scroll tick, which
+    // on a real touch device compounds across every section's own
+    // listener into visibly janky scrolling (reported: "휠로 컨텐츠
+    // 확인함에 있어 엄청 느리게 느려진다"). Skipping attachment entirely
+    // costs the live resize-into-compact case (matches how
+    // prefersReduced already behaves here) in exchange for not paying
+    // this per-frame tax on every real compact-viewport scroll.
+    if (isCompact()) return;
     const vsteps = Array.from(sec.querySelectorAll('.vwipe__vstep'));
     // The released statement column, faded out below as VISION grows in
     // (see the ENTRY_END-keyed opacity further down) — bridges the
@@ -1239,19 +1248,6 @@
 
     function update() {
       ticking = false;
-      if (isCompact()) {
-        // VISION's zoom, the ground's push-in and the vision-statement
-        // cross-blur all replaced by a plain static photo band + a
-        // horizontally swipeable statement row (see the max-width:1024px
-        // block in style.css) — nothing here to drive, just clear
-        // whatever the wide-viewport pass last set.
-        word.style.transform = ''; word.style.fontSize = ''; word.style.opacity = '';
-        to.style.opacity = ''; to.style.transform = '';
-        if (statementCol) statementCol.style.opacity = '';
-        sec.dataset.eqBg = 'dark';
-        vsteps.forEach(step => { step.style.opacity = ''; step.style.filter = ''; });
-        return;
-      }
       const r = sec.getBoundingClientRect();
       // What is left of the section once the sticky stage has filled the
       // screen — the actual pinned distance, so this stays correct if the
@@ -1528,7 +1524,14 @@
 
     // No marquee loop, no scroll-driven mark/blur/cross-blur — see the
     // .whyp--static rules in style.css for what this actually changes.
-    if (prefersReduced) {
+    // Also isCompact() — this section drives TWO independent pinned
+    // scroll listeners (marquee + copy stage), both skipped by the same
+    // early return, which is real weight off every compact-viewport
+    // scroll tick (reported: "휠로 컨텐츠 확인함에 있어 엄청 느리게
+    // 느려진다"). .whyp--static's own stacked/unpinned layout, already
+    // built for reduced-motion, is reused as-is rather than building a
+    // second bespoke touch layout for this section right now.
+    if (prefersReduced || isCompact()) {
       sec.classList.add('whyp--static');
       return;
     }
@@ -4023,6 +4026,10 @@
       // First panel stays put (CSS default), nothing else to drive.
       return;
     }
+    // Checked before attaching the scroll listener below, not live
+    // inside update() — see the matching comment in initVisionWipe for
+    // why (reported scroll jank on real compact-viewport devices).
+    if (isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const lerp = (a, b, t) => a + (b - a) * t;
@@ -4082,22 +4089,6 @@
 
     function update() {
       ticking = false;
-      if (isCompact()) {
-        // All 3 panels stack in normal flow instead (see the
-        // max-width:1024px block in style.css) — nothing here to
-        // drive, just clear whatever the wide-viewport pass last set
-        // so CSS's own resting values (opacity:1, no filter/transform)
-        // are in full control on every panel and both curtains.
-        panels.forEach(panel => {
-          panel.style.opacity = '';
-          panel.style.filter = '';
-          const copy = panel.querySelector('.brandid__colorstory-copy');
-          if (copy) { copy.style.opacity = ''; copy.style.transform = ''; }
-        });
-        if (curtainLeft) curtainLeft.style.transform = '';
-        if (curtainRight) curtainRight.style.transform = '';
-        return;
-      }
       const r = sec.getBoundingClientRect();
       const runway = r.height - window.innerHeight;
       const p = runway <= 0 ? 0 : clamp01(-r.top / runway);
@@ -5311,7 +5302,10 @@
   function initApplicationsEntrance() {
     const sec = document.querySelector('.apps');
     const intro = sec ? sec.querySelector('.apps__intro') : null;
-    if (!sec || !intro || prefersReduced) return;
+    // isCompact() checked before attaching listeners, not live inside
+    // update() — see the matching comment in initVisionWipe for why
+    // (reported scroll jank on real compact-viewport devices).
+    if (!sec || !intro || prefersReduced || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smootherstep = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10);
@@ -5320,7 +5314,6 @@
     let ticking = false;
     function update() {
       ticking = false;
-      if (isCompact()) { intro.style.opacity = ''; intro.style.transform = ''; return; }
       const vh = window.innerHeight;
       const top = sec.getBoundingClientRect().top;
       const p = smootherstep(clamp01((vh - top) / (vh * .55)));
@@ -5348,7 +5341,10 @@
     const runway = document.querySelector('.apps__runway');
     const lead = document.querySelector('.apps__lead');
     const body = document.querySelector('.apps__body');
-    if (!sec || !ground || !intro || !runway || prefersReduced) return;
+    // isCompact() checked before attaching listeners, not live inside
+    // update() — see the matching comment in initVisionWipe for why
+    // (reported scroll jank on real compact-viewport devices).
+    if (!sec || !ground || !intro || !runway || prefersReduced || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smootherstep = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10);
@@ -5420,14 +5416,6 @@
     let ticking = false;
     function update() {
       ticking = false;
-      if (isCompact()) {
-        ground.style.opacity = '';
-        sec.style.backgroundColor = '';
-        if (lead) lead.style.color = '';
-        if (body) body.style.color = '';
-        intro.style.transform = '';
-        return;
-      }
       if (runPx <= 0) return;
       const raw = pinOffset - sec.getBoundingClientRect().top;
       const t = smootherstep(clamp01((raw + preroll) / (runPx + preroll)));

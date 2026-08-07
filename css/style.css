@@ -1491,79 +1491,65 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    (main.js) stops touching any of this past 1024px and just clears its
    inline styles so these are the only rules in effect. */
 @media (max-width: 1024px) {
+  /* One continuous background behind title AND cards together, not a
+     separate band above them (request: "타이틀이랑 아래 내용이 같은
+     그룹으로 묶이고 그 바깥쪽 섹션쪽에 배경을 깔고... 같은 배경이
+     이어져 나오게") — .vwipe itself is the positioning context for
+     -ground/-word now (both escape .vwipe__stage, which is left
+     unpositioned below), and its own height is purely whatever
+     content (word + the vision row) actually needs, so the photo
+     stretching to fill it (inset:0) covers exactly that, no more. */
   .vwipe {
     height: auto;
-    background: var(--ink);
-    /* One place for the photo band's height, referenced by -to/-word/
-       -vision's margin-top below so the three can't drift out of sync.
-       Was 60vh — read as too much empty photo above "VISION" itself
-       (request: "지금은 비전 타이틀 위로 여백이 너무많아"), eased down
-       to a band VISION's own line-height actually fills more of. */
-    --vwipe-band-h: 42vh;
-  }
-  /* height:auto now (was the fixed 100svh the sticky pin needed) — it
-     has to grow to hold the vision row below the photo band too. The
-     ground/word band below is given its OWN explicit height instead
-     of inset:0, specifically so it stays a fixed --vwipe-band-h
-     regardless of how tall this stage's real (grown) height ends up
-     being — inset:0 would otherwise re-stretch it to match, pulling
-     the photo down behind the vision row instead of stopping above
-     it. */
-  .vwipe__stage {
     position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    /* Top/bottom kept close but not equal (request: "섹션 위 아래
+       여백도 비슷하게... 아랫쪽만 조금 더넓게") — horizontal is 0:
+       the photo bleeds edge to edge, and both the title and the card
+       row carry their own horizontal inset already. */
+    padding: clamp(32px, 6vw, 56px) 0 clamp(48px, 9vw, 80px);
+  }
+  .vwipe__stage {
+    position: static;
     top: auto;
     height: auto;
     overflow: visible;
-    /* flow-root, not block — .vwipe__vision's margin-top (below) would
-       otherwise collapse straight through this element's own top edge
-       (a plain block with no border/padding doesn't contain a child's
-       margin), pushing the whole stage down inside .vwipe instead of
-       opening space for it INSIDE the stage — confirmed by
-       measurement: the stage's own height came back equal to just
-       .vwipe__vision's content height, with the photo band and vision
-       row still fully overlapping. flow-root establishes a block
-       formatting context with no other side effects (unlike
-       overflow:hidden, which would clip). */
-    display: flow-root;
+    display: block;
     place-items: unset;
   }
   .vwipe__ground--from { display: none; }
-  /* Same photograph the hero itself already shows at this width
-     (bg_m_hero.jpg, the light-beam frame with the 3D symbol cropped
-     out) instead of section 03's own photo, on request ("위의 빛이
-     나오는 그 배경으로 통일") — visual continuity between the two once
-     both are plain static bands rather than the hero's own blurred
-     entrance + breathing zoom (that motion stays hero-only; this is
-     just the same still frame). Same darkening gradient
-     .vwipe__ground--to already carried, so legibility is unchanged. */
+  /* Back to section 03's own photograph (was briefly swapped to the
+     hero's bg_m_hero.jpg for cross-section visual unity — reverted on
+     request: "비전 배경은 피시버전의 껄로 다시 적용", i.e. the same
+     photo the >1024px version already uses here). position:absolute
+     with no positioned ancestor between here and .vwipe escapes
+     .vwipe__stage entirely, so inset:0 fills .vwipe's own (now
+     content-driven) height — title and cards both sit over the same
+     continuous image instead of just the title. */
   .vwipe__ground--to {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    height: var(--vwipe-band-h);
+    position: absolute;
+    inset: 0;
+    height: auto;
     background-image:
       linear-gradient(180deg, rgba(10,10,10,.45) 0%, rgba(10,10,10,.55) 100%),
-      url('../images/bg_m_hero.jpg');
+      url('../images/bg_section_04.jpg');
     opacity: 1;
     transform: none;
     animation: none;
   }
   .vwipe__ground--to::before { animation: none; }
-  /* Same band as the photo (position:absolute here already takes it
-     out of normal flow, same reasoning as -to above), bottom-aligned
-     within it as a caption instead of centred/huge. */
+  /* Normal flow now (was position:absolute, centred over the whole
+     stage) — sits right above the vision row as the first of the two
+     grouped pieces, on the shared background rather than in its own
+     fixed-height band. */
   .vwipe__word {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: var(--vwipe-band-h);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: clamp(20px, 5vw, 32px);
-    font-size: clamp(32px, 10vw, 56px);
+    position: static;
+    inset: auto;
+    display: block;
+    margin: 0 0 clamp(20px, 4vw, 32px);
+    padding: 0 var(--edge);
+    font-size: clamp(28px, 8vw, 48px);
     white-space: normal;
     text-align: center;
     color: var(--paper);
@@ -1571,23 +1557,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     opacity: 1;
     transform: none;
   }
-  /* Normal flow (position:static), so it's what actually gives
-     .vwipe__stage its real height — margin-top clears the photo
-     band above it (ground/word are both absolute and don't otherwise
-     reserve any space for this to flow below). Top/bottom padding
-     split unevenly on purpose (request: "상단 하단 여백 비슷하게
-     조정하되 아랫쪽이 조금더 넓은 느낌으로") — top stays modest since
-     the photo band above already reads as a clean break from the
-     cards, bottom carries more to close out the section. */
+  /* Normal flow, directly under .vwipe__word — no margin-top of its
+     own any more (the gap down to it now lives on .vwipe__word's
+     margin-bottom above, and .vwipe's own padding handles the
+     section's outer top/bottom, so nothing here needs to reserve
+     space for a photo band that no longer exists as a separate
+     piece). */
   .vwipe__vision {
     position: static;
     inset: auto;
-    margin-top: var(--vwipe-band-h);
+    margin-top: 0;
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: clamp(24px, 5vw, 40px) var(--edge) clamp(40px, 9vw, 72px);
+    padding: 0 var(--edge);
     gap: clamp(16px, 4vw, 28px);
   }
   .vwipe__vstep {
