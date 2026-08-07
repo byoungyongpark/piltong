@@ -2524,6 +2524,22 @@
 
     function updateColor() {
       if (!colorStage || !colorSticky) return;
+      // Colour Principle becomes a horizontal touch-scroll row of flat-
+      // coloured cards at this width (style.css, request: "컬러프린서플
+      // 섹션도 좌우로 터치해서 보는 구조로 변경") — each card carries its
+      // own background colour directly in CSS, so none of the shared
+      // sticky's JS-driven cross-fade/ripple/entrance below applies.
+      if (isCompact()) {
+        colorSticky.style.backgroundColor = '';
+        colorSticky.style.color = '';
+        colorSticky.style.transform = '';
+        if (colorSymbol) colorSymbol.style.fill = '';
+        if (colorFlash) colorFlash.style.backgroundImage = 'none';
+        if (colorHead) { colorHead.style.opacity = ''; colorHead.style.transform = ''; colorHead.style.filter = ''; }
+        if (colorCaption) colorCaption.style.filter = '';
+        colorNames.forEach(el => el.classList.remove('is-active'));
+        return;
+      }
       const r = colorStage.getBoundingClientRect();
       const runway = r.height - window.innerHeight;
       // raw covers the whole stage; the first COLOR_INTRO_END of it is
@@ -2716,7 +2732,15 @@
     const symbol = sticky ? sticky.querySelector('.brandid__color-symbol') : null;
     const head = sticky ? sticky.querySelector('.brandid__color-head') : null;
     const caption = sticky ? sticky.querySelector('.brandid__color-caption') : null;
-    if (!stage || !sticky || !symbol || prefersReduced) return;
+    // Both the mark-redraw-and-fill phase and the pinball physics below
+    // are removed outright at this width, not shown at rest — Color
+    // Principle goes straight to its own content instead (request:
+    // "워드마크 섹션 이후로 휠하면 나타나는 심볼 그려지고 색상 채워지는
+    // 섹션은 제거하고 컬러프린서플 섹션으로 바로 넘어가되... 기존
+    // 핀볼화 되서 돌아다니던 그 로고도 제거"). style.css hides
+    // .brandid__color-seal/-symbol outright at this width, so there's
+    // nothing left for either half of this function to drive.
+    if (!stage || !sticky || !symbol || prefersReduced || isCompact()) return;
 
     // Bounces off the sticky stage's own edges AND the title/lead and
     // caption text groups (it must never overlap them), free-running
@@ -3392,7 +3416,10 @@
     // already turns off every transition involved; this just makes
     // sure the segments' own dash values don't leave them permanently
     // invisible with no animation to reveal them).
-    if (prefersReduced) {
+    // isCompact() shares this same fallback — a static, fully-drawn mark
+    // rather than a smaller version of the wheel-scrubbed draw (request:
+    // "심볼이랑 워드마크 휠에 반응해서 그려지는 효과를 그냥 제거하자").
+    if (prefersReduced || isCompact()) {
       section.classList.add('is-drawing');
       segs.forEach(seg => { seg.style.strokeDasharray = 'none'; seg.style.strokeDashoffset = '0'; });
       const handleLines0 = Array.from(section.querySelectorAll('.bp-handles line'));
@@ -3617,11 +3644,12 @@
     const wordmarkPanel = document.querySelector('.brandid__blueprint-panel--wordmark');
     if (!stage || !diagramPanel || !wordmarkPanel) return;
 
-    // Reduced motion: the CSS reduced-motion block already switches
-    // .brandid__blueprint-stage back to plain stacked flow with both
-    // panels forced visible — nothing for this scroll-driven crossfade
-    // to do.
-    if (prefersReduced) return;
+    // Reduced motion / isCompact(): the CSS block (shared between the
+    // two, style.css) already switches .brandid__blueprint-stage back to
+    // plain stacked flow with both panels forced visible — nothing for
+    // this scroll-driven crossfade to do (request: "심볼섹션이랑 워드마크
+    // 섹션도 휠해서 화면 전환하는거 제거하고 그냥 아래로 풀어주고").
+    if (prefersReduced || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smoothstep = t => t * t * (3 - 2 * t);

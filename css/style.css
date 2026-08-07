@@ -2127,19 +2127,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    no longer move through the viewport on the page's own vertical
    scroll. */
 @media (max-width: 1024px) {
+  /* Was position:sticky at a fixed 45svh "peek window" (matching the
+     desktop 100svh version, just shorter) — confirmed by measurement
+     that the pin RELEASES partway through .acycle__steps' own trailing
+     padding (intro + one card easily exceeds a 45svh-tall peek once the
+     card's own bottom padding + .acycle__steps' padding-bottom are
+     added on), and once released, the ground image scrolls away with
+     the page while the section itself (background: var(--ink), plain
+     black) still has a bit further to go before .whyp begins — that
+     stretch is the black gap (request: "아워 어프로치 섹션 아래 와이필통
+     섹션 사이 여전히 검은공간 존재... 무슨 효과 때문인것 같은데 그것도
+     제거"). A "peek shorter than the full section" no longer earns its
+     complexity now that the section itself is just one screen's worth
+     of card (not several stacked ones) — position:absolute, sized via
+     inset:0 to whatever .acycle's own content height ends up being,
+     covers the section completely by construction instead of trying to
+     time a release against it. */
   .acycle__bg {
-    /* svh, not plain vh — matches this same element's own desktop rule
-       above (100svh/-100svh). Plain vh tracks the LARGE viewport (address
-       bar retracted); on a real phone with the bar showing, that overstates
-       the actually-visible height, and the sticky pin (measured against
-       the small/dynamic viewport at scroll time) can pull .acycle__list up
-       by more than what's really behind it — the paper-coloured .whyp
-       below hasn't scrolled up far enough yet to fill what got uncovered,
-       which reads as a black gap between the two sections. Invisible in
-       desktop devtools (no address bar to shrink/grow the viewport), which
-       is why static geometry checks here never caught it. */
-    height: 45svh;
-    margin-bottom: -45svh;
+    position: absolute;
+    inset: 0;
+    height: auto;
+    margin-bottom: 0;
   }
   .acycle__intro {
     min-height: 0;
@@ -2830,7 +2838,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    frame's right side returns into view without touching crop position
    itself (request: "배경의 우측 부분이 어느정도 보이는 높이로"). */
 @media (max-width: 1024px) {
-  .brandwall { min-height: 70svh; }
+  /* 70svh (first pass) still read as too tall on request ("브랜드월
+     섹션 높이도 확 줄여줘") — the logo lockup itself needs nowhere near
+     that much room (its own height, at its clamp()'d width, comes out
+     well under half of even this shorter band), and a shorter box
+     lowers cover's required scale-up further still, revealing even
+     more of the frame's right side per the comment above. */
+  .brandwall { min-height: 45svh; }
 }
 
 /* ---------- Brand Identity ----------
@@ -4351,6 +4365,86 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   will-change: background-image;
 }
 
+/* Symbol diagram ⇄ Wordmark cross-fade, the mark-redraw-and-fill
+   handover, and the pinball-bouncing logo all depend on wheel-paced
+   position within one long pinned stage — none of it maps to touch
+   scroll (site-wide ≤1024px rule). Diagram and Wordmark drop their pin
+   and stack in normal flow instead, reusing the exact resting values
+   the existing prefers-reduced-motion fallback already established for
+   them (both panels fully visible, no transform) — request: "심볼섹션이랑
+   워드마크 섹션도 휠해서 화면 전환하는거 제거하고 그냥 아래로 풀어주고
+   심볼이랑 워드마크 휠에 반응해서 그려지는 효과를 그냥 제거하자". The
+   redraw+fill phase (.brandid__color-seal) and the pinball logo
+   (.brandid__color-symbol) are removed outright, not just shown at rest
+   — straight from Wordmark to Color Principle's own content (request:
+   "워드마크 섹션 이후로 휠하면 나타나는 심볼 그려지고 색상 채워지는
+   섹션은 제거하고 컬러프린서플 섹션으로 바로 넘어가되... 기존 핀볼화
+   되서 돌아다니던 그 로고도 제거"). Color Principle's caption becomes a
+   horizontal scroll-snap row (request: "컬러프린서플 섹션도 좌우로
+   터치해서 보는 구조로 변경") — each card carries its own flat
+   background colour directly, so swiping between them needs no JS.
+   initBlueprintDraw/initBlueprintTransition/initColorPinball/
+   updateColor (main.js) all gain a matching isCompact() early return. */
+@media (max-width: 1024px) {
+  .brandid__blueprint-wordmark-svg path { transition: none; }
+  .brandid__blueprint-stage,
+  .brandid__color-stage { height: auto; }
+  .brandid__blueprint-sticky,
+  .brandid__color-sticky {
+    position: static;
+    height: auto;
+    overflow: visible;
+    padding: clamp(48px, 9vw, 88px) 0;
+  }
+  .brandid__blueprint-panel {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto !important;
+  }
+  .brandid__blueprint-panel + .brandid__blueprint-panel {
+    margin-top: clamp(48px, 8vw, 96px);
+  }
+  .brandid__color-flash,
+  .brandid__color-seal,
+  .brandid__color-symbol { display: none; }
+  .brandid__color-head {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    padding: 0 var(--edge);
+    margin-top: clamp(48px, 8vw, 96px);
+  }
+  .brandid__color-caption {
+    position: relative;
+    height: auto;
+    width: 100%;
+    max-width: none;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-top: clamp(32px, 6vw, 56px);
+  }
+  .brandid__color-name {
+    position: static;
+    opacity: 1 !important;
+    filter: none;
+    flex: 0 0 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    padding: clamp(56px, 12vw, 96px) var(--edge);
+    transition: none;
+  }
+  .brandid__color-name[data-color="0"] { background: var(--paper); color: var(--ink); }
+  .brandid__color-name[data-color="1"] { background: var(--ink); color: var(--paper); }
+  .brandid__color-name[data-color="2"] { background: var(--signal-surface); color: var(--paper); }
+}
+
 /* ---- Color Story ---- */
 /* Same tall-wrapper + single 100svh sticky-inner shape as Color
    Principle/Shape DNA above — three panels stacked absolutely inside
@@ -4636,19 +4730,51 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     overflow: visible;
   }
   .brandid__colorstory-panel {
-    position: static;
+    position: relative;
     opacity: 1;
     height: auto;
+    min-height: clamp(360px, 72vw, 560px);
+    overflow: hidden;
     margin-bottom: clamp(48px, 10vw, 96px);
   }
   .brandid__colorstory-panel:last-child { margin-bottom: 0; }
+  /* Was its own stacked block above the card/copy — moved behind them
+     instead, anchored to the panel's bottom edge, on request ("컬러스토리는
+     각 배경을 컨텐츠 텍스트 그룹 하단에 배치하여 상단쪽은 투명
+     그라데이션 적용해서 위치 시켜보자(각 색깔 3개 다 동일)"). The mask
+     fades its own top edge to nothing rather than cutting there, so it
+     dissolves into the panel's plain background instead of showing a
+     hard seam under the text. Same treatment on all 3 panels — no
+     per-panel override anywhere below. */
   .brandid__colorstory-img {
-    position: static;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    z-index: 0;
     width: 100%;
-    height: auto;
-    aspect-ratio: 1672 / 941;
+    height: min(70vw, 60vh);
+    aspect-ratio: auto;
     transform: none;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
   }
+  .brandid__colorstory-card,
+  .brandid__colorstory-copy {
+    position: relative;
+    z-index: 1;
+  }
+  /* Panel 1's copy is paper-coloured by default (.brandid__colorstory-
+     lead/-body base rules) for reading over its own dark photo — that
+     photo is now a faded-in band anchored to the bottom instead of a
+     full-bleed backdrop, so the copy above mostly sits over the plain
+     paper page colour instead. Forced to ink for all 3 panels here
+     (overriding both the base rule and the desktop-only --copy--ink
+     modifier, now redundant but harmless) so it stays legible regardless
+     of which panel or how much of the image happens to show behind it. */
+  .brandid__colorstory-lead { color: var(--ink); }
+  .brandid__colorstory-body { color: var(--ink-70); }
   .brandid__colorstory-curtain { display: none; }
 }
 
