@@ -542,7 +542,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      photograph sets the height here instead. */
   min-height: 0;
 }
-@media (min-width: 901px) {
+/* Was (min-width: 901px) — raised to 1025px so the whole corner-
+   crossing composition (sticky-pinned text column, photo tilt press,
+   OUR/PHILO/SOPHY letter-pour timed to the pin) drops out below tablet
+   width too, not just phones, per the touch-scroll request ("아워
+   필라서피의 영문타이틀 및 텍스트 포함 스크롤 아래로 내릴때 작동되는
+   애니매이션도 다 제거"). The sub-threshold layout below already
+   existed as a proper mobile fallback (plain block flow, no grid, no
+   sticky) rather than a stripped-down one built for this — it just
+   needed a wider range to cover. initStatementStickyPress
+   self-disables once .statement__col isn't sticky any more (its own
+   pinState() reads getComputedStyle(col).top, which is 'auto' —
+   NaN — on a static element, so it always resolves to "not pinned");
+   initPhilosophyScatter's letter-pour and initStatementParallax's
+   photo rise are separately gated on isCompact() below since neither
+   depends on this element's position at all. */
+@media (min-width: 1025px) {
   /* Photo left and bled off that edge; type and copy in a column to its
      right. A grid rather than absolute positioning so the copy's height
      still drives the section — nothing here has to be measured by hand.

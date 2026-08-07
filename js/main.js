@@ -624,6 +624,7 @@
 
     let shown = 0;
     function update() {
+      if (isCompact()) return;
       const r = sec.getBoundingClientRect();
       // How far the section has travelled past the viewport's midline,
       // normalised over its own height plus one screen so the last
@@ -690,6 +691,7 @@
 
     function update() {
       ticking = false;
+      if (isCompact()) { if (applied !== 0) { media.style.transform = ''; applied = 0; } return; }
       const r = media.getBoundingClientRect();
       const top = r.top - applied;
       // -1 with the frame a screen below the fold, 0 as it crosses the
@@ -745,7 +747,7 @@
     // .statement__korean-in in style.css), so they still need is-in
     // added even when the English split is skipped, or they would be
     // permanently invisible under reduced motion.
-    if (prefersReduced) {
+    if (prefersReduced || isCompact()) {
       koreans.forEach(el => el.classList.add('is-in'));
       return;
     }
@@ -921,7 +923,17 @@
   /* ---------- Statement: photo tilts under the sticky column's weight ---------- */
 
   function initStatementStickyPress() {
-    if (prefersReduced) return;
+    // Also isCompact(), not just "self-disables because .statement__col
+    // isn't sticky any more" — true for the PRESS animation itself
+    // (pinState() reads getComputedStyle(col).top, NaN on a static
+    // element, so it never reports pinned), but line 1 ("우리는
+    // 기술보다") still gets its initial measure()+render(0) at setup,
+    // which is the pre-press "right-aligned to line 2" entrance
+    // position, not its natural flush-left rest — that render never
+    // gets corrected afterward since setTarget(0) is a no-op when
+    // target is already 0. Skipping the function outright avoids ever
+    // writing that entrance transform in the first place.
+    if (prefersReduced || isCompact()) return;
     const col = document.querySelector('.statement__col');
     const tilt = document.querySelector('.statement__tilt');
     const line2 = document.querySelector('.statement__line:nth-child(2)');
