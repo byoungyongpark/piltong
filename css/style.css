@@ -40,6 +40,15 @@
   --ease: cubic-bezier(.16, 1, .3, 1);
   --divider: #D8D4CD;
 }
+/* Below 420px the 6vw term still ranged from 20px up to ~25px (only
+   hits its own 20px floor right at 333px), so the site's left/right
+   gutter kept drifting a few px narrower as the screen did, rather than
+   holding still — on request ("420아래로는 좌우 여백을 20이하로
+   고정"), pinned flat for the whole sub-420px range instead of just at
+   its one exact floor width. */
+@media (max-width: 420px) {
+  :root { --edge: 20px; }
+}
 
 * { box-sizing: border-box; }
 
@@ -585,10 +594,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
       minmax(0, calc(min(60vw, 1380px) - var(--edge)))
       minmax(360px, 1fr);
     --st-row-gap: clamp(20px, 2.6vw, 48px);
+    /* Tried raising this first — it turns out to cancel out of every
+       position formula below (.statement__big's margin-left pays it
+       back with "-gap", .statement__body's own left does the same), so
+       it has zero effect on the actual photo-to-text gap; confirmed by
+       measuring before/after and getting identical rects. Left at its
+       original value. */
     --st-gap: clamp(20px, 2.6vw, 48px);
     /* How far the display type laps onto the photograph. Shared, because
-       the copy below is positioned from the same origin. */
-    --st-overlap: clamp(20px, 3vw, 56px);
+       the copy below is positioned from the same origin. This is the
+       ONE term that doesn't cancel out — every element's final position
+       includes "- overlap" uncancelled, so it's what actually governs
+       the gap. Was clamp(20px,3vw,56px) — measured ~49-58px from the
+       photo to PHILO/SOPHY/the Korean copy at 1440px, reading as tight
+       (request: "1024 이상 구간에서... 영문 타이틀 + 한글 그룹과 좌측
+       영상 사이 여백이 타이트하지 않게"). Reduced so OUR itself also
+       crosses a shorter distance onto the photo, which is what buys
+       everything else (anchored relative to OUR, not to the photo
+       directly) the extra clearance. */
+    --st-overlap: clamp(12px, 1.8vw, 34px);
     /* Where SOPHY's ink STARTS, measured from its line box's left edge,
        in ems of --big: its 1.5217 step plus the S's .0317 left side
        bearing. The copy hangs off this so the two share an edge.
@@ -781,6 +805,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   -webkit-tap-highlight-color: transparent;
   background: none;
 }
+/* On request ("1025이하 기준으로 왼쪽 상단 로고도 적당하게 더
+   줄여야할듯", then "로고 더작아져도 될듯" — was 16px). Not floored any
+   lower than this: the comment above already explains why 18px was
+   chosen over 16px on desktop (stem pixel-snapping), and a phone's own
+   higher DPR is what makes stepping down further safe here without
+   reopening that. */
+@media (max-width: 1025px) {
+  .hero-logo { height: 14px; }
+}
 .hero-logo.is-nav-fixed {
   position: fixed;
   /* Raised well past every other fixed overlay on the page (equalizer:
@@ -886,6 +919,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     --hero-big: clamp(28px, min(var(--hero-measure) / 9.2, var(--hero-vfit)), 240px);
   }
 }
+/* After the aspect-ratio override above, not before — most phones in
+   portrait match BOTH that query and this one, and this needs to win
+   on those. Was clamp(32px, 9.6vw, 40px) — a flat 40px across almost
+   the entire 420-1024px range (9.6vw already exceeds 40 past ~417px),
+   which read as the title suddenly freezing instead of continuing to
+   shrink the way it naturally does above 1025px. Reusing the base
+   rule's own formula here instead, just with its floor raised from
+   28px to 36px, keeps the exact same declining curve continuous across
+   the 1025px boundary rather than swapping to an unrelated shape
+   (request: "히어로 섹션 영문 폰트 사이즈도 1024~420까지는 1024이상에서
+   작동했던 방향대로 자연스럽게 폰트 줄어들게"). */
+@media (max-width: 1025px) {
+  .hero {
+    --hero-big: clamp(36px, min(9.2vw, var(--hero-measure) / 8.36, var(--hero-vfit)), 200px);
+  }
+}
 .hero-content {
   position: absolute;
   z-index: 1;
@@ -916,11 +965,40 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Outfit rather than the mono: a clean geometric sans with a full
      100–900 range, so the weight here is tunable. */
   font-family: 'Outfit', var(--font-en);
-  font-size: 40px;
+  /* Was a flat 40px — every OTHER measurement on this label (both
+     margins above) already tracks --hero-big so the whole block scales
+     as one piece, but the label's own type size didn't, so it stayed a
+     fixed 40px while the title under it shrank across the full width
+     range, on request ("A NEW 이 문장도 아래 타이틀과 마찬가지로 똑같이
+     점진적으로 줄여야할듯 (전체구간)"). .338 is 40px's own measured
+     ratio to --hero-big at 1440px (118.368px there), so this renders
+     pixel-identical at that width and now floats with the title
+     everywhere else instead of only there. Floored for the same reason
+     the margin above is — a pure ratio reached ~9px on the smallest
+     phones. */
+  font-size: max(13px, calc(var(--hero-big) * .338));
   font-weight: 500;
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--signal-100);
+}
+/* .hero-eyebrow's own font-size above is a ratio of --hero-big (.338) —
+   left alone it would shrink to ~12px (floored to 13px) along with the
+   compact title. Given its own explicit size here instead so it still
+   reads as a real caption, not an afterthought (request: "이 조정된거에
+   따라 위쪽 빨간 영문도 적절하게 크게 조정"). Placed after the base rule
+   above, not before — same specificity, so source order is what decides
+   the winner, and the earlier placement lost to the unconditional base
+   rule regardless of the media query matching. */
+@media (max-width: 1025px) {
+  .hero-eyebrow {
+    /* Was a flat 16px — 16 is now just the mobile-width floor of a
+       clamp so it grows toward tablet width along with --hero-big
+       above, instead of staying fixed across the whole ≤1025px range
+       (request: "모바일 기준... 그 이상 해상도에선 자연스럽게...
+       커지게"). */
+    font-size: clamp(16px, 3.5vw, 22px);
+  }
 }
 
 .hero .display--en {
@@ -1190,6 +1268,29 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink);
   letter-spacing: -.015em;
 }
+/* Below 1025px the sticky-pin composition is already out (see
+   .statement__stage's own min-width:1025px gate above), so this is
+   free to shrink like any other compact text — matched to .vwipe__
+   vtitle's own clamp (was a flat 40px at every width, on request:
+   "아워 필라서피 섹션의 한글 타이틀... 폰트 스타일은 비전과 똑같이
+   맞춰줘 글자색 빼고", "1025이하 기준"). */
+@media (max-width: 1025px) {
+  /* Was clamp(24px, 5vw, 36px) — that plateaued at 36 by 720px and at
+     24 by 480px, not actually transitioning across the full requested
+     range. Rebuilt as an exact two-point line (offset + vw, not vw
+     alone) so 36px lands exactly at 1025px and 24px exactly at 420px,
+     with a real gradient between (request: "1024~420 구간까지...
+     1025 이하 구간에서부터의 크기부터 자연스럽게 420될때까지 적절한
+     비율로 줄어들다가 420이하부터는 지금 고정해놓은 수치로"). */
+  .statement__body .statement__lead {
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+  }
+  /* Same two-point construction, 19px at 1025px down to 15px at 420px
+     (was clamp(15px, 3.5vw, 19px), same plateau problem as above). */
+  .statement__body p {
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
+  }
+}
 /* inline-block, not the default inline a bare span gets: transform has
    no effect at all on a plain inline element (same reason
    .scatter-letter needs it elsewhere in this file). */
@@ -1226,23 +1327,238 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   transform: translateX(0);
 }
 
-@media (max-width: 900px) {
-  /* Too narrow to overlap type across a photo — everything returns to
-     a single stacked column in normal flow. */
-  .statement { --big: clamp(44px, 16vw, 120px); }
-  .statement__stage { min-height: 0; }
-  .statement__figure { width: 100%; }
-  /* The 4/3 that used to be forced here is gone — it cropped the
-     picture. The natural ratio applies at every width now. */
-  .statement__big {
-    margin-top: clamp(28px, 6vw, 44px);
-    /* Nothing to blend against once the type sits on plain paper. */
-    mix-blend-mode: normal;
-    color: var(--ink);
+@media (max-width: 1025px) {
+  /* Float (video floats left, title wraps beside it) was tried here and
+     reverted again: once every line sits within the float's own height,
+     the float's exclusion zone always wins over each line's own
+     margin-left, so PHILO/SOPHY's indent had no visible effect — every
+     line landed at the same x. Back to absolute positioning instead,
+     which keeps the indent under this rule's own control regardless of
+     where the video ends up (request: "아워 필라서피 영문 타이틀은
+     들여쓰기 한채로 참조사진처럼 위치시켜봐줘"). */
+  .statement {
+    /* Was clamp(30px, 6vw, 48px) — flat at 48px across most of the
+       420-1024px range (6vw already exceeds 48 past ~800px) and flat
+       at 30px below ~500px, with real scaling only in a narrow middle
+       band. Reusing the base rule's own clamp(48px, 7.2vw, 160px) here
+       instead, just with its floor lowered from 48px to 30px — same
+       slope/max as it already uses above 1025px, so the curve stays
+       continuous across the whole 1025-420px range rather than swapping
+       to an unrelated shape (request: "히어로... 1024~420까지는...
+       자연스럽게 폰트 줄어들게... 아워 필라서피 영역도 마찬가지"). */
+    --big: clamp(30px, 7.2vw, 160px);
+    /* Matched back to .vwipe's own compact top/bottom padding exactly —
+       had drifted since (widened on top, then trimmed on bottom, each
+       time chasing a gap that came from the video/title/copy's own
+       positioning rather than the section's own padding) as the
+       layout changed underneath it across several requests.
+       Bumped up from that flat match — .statement__big's own negative
+       top offset (crossing onto the video, see below) eats into this
+       padding in a way .vwipe__word never has to account for, so
+       matching the raw padding value left the actual visible gap ~28-
+       32px short of .vwipe's at every width. This adds that back
+       (request: "영문 타이틀 기준으로 비전 섹션과 비슷하게 여백
+       맞춰줘"). */
+    padding-top: clamp(84px, 13vw, 128px);
+    padding-bottom: clamp(64px, 11vw, 96px);
+    /* .frame's own min-height:100svh (base rule) was forcing this
+       section to be at least a full viewport tall — harmless while
+       content roughly filled that, but the video/title/copy are all
+       far more compact now, so the leftover space was landing as dead
+       air below everything, well past the padding-bottom above (the
+       actual bug behind the bottom gap reading nothing like .vwipe's,
+       even with matching padding — .vwipe already does the same
+       height:auto override, see below). */
+    min-height: 0;
   }
-  .statement__line:nth-child(1),
+  /* .is-copy-below's own title has no negative top offset to
+     compensate for any more (it isn't crossing anything, see
+     .statement__stage.is-copy-below .statement__big below) — the
+     padding-top bumped up above specifically to cancel that offset out
+     measured 28px past .vwipe's own gap once there was nothing left to
+     cancel, on request ("아워 필라서피 섹션 위쪽 여백은 비전 섹션과
+     같이 맞추자"). Matches .vwipe's own compact padding-top exactly. */
+  .statement:has(.statement__stage.is-copy-below) {
+    padding-top: clamp(56px, 10vw, 96px);
+  }
+  /* flow-root, not just min-height:0 — .statement__figure's own
+     margin-top (pushing the video down toward the section's bottom, see
+     below) was the first in-flow child's margin, so it collapsed
+     straight through .statement__stage and pushed the STAGE itself down
+     by the same amount, inflating the section's visible top gap well
+     past its own padding-top (measured 180px vs .vwipe's 56px, even
+     though the padding values matched exactly). Same class of bug as
+     .statement__body's margin-top collapsing through .statement__col a
+     few turns back. */
+  .statement__stage { min-height: 0; display: flow-root; }
+  .statement__figure {
+    /* Cancels .frame's own left inset so the video runs flush to the
+       screen edge, the same bleed technique the PC layout already uses
+       (request from a few turns back, still standing: "영상은 좌측에
+       여백없이 피시처럼 왼쪽에 붙이고"). */
+    margin-left: calc(-1 * var(--edge));
+    /* Pushed down from the section's own top — the title+Korean group
+       cluster now lives up there instead (see .statement__big/__body
+       below), and the video sits lower than the very top of the
+       section. Was clamp(140px,30vw,320px) — read as too far down
+       (request: "영상이 너무 아래로 내려갔고"), scaled back. */
+    margin-top: clamp(60px, 14vw, 150px);
+    /* Was 69% (max-width 620px), then dropped hard to 38%/340px to make
+       the text column the wider of the two — that swing itself read as
+       too drastic (request: "지금은 너무 차이나게 조정됬고"), and since
+       .statement__body has gone back to tracking PHILO's own position
+       rather than this element's edge (see initStatementCopyAlign in
+       main.js), the copy's width no longer depends on exactly how
+       narrow this is anyway. Landed on a middle point instead of either
+       extreme. */
+    width: 52%;
+    max-width: 460px;
+  }
+  .statement__big {
+    /* Anchored to the stage's own top-right, same mechanism as the PC
+       rest state's own text column — width:max-content so the box is
+       only as wide as its widest line (SOPHY, plus its own indent
+       below), which is what lets OUR (flush at the box's own left edge)
+       land back on the video's right portion, crossing onto it the same
+       way the reference photo (the PC layout) does. */
+    position: absolute;
+    /* Pulled up further still — was clamp(-16px,-2vw,-8px) — so the
+       whole title sits higher against the video's corner, closer to the
+       PC reference (request: "영문타이틀 전체를 위로 더올려서 모서리
+       쪽에 피시버전처럼"). Still a clamp, not a flat value, so it keeps
+       scaling with the rest of the composition rather than drifting out
+       of proportion as the viewport grows (request: "이 형태가...
+       자동 반응하게"). */
+    top: clamp(-32px, -4vw, -16px);
+    /* Not flush at 0 — "OUR" turned out wide enough on its own (round
+       caps O/U/R vs PHILO's narrow I/L) that a flush-right box landed
+       just past the video's own edge with a gap, not a crossing. Pulled
+       in by a fixed amount instead of chasing exact glyph widths, which
+       would only drift again on any copy/face change. */
+    right: clamp(24px, 6vw, 36px);
+    width: max-content;
+    max-width: 100%;
+    z-index: 2;
+    margin-top: 0;
+    /* Was the base rule's .86 — opened up a bit, matching
+       .acycle__intro-title's own compact bump (request: "아워 필라서피랑
+       아워 어프로치 타이틀 행간 지금보단 조금 넓히자"): the forced
+       OUR/PHILOSOPHY two-line break (below-mode) read too cramped at
+       .86, lines nearly touching. */
+    line-height: 1;
+    /* Matches .brandid__intro-index's own letter-spacing (was 0). */
+    letter-spacing: -.02em;
+    /* Was 500 (itself brought down from 600, up from the base rule's
+       400) — one step lighter again, unified with .acycle__intro-title
+       below at the same value (request: "아워필라서피 영문 굵기 다시
+       한단계 낮추고... 아워 어프로치도 똑같이 적용"). */
+    font-weight: 400;
+    text-align: left;
+    /* Ink, not paper — matches the PC rest state's own ink-over-photo
+       crossing (request from a few turns back: "아워필라서피 영문
+       타이틀은 잉크색"). */
+    color: var(--ink);
+    mix-blend-mode: normal;
+  }
+  .statement__line:nth-child(1) { margin-left: 0; }
+  /* Deeper than before (.55em) — on request ("필라서피 영문 라인을
+     안쪽으로 더 들여쓰기"). em-based, so it scales automatically with
+     .statement's own --big clamp rather than needing its own separate
+     responsive value. */
   .statement__line:nth-child(2),
-  .statement__line:nth-child(3) { margin-left: 0; }
+  .statement__line:nth-child(3) { margin-left: .9em; }
+  /* Absolute, same mechanism as .statement__big. Was right + a narrow
+     fixed width (tuned to line up with SOPHY's own left edge) — that
+     width clamp(160px,22vw,230px) was well short of the actual space
+     available out to the right edge, so the copy wrapped into a much
+     narrower column than it had room for and read as squeezed/distorted
+     (request: "글자가 가제로 찌그러트려 놓은것 같은데"). left+right
+     instead (width auto-fills the space between) — left tracks the
+     video's own right edge directly (its width is 38%, see
+     .statement__figure) plus a small gap; right is a modest fixed
+     margin, not the full .frame edge inset (that alone was eating a
+     big share of the little room this column has). Fills everything
+     between the video and a sensible right margin instead of an
+     arbitrarily narrow slice of it (request: "오른쪽 여백 적절하게만
+     남겨두고 풀로 채워줘"). */
+  .statement__body {
+    position: absolute;
+    /* Neutralizes the older max-width:900px rule below, which still
+       matches here and would otherwise add on top of (not replace) the
+       top offset below, since margin still shifts an absolutely
+       positioned element's final position. */
+    margin-top: 0;
+    /* Tracks roughly where the title's own bottom lands (its height +
+       negative top offset both scale with --big) plus a small gap. */
+    top: clamp(85px, 18vw, 185px);
+    left: calc(38% - var(--edge) + 16px);
+    right: clamp(16px, 3vw, 24px);
+    text-align: left;
+  }
+  /* The @media(max-width:560px) fallback that used to revert this to
+     plain flow below the video is gone — with the text column now the
+     WIDER of the two (video shrunk to 38%, see .statement__figure), the
+     copy has enough room to keep wrapping normally all the way down to
+     the smallest mobile width instead of needing to escape below the
+     video (request: "영상 아래로 한글 그룹 떨어지는 구간없이 그냥
+     우측에 최대한 유지해서 모바일 최소 미니멈까지 갈수 있게"). See
+     initStatementCopyAlign in main.js — its own window.innerWidth<=560
+     early-return is gone too, for the same reason. */
+
+  /* .is-copy-below: applied by initStatementCopyAlign (main.js) at
+     whichever width the Korean copy would wrap past the video's own
+     bottom edge while sitting beside it — the same measurement that
+     already decides when the copy itself drops below the video, now
+     also switching the composition above it. The 3-line OUR/PHILO/
+     SOPHY corner-crossing read doesn't make sense once nothing is
+     crossing anything any more (video's centered below it, not beside
+     it) — collapses to one line instead, the same static-word treatment
+     .vwipe__word already uses in compact mode (request: "한글 그룹이
+     아래로 떨어진 시점에서 영문 타이틀은 비전 섹션처럼 한줄로 나오게
+     하고 자간도 통일시켜서"). */
+  .statement__stage.is-copy-below .statement__big {
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: 0;
+    width: max-content;
+    text-align: center;
+    /* Matches .vwipe__word's own compact letter-spacing exactly. */
+    letter-spacing: .1em;
+  }
+  .statement__stage.is-copy-below .statement__line {
+    display: inline;
+  }
+  /* block, not inline like the other two — forces PHILO (inline,
+     following it) onto its own new line, same as .acycle__intro-title's
+     own <br> a few lines up, on the same request: "아워 필라서피랑
+     아워 어프로치 섹션 영문 아워에서 강제 줄바꿈 해서 위치". "OUR" on
+     its own line, "PHILOSOPHY" (PHILO+SOPHY joined, see below) on the
+     next, always — not just when the container happens to be narrow. */
+  .statement__stage.is-copy-below .statement__line:nth-child(1) {
+    display: block;
+  }
+  .statement__stage.is-copy-below .statement__line:nth-child(2) {
+    margin-left: 0;
+  }
+  /* Closes the natural inter-element whitespace between the PHILO and
+     SOPHY spans (a newline + indentation in the markup, which collapses
+     to one rendered space once these switch to inline) — PHILO/SOPHY
+     read as one word, "PHILOSOPHY", joined on OUR's forced second
+     line. */
+  .statement__stage.is-copy-below .statement__line:nth-child(3) {
+    margin-left: -.3em;
+  }
+  /* Fixed width, centered — not the video's own bled/scaled sizing used
+     beside the copy, since this is a different, simpler composition
+     (title above, video centered below, on request: "아래 영상은 좌우
+     크기 280정도로 고정한채 가운데 정렬로 배치"). */
+  .statement__stage.is-copy-below .statement__figure {
+    margin-left: auto;
+    margin-right: auto;
+    width: 280px;
+    max-width: 280px;
+  }
 }
 
 .lede--hero {
@@ -1504,15 +1820,33 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: relative;
     overflow: hidden;
     background: var(--ink);
-    /* Top/bottom kept close but not equal (request: "섹션 위 아래
-       여백도 비슷하게... 아랫쪽만 조금 더넓게"; widened again on
-       request: "비전 상단 여백 지금보단 조금 더 먼저 넉넉히 확보한뒤
-       상하 전체 지금보다 조금더 넉넉히 넓혀줘" — top raised the most,
-       bottom raised along with it to stay proportionally the larger of
-       the two). horizontal is 0: the photo bleeds edge to edge, and
-       both the title and the card row carry their own horizontal inset
-       already. */
-    padding: clamp(48px, 8vw, 80px) 0 clamp(64px, 11vw, 112px);
+    /* Top matched to .acycle__intro's own top padding and bottom to
+       .acycle__steps' own bottom padding (Our Approach's real top/bottom
+       edges in compact mode — .acycle itself carries no padding of its
+       own), then the bottom widened a bit past that shared baseline, on
+       request ("비전섹션 아워 어프로치 섹션 상 하단 여백 동일하게
+       조정한뒤 하단만 조금 더 넓게"). */
+    padding: clamp(56px, 10vw, 96px) 0 clamp(64px, 11vw, 96px);
+  }
+  /* .hscroll-dots (style.css, shared component) uses background:
+     currentColor with no colour of its own — inherited all the way up
+     to body's ink, which is invisible against this section's own ink
+     background (measured: both rgb(24,28,35), literally the same
+     pixel). Paper is the correct contrast here, same as the rest of
+     this section's type. */
+  .vwipe .hscroll-dots {
+    color: var(--paper);
+    /* Was the shared 14px/4px split — dots pulled closer to the cards
+       above (top 14->6), bottom grown by the same 8px so the total
+       (and so .vwipe's own section height) doesn't change, just where
+       the dots sit within it (request: "터치 스크롤 되는 하단 원형
+       네비게이션과 컨텐츠 그룹간 여백을 조금 좁히되 섹션의 전체
+       높이는 현재 높이값 유지한채 네비게이션 점만 위로 올려서"). Bottom
+       now also carries .vwipe__vision's own reduced padding-bottom
+       (12px + the clamp(48,9vw,80)->clamp(6,1vw,10) cut, see below) so
+       the section's total height still holds even after that much
+       bigger (now twice-repeated) second cut. */
+    padding: 6px 0 calc(12px + clamp(48px, 9vw, 80px) - clamp(6px, 1vw, 10px));
   }
   .vwipe__stage {
     position: static;
@@ -1553,7 +1887,26 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     display: block;
     margin: 0 0 clamp(20px, 4vw, 32px);
     padding: 0 var(--edge);
-    font-size: clamp(28px, 8vw, 48px);
+    /* Unified with .acycle__intro-title and .statement__big at this
+       width, on request ("비전, 아워 어프로치 섹션 타이틀도 30으로
+       통일"). Was clamp(30px, 6vw, 48px), which still plateaued well
+       inside the 1024-420px range — same exact formula .statement's own
+       --big already uses (clamp(30px, 7.2vw, 160px)), copied here
+       directly rather than re-derived, so all three scale with
+       identically the same feel across 1024-420px and land on
+       identically the same 30px floor right around 420px (request:
+       "아워필라서피 섹션의 폰트 사이즈 변화를 비전, 아워 어프로치에도
+       똑같이 적용해서 똑같은 느낌으로... 420이하에서 같은 크기로
+       고정"). */
+    font-size: clamp(30px, 7.2vw, 160px);
+    /* Matched to .acycle__intro-title's own compact tracking/leading —
+       font-weight already matches via the base rule (300 on both).
+       line-height was 1.05, a stale match from before .acycle__intro
+       -title/.statement__big's own compact line-height both moved to 1
+       (request then: "타이틀 행간 지금보단 조금 넓히자") — brought back
+       in step with them now (request: "행간은 아워 필라서피랑 통일"). */
+    letter-spacing: .1em;
+    line-height: 1;
     white-space: normal;
     text-align: center;
     color: var(--paper);
@@ -1567,6 +1920,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      section's outer top/bottom, so nothing here needs to reserve
      space for a photo band that no longer exists as a separate
      piece). */
+  /* Unified with the site's other touch-scroll rows (.acycle__steps,
+     .whyp__copy-sticky, ...) — was its own, older pattern: the row's own
+     padding insets both edges AND the card subtracted var(--edge) a
+     SECOND time from its own flex-basis, on request ("비전도 타이틀
+     아래 컨텐츠 그룹이 중앙에 오게 하고 다른 터치 스크롤 구조와 같이
+     통일"). .acycle__step already dropped this exact double-subtraction
+     (see its own comment) for the same reason: it left the card
+     narrower than the row actually had room for, reading as off-centre
+     rather than filling its own snap slot. */
   .vwipe__vision {
     position: static;
     inset: auto;
@@ -1575,17 +1937,79 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
-    padding: 0 var(--edge);
+    /* Was clamp(48px,9vw,80px) — that, not .hscroll-dots's own 14px/4px
+       split, was the real bulk of the space before the dots (the
+       earlier padding-top/bottom rebalance on .vwipe .hscroll-dots
+       below only touched that much smaller share, which barely moved
+       anything — request after seeing it: "그대로인것 같아, 좁힌거라면
+       더 확 표나게 좁혀줘"). Cut hard, then cut again on "여백 조금만
+       더 좁혀줘"; the removed amount is added back onto .vwipe
+       .hscroll-dots's own bottom padding below so the section's total
+       height still doesn't change. */
+    padding: 0 var(--edge) clamp(6px, 1vw, 10px);
     gap: clamp(16px, 4vw, 28px);
   }
   .vwipe__vstep {
     grid-column: auto;
     grid-row: auto;
-    flex: 0 0 calc(100% - var(--edge) * 2);
+    /* The base rule's max-width:32rem was still capping this even with
+       flex-basis:100% below (max-width wins over flex-basis in the
+       sizing algorithm) — on any card wider than 32rem it left the step
+       narrower than its own snap slot, packed to the left instead of
+       filling/centering in it, exactly the "double subtraction" bug the
+       comment above already fixed for the ROW, just recurring here on
+       the STEP itself. Same fix, structurally identical to
+       .acycle__step now (request: "비전 섹션 터치 스크롤은 아워
+       어프로치 구조랑 똑같이 가운데 컨텐츠가 위치하게"): no max-width,
+       flex-column with the content centered both axes. */
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 100%;
     scroll-snap-align: center;
     scroll-snap-stop: always;
     opacity: 1;
     filter: none;
+    padding-top: clamp(32px, 6vw, 48px);
+    padding-bottom: clamp(32px, 6vw, 48px);
+  }
+  /* .vwipe__vtitle/__vbody never had a compact-specific override before
+     — they just inherited the base clamp(28px,2.9vw,40px)/clamp(18px,
+     1.9vw,24px), which reaches its own floor by ~965px/~945px and sits
+     flat there the rest of the way down to 420px and below, same
+     plateau problem .statement__lead had. First rebuilt as an exact
+     two-point line off this SAME element's own desktop clamp (28-
+     29.73px) — technically no longer flat, but a <2px range across the
+     whole 1024-420px span reads as fixed to the eye regardless, which
+     is exactly what got reported again ("비전섹션의 한글 컨텐츠 터치
+     스크롤 되는 부분... 아워어프로치 섹션의 한글 터치스크롤되는
+     부분은 안바뀌고 고정되어 있는것 같아"). Matched to .statement__
+     lead's own range instead (24-36px, the same "matched to section
+     02's Korean group" this element was already built to track, per
+     the comment above) rather than this element's own too-narrow
+     desktop clamp — same fix as unifying the English titles onto
+     .statement's own --big a turn back, just for the Korean pair. */
+  .vwipe__vtitle {
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+  }
+  .vwipe__vbody {
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
+  }
+  /* Same plateau problem as vtitle/vbody above, worse — the base clamp
+     (15px, 1vw, 16px) never even reaches its own 16px ceiling until
+     1500px wide, so across the ENTIRE compact range it just sat flat at
+     15px the whole time. Rebuilt as its own two-point line: 16px right
+     at 1025px (this element's own desktop ceiling) down to 14px at
+     420px (request: "비전 섹션의 빨간 영문도 1025이하에 진입전
+     크기에서부터 진입후 자연스럽게 작아지다가 420이하에서 13~14정도로
+     고정"). */
+  /* Floor brought down from 14 to 13 (request: "비전의 빨간영문 13으로
+     고정하자") — same two-point construction, ceiling unchanged (16px
+     at 1025px, this element's own desktop size). */
+  .vwipe__veng {
+    font-size: clamp(13px, calc(10.92px + .4959vw), 16px);
   }
 }
 
@@ -1959,6 +2383,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   will-change: opacity, transform;
 }
 .acycle__ground.is-active { opacity: 1; }
+@media (max-width: 1025px) {
+  /* First card's own background (bg_approach.png, behind "Essential")
+     specifically — background-position:center (base rule) was
+     centering its subject, cropping away the photo's own stand/leg on
+     both sides. Shifted right so it lands near the right edge instead
+     (request: "아워 어프로치 첫번째 배경 다리가 오른쪽 끝쯤에 보이게
+     오른쪽으로 넉넉히 옮겨보자"). :first-child, not .is-active — active
+     rotates across all four as you swipe, this needs to stay tied to
+     specifically the FIRST image regardless of which is showing. */
+  .acycle__ground:first-child {
+    background-position: 88% center;
+  }
+}
 /* Was a darkening gradient for legible paper-coloured type over dark
    photos (see .vwipe__ground--to / .overview--shot for that same
    technique elsewhere). All four grounds here are now the pale
@@ -1993,6 +2430,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   font-weight: 500;
   letter-spacing: .1em;
   color: var(--paper);
+}
+/* Suppressed on desktop — "OUR APPROACH" reads as one line there, no
+   break needed. Visible by default (≤1025px), forcing the break at
+   "OUR" every time instead of only when the container happens to be
+   narrow enough for a natural wrap (request: "아워 필라서피랑 아워
+   어프로치 섹션 영문 아워에서 강제 줄바꿈 해서 위치하고"). */
+.acycle__intro-title-break {
+  display: none;
 }
 /* All four grounds are the pale bg_approach*.png set rather than dark
    photos — the site's usual paper-on-dark palette reads as low-contrast
@@ -2153,13 +2598,51 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     min-height: 0;
     padding: clamp(56px, 10vw, 96px) var(--edge) clamp(32px, 6vw, 48px);
   }
+  /* The actual "OUR APPROACH" label — was a flat 40px at every width,
+     same as .hero-eyebrow used to be. Matched to .vwipe__word's own
+     compact size/weight, tightened line-height, explicit wrap (two
+     words, so word-based wrap is meaningful here unlike .acycle__word's
+     single-word cards), on request ("아워 어프로치 영문 타이틀(OUR
+     APPROACH)을... 행간을 좁히고 위의 비전 타이틀 스타일을 똑같이
+     맞춰달란", "1025이하 기준"). */
+  .acycle__intro-title {
+    /* Unified with .vwipe__word and .statement__big at this width, on
+       request ("비전, 아워 어프로치 섹션 타이틀도 30으로 통일") — see
+       .vwipe__word for the reasoning behind the exact formula (matches
+       .statement's own --big directly, so all three scale with the
+       same feel across 1024-420px). */
+    font-size: clamp(30px, 7.2vw, 160px);
+    /* Was 500 (itself brought down from 600, up from 400, then 300).
+       One step lighter again, unified with .statement__big at the same
+       value (request: "아워필라서피 영문 굵기 다시 한단계 낮추고...
+       아워 어프로치도 똑같이 적용"). */
+    font-weight: 400;
+    /* Was .86 (tightened to match .statement__big at the time) — opened
+       back up a bit, matching .statement__big's own compact bump below
+       (request: "아워 필라서피랑 아워 어프로치 타이틀 행간 지금보단
+       조금 넓히자") — .86 read as too cramped once both titles started
+       force-breaking into two lines every time, not just when narrow. */
+    line-height: 1;
+    white-space: normal;
+  }
+  /* Visible again below 1025px — see the base rule (desktop) for why
+     it's hidden by default. */
+  .acycle__intro-title-break {
+    display: inline;
+  }
   .acycle__steps {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     gap: clamp(16px, 4vw, 28px);
-    padding: 0 var(--edge) clamp(48px, 9vw, 80px);
+    /* Was clamp(48px,9vw,80px) — same cut as .vwipe__vision's own row
+       padding-bottom, same reason (that dwarfed the .hscroll-dots
+       padding-top/bottom rebalance below it, request: "그대로인것
+       같아... 더 확 표나게 좁혀줘"), cut again on "여백 조금만 더
+       좁혀줘". Compensated into .acycle .hscroll-dots's own bottom
+       padding below. */
+    padding: 0 var(--edge) clamp(6px, 1vw, 10px);
   }
   .acycle__step {
     min-height: 0;
@@ -2181,7 +2664,73 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      the shared flex-basis above. Capped down to a size every word fits
      on one line within the card's own padding. */
   .acycle__word {
-    font-size: clamp(40px, 8vw, 64px);
+    /* Was clamp(40px, calc(23.34px + 3.9669vw), 64px) — that range left
+       a lot of slack against the card edges (measured: "Appropriate"
+       only needed 399px of a 737px card at 1025px). Rebuilt to actually
+       hit the left/right margins — measured the required font-size for
+       each of the four words (the longest, "Appropriate", is the
+       binding one at both ends) to fill the card width minus a small
+       safety margin without wrapping, then built the same two-point
+       exact line through those two sizes: ~116px at 1025px down to
+       ~48px at 420px (request: "영문이 두줄 줄바꿈 되지 않는 선에서
+       좌우측 여백에 걸리게 풀로 크게"). Re-measure if any word changes. */
+    font-size: clamp(48px, calc(.79px + 11.24vw), 116px);
+    /* Slightly wider than the base -.04em, on request ("그위의 영문 자간
+       살짝 넓혀주고"). */
+    letter-spacing: -.03em;
+  }
+  /* Korean group below the word — matched to .vwipe__vtitle/.vwipe__vbody
+     the same way .acycle__intro-title was matched to .vwipe__word, minus
+     colour (request: "아워 어프로치 섹션의 한글 그룹도... 비전과 똑같이
+     맞춰줘 글자색 빼고"). */
+  .acycle__title {
+    /* Matched to .vwipe__vtitle (same fix, same source clamp — see it
+       for the reasoning: the old range was under 2px across the whole
+       1024-420px span, which read as fixed regardless of technically
+       being a clamp). */
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+    line-height: 1.2;
+    letter-spacing: -.015em;
+    /* Top value added (was 0) to open up the gap from .acycle__word
+       above, on request ("아워어프로치 한글 그룹은 위로 여백 줘서
+       [영문]단어 사이 넓혀줘"). */
+    margin: clamp(20px, 4vw, 32px) 0 clamp(18px, 2.4vw, 32px);
+  }
+  .acycle__body {
+    /* Matched to .vwipe__vbody. */
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
+    line-height: 1.45;
+    letter-spacing: -.01em;
+  }
+  /* .acycle__step--onlight's own letter-spacing (-.04em / -.03em, two
+     classes = higher specificity than the plain rules above) otherwise
+     wins over them at every width, since every step carries --onlight
+     now — matched here too so the compact override actually takes. */
+  .acycle__step--onlight .acycle__title {
+    letter-spacing: -.015em;
+  }
+  .acycle__step--onlight .acycle__body {
+    letter-spacing: -.01em;
+  }
+  /* .acycle has no section-level bottom padding of its own (.acycle__bg
+     is position:absolute/inset:0, not part of flow) — .hscroll-dots is
+     the last thing in flow, so its own bottom padding stands in for that,
+     matched to .vwipe's section padding-bottom (request: "하단 섹션
+     네비게이션 점 아래로 여백 비전섹션과 비슷하게"). */
+  .acycle .hscroll-dots {
+    /* Top brought in from the shared 14px to 6px, same "pull the dots
+       up" move as .vwipe's own hscroll-dots above — but here the
+       section is allowed to grow rather than needing to stay flat, so
+       the bottom isn't just compensated, it's opened up further still,
+       grown three times over now (+16px, then +40px, then +60px, each
+       on its own "조금 더 높게/넉넉히" request). Also now carries
+       .acycle__steps's own reduced padding-bottom (the
+       clamp(48,9vw,80)->clamp(6,1vw,10) cut below), same compensation
+       as .vwipe's own dots — otherwise that much bigger second cut
+       would eat into the section's own growth instead of just
+       tightening the visible gap. */
+    padding-top: 6px;
+    padding-bottom: calc(clamp(64px, 11vw, 96px) + 60px + clamp(48px, 9vw, 80px) - clamp(6px, 1vw, 10px));
   }
 }
 
@@ -2466,8 +3015,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   white-space: nowrap;
   pointer-events: none;
 }
-@media (max-width: 900px) {
-  .whyp__media-label { font-size: clamp(18px, 4.4vw, 32px); }
+/* Was its own one-off @media(max-width:900px) breakpoint, clamp(18px,
+   4.4vw,32px) — off the site's shared 1025px convention, and at
+   1024-900px it was still stuck flat at the base rule's 40px with no
+   scaling at all. Two-point exact line instead: the base rule's own
+   40px as the ceiling at 1024px (so entering compact doesn't jump)
+   down to 18px at 420px (request: "와이필통 영상 좌측 상단에 있는
+   와이필통도 1024이상 크기에서부터 1024~420까지 자연스럽게 줄어들고
+   늘어나다가 420이하에서 적절한 크기로 고정"). */
+@media (max-width: 1025px) {
+  /* Floor lowered again, 18px -> 14px (request: "와이필통 심볼 영상의
+     좌측 상단 와이필통 영문 폰트 크기 420이하에선 14~15로 축소"). */
+  .whyp__media-label { font-size: clamp(14px, calc(-4.08px + 4.3046vw), 40px); }
 }
 /* ---- Copy stage: a second, separate scroll runway — its own pin, its
    own progress, entirely independent of the marquee stage above it.
@@ -2635,20 +3194,39 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   height: auto;
   padding: clamp(56px, 10vw, 96px) 0 clamp(32px, 6vw, 48px);
 }
+/* Desktop's clamp(-56px,-7vw,-18px) pulls the outline row up to
+   overlap/hug the solid row above it. Two-point exact line, same
+   ceiling as the desktop formula's own value at 1025px (-56px, so
+   there's no jump entering compact) down to a shallower -20px at
+   420px — less overlap, the two rows read as more separated (request:
+   "좌우로 흘러가는 글자 스트로크 된 영문과 사이 조금 떨어뜨려주고"). */
+.whyp--compact .whyp__row--outline {
+  margin-top: clamp(-56px, calc(4.99px - 5.9504vw), -20px);
+}
 .whyp--compact .whyp__media {
   position: static;
   top: auto;
   left: auto;
   transform: none;
-  margin: 0 auto;
-  /* Desktop's shadow (below) was tuned for a video floating alone in a
-     full screen — its 130px/-34px far layer reaches well past the
-     narrower 92vw box this becomes here, spilling into the copy stage
-     directly beneath it in normal flow. Scaled down roughly in step
-     with how much narrower the box itself gets, not just trimmed. */
-  box-shadow:
-    6px 10px 20px -14px rgba(24, 28, 35, .10),
-    12px 26px 48px -20px rgba(24, 28, 35, .12);
+  /* Was 0 auto — flush against the marquee rows above with no gap at
+     all. Two-point line, matching the marquee-sticky's own top padding
+     (56px) as the ceiling so the video's own top gap tracks the
+     section's top padding, down to a smaller 20px floor (request:
+     "영상과 흘러가는 타이틀 사이도 적절하게 여백 주고"). */
+  /* Widened further still — the first pass (20-56px) read as still too
+     tight (request: "와이필통 타이틀 흘러가는 아래 여백도 더 넉넉하게
+     줘"). Same two-point construction, both ends pushed up ~16px. */
+  margin: clamp(36px, calc(11.01px + 5.9504vw), 72px) auto 0;
+  /* Was min(1490px,92vw) (desktop's own unbounded formula) — two-point
+     line instead, ceiling matched to that formula's own value at
+     1025px (943px, so entering compact doesn't jump) down to a flat
+     280px at 420px and fixed there below it (request: "영상도 대략
+     420이하 지점에선 280정도로 고정하자"). */
+  width: clamp(280px, calc(-180.28px + 109.59vw), 943px);
+  /* Removed — desktop's shadow (below), even scaled down, still read
+     as an unwanted mark under the video at compact sizes (request:
+     "영상 아래 그림자는 제거 하자"). */
+  box-shadow: none;
 }
 .whyp--compact .whyp__copy-stage { height: auto; }
 /* Horizontal scroll-snap row, not a vertical stack (request: "와이필통
@@ -2665,7 +3243,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   gap: clamp(16px, 4vw, 28px);
-  padding: clamp(48px, 9vw, 88px) var(--edge) clamp(72px, 11vw, 140px);
+  /* Bottom was clamp(72px,11vw,140px) — its own one-off scale, not the
+     clamp(64px,11vw,96px) every other section's bottom padding shares
+     (.vwipe, .acycle, .statement). Matched to that shared value, same
+     as the top above already matches .acycle__intro's own top padding
+     (request: "와이필통 섹션도 위쪽 아랫쪽 여백 윗 섹션과 비슷하게
+     통일하자"). Trimmed down twice more since — the dots row right
+     below now carries its own bottom padding too (added since), so
+     this wrapper's own top/bottom didn't need to stay this generous —
+     and the second cut brought the top down further than the bottom,
+     not an even split (request: "와이필통 한글 컨텐츠 그룹 위아래
+     여백도 조금더 축소하는데 상단은 조금 더 축소"). */
+  padding: clamp(16px, 3vw, 32px) var(--edge) clamp(28px, 5vw, 44px);
 }
 .whyp--compact .whyp__step {
   position: static;
@@ -2679,8 +3268,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   clip-path: none;
   transform: none;
   margin: 0 auto;
+  /* Was the same clamp(22px,3.4vw,44px) as desktop, unscaled for
+     compact at all. Two-point exact line: ceiling matched to that
+     formula's own value at 1024px (34.82px) down to an 18px floor at
+     420px (request: "터치되는 텍스트들도 1024이상에서 부터의 크기로
+     시작해서 자연스럽게 1024~420까지 줄어들고... 420이하에서 적절한
+     크기로 고정"). */
+  font-size: clamp(18px, calc(6.31px + 2.7841vw), 34.82px);
 }
-.whyp--compact .whyp__keyword { transform: none; }
+/* Same two-point treatment as .whyp__step above, own ceiling/floor —
+   higher specificity than .whyp__step--bridge's own plain rule (that
+   base rule loses the compact cascade to .whyp--compact .whyp__step
+   otherwise, source order alone isn't enough once compact's own class
+   is added). */
+.whyp--compact .whyp__step--bridge {
+  font-size: clamp(24px, calc(7.93px + 3.8252vw), 47.1px);
+}
+.whyp--compact .whyp__keyword {
+  transform: none;
+  font-size: clamp(35px, calc(12.34px + 5.3947vw), 67.58px);
+}
+/* .hscroll-dots is inserted right after .whyp__copy-sticky (JS,
+   initHorizontalScrollDots) as its own sibling, not a child — so
+   .whyp__copy-sticky's own padding-bottom (above) only adds room
+   BEFORE the dots, never after them, and .whyp had no bottom margin
+   of its own past that point at all. Same clamp(64px,11vw,96px) every
+   other section's dots-row carries (request: "와이필통 한글 텍스트
+   그룹 하단 네비게이션 점 밑으로 여백이 있어야해"). */
+.whyp--compact .hscroll-dots {
+  padding-bottom: clamp(64px, 11vw, 96px);
+}
 
 /* ---------- Brand wall: logo revealed on the concrete photo ---------- */
 
@@ -2844,7 +3461,60 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      well under half of even this shorter band), and a shorter box
      lowers cover's required scale-up further still, revealing even
      more of the frame's right side per the comment above. */
-  .brandwall { min-height: 45svh; }
+  /* Was 45svh — with the video now containing (below) instead of
+     bleeding/cropping to fill this box, a tall fixed box just meant a
+     small video floating in a lot of empty dark space, not a section
+     that reads as having shrunk (request: "브랜드월에 깔린 배경도
+     같이 줄어들어야할것 같아" — the box itself needs to shrink
+     alongside the logo, not just what's rendered inside it). */
+  .brandwall { min-height: 30svh; }
+  /* Was still the desktop bleed-and-cover box (top:-8%, height:116%,
+     object-fit:cover) — shrinking .brandwall's own height above just
+     cropped it tighter instead of shrinking the whole frame into view.
+     Tried a plain 100%-tall contain box next, so the video would scale
+     down as one whole piece (request: "비쥬얼 배경 높이가 100%
+     콘테인처럼 줄고") — but contain against a box whose aspect ratio
+     doesn't match the video's own left visible black bars top and
+     bottom instead (request after seeing it: "브랜드월 깔려진 배경
+     위아래 검은 여백이 조금 남네... 배경에 딱맞게 조정"). Back to
+     cover — fills the (already-shrunk, see .brandwall's own min-height
+     below) box exactly, no bars — with the crop window's focal point
+     shifted right (object-position's x term, was 62% on desktop; here
+     bumped further right still, on request: "배경의 위치를 오른쪽으로
+     30%정도 옮겨보자"). */
+  .brandwall__bg {
+    top: 0;
+    height: 100%;
+    object-fit: cover;
+    /* Pushed further right again, 80% -> 92% — the glowing mark itself
+       should read as sitting slightly right of centre, not just barely
+       off it (request: "조금더 과감히 오른쪽으로 옮겨봐줘 빛나는
+       문양이 약간 오른쪽에 치우쳐 보이게"). */
+    object-position: 92% center;
+  }
+  /* opacity: JS never sets --brandwall-scrim here (initBrandWall bails
+     out entirely under isCompact()), so this stayed at the CSS
+     default (0) — no dim at all in compact until now. Flat, not
+     scroll-driven like desktop's own version, since there's no scroll
+     transform running to tie it to (request: "브랜드월 조금더 어둡게
+     딤처리(1025이하 기준)"). */
+  .brandwall::before { top: 0; height: 100%; opacity: .45; }
+  /* The desktop lockup (padding-left + a -3.5vh nudge, both below) was
+     tuned to sit in the video's off-centre shadowed bay under `cover`
+     cropping — with the video containing instead of cropping now,
+     that focal point is gone, so the logo just centers plainly and
+     scales down together with it (request: "그안에 로고도 센터
+     정렬해서 자연스럽게 줄게"). */
+  .brandwall { padding-left: 0; align-items: center; }
+  .brandwall__logo {
+    transform: none;
+    /* Was the desktop clamp(240px,40vw,660px) — scaled down to a
+       smaller ratio so the logo doesn't dominate the now-shrunk
+       (30svh) box quite as much, growing/shrinking more gently across
+       the compact range (request: "안에 로고는 조금 더 작은 비율로
+       줄어들거나 늘어나게 조정"). */
+    width: clamp(180px, 28vw, 480px);
+  }
 }
 
 /* ---------- Brand Identity ----------
@@ -2877,6 +3547,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-70);
 }
 .brandid__body:last-child { margin-bottom: 0; }
+@media (max-width: 1025px) {
+  /* Scoped to the intro section's own copy specifically — .brandid__body
+     is shared by Symbol Construction/Blueprint/Wordmark too, and this
+     unification request was about the intro's Korean group only.
+     Matched to .statement__body p's own two-point formula (Our
+     Philosophy's Korean body copy), same reasoning as
+     .brandid__intro-title above. */
+  .brandid__intro-copy .brandid__body {
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
+  }
+}
 
 /* background-color: flat paper from the start — was a dark-to-light
    hand-off animated in main.js (initBrandIdentity's updateIntro),
@@ -2899,11 +3580,53 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    여백만큼 확보"), narrowed back down a step from matching padding-top
    exactly, on request ("지금보단 조금 좁히자"). */
 .brandid__intro { background-color: var(--paper); padding-top: clamp(160px, 22vw, 360px); padding-bottom: clamp(100px, 15vw, 240px); overflow: hidden; }
+/* Desktop's own padding (above) never had a compact override at all —
+   at every width below 1025px both values sat flat at their own clamp
+   floor (160px top / 100px bottom, since 22vw/15vw don't reach those
+   floors until well past 1025px), noticeably heavier than every other
+   section's shared compact padding. Matched to that shared pair
+   instead (request: "비쥬얼 아이덴티티 섹션도 위아래 여백
+   통일시켜줘"). */
+@media (max-width: 1025px) {
+  .brandid__intro {
+    padding-top: clamp(56px, 10vw, 96px);
+    /* Cut hard again, 64-96px -> 20-32px — Shape DNA right below
+       brings its own generous top spacing (its sticky stage pins at
+       100svh), so this section's own bottom padding was stacking on
+       top of that rather than doing useful work (request: "아래 여백도
+       대폭 줄이고"). Cut once more (request: "기준이 형태가 되는순간
+       한글 그룹 아래로 여백도 좁혀주고"). */
+    padding-bottom: clamp(12px, 2vw, 20px);
+    /* .frame's own base rule (this section carries the "frame" class
+       too) sets min-height:100svh plus a flex column with
+       justify-content:center — .brandid__intro never overrode either,
+       so the actual box was always stretching to fill the full
+       viewport height and CENTERING its content inside that, which is
+       what was really producing the big gap above VISUAL/IDENTITY
+       (not the padding-top above, which was comparatively minor) — on
+       a short viewport the content sits nowhere near the section's own
+       padding edges. Checked it traces back to this, not Brand wall
+       (request: "위쪽으로... 여백이 있는데 혹시 브랜드월쪽 때문인지
+       체크하고"). min-height:0 lets the section shrink to its actual
+       content + padding, so the padding values above are what
+       actually determine the gap now. */
+    min-height: 0;
+  }
+}
 .brandid__intro-head {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   text-align: left;
+}
+@media (max-width: 1025px) {
+  /* Was left (matching the desktop word-crossing-the-photo layout,
+     where VISUAL/IDENTITY has to stay left-hung for D/E to land on the
+     photo) — that composition doesn't exist in the stacked compact
+     layout (alignIntroWord already bails out of it here, see main.js),
+     so there's no reason left to hold it off-centre (request: "비쥬얼
+     아이덴티티 타이틀은 센터 정렬로 바꾸고"). */
+  .brandid__intro-head { text-align: center; }
 }
 /* Outfit, uppercase, ink — a display-scale departure from the site's
    usual small red mono .index label, so it gets its own class rather
@@ -2921,6 +3644,26 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: -.02em;
   text-transform: uppercase;
   color: var(--ink);
+}
+/* Was the same 7.2vw slope but a 48px floor, not the 30px every other
+   section's own English title shares (.statement's --big, .vwipe__word,
+   .acycle__intro-title) — this one plateaued at 667px and sat flat the
+   rest of the way down, while the others kept shrinking all the way to
+   420px. Same exact formula now, so it tracks them 1:1 (request:
+   "비쥬얼 아이덴티티 영문 타이틀 반응하는 작동 스타일을... 섹션의
+   영문타이틀과... 똑같은 크기로 고정 해보자"). */
+@media (max-width: 1025px) {
+  .brandid__intro-index {
+    font-size: clamp(30px, 7.2vw, 160px);
+    /* Was -.02em/.86 (the desktop base rule's own values, never
+       overridden for compact) — unified with the other three compact
+       titles (.statement__big, .vwipe__word, .acycle__intro-title),
+       which all share .1em tracking and (as of the fix above) line-
+       height:1 (request: "비쥬얼 아이덴티티 타이틀의 행간 및 자간
+       통일 시키자"). */
+    letter-spacing: .1em;
+    line-height: 1;
+  }
 }
 .brandid__intro-index-line { display: block; }
 /* Both lines' margin-left are set by alignIntroWord in main.js, not
@@ -2957,6 +3700,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: clamp(64px, 8vw, 160px) auto 0;
   text-align: left;
 }
+@media (max-width: 1025px) {
+  /* Narrowed to roughly Our Philosophy's own title-to-video gap
+     (TITLE_GAP, 32px flat in initStatementCopyAlign/main.js) — the
+     desktop clamp's own floor (64px) never even applied in compact,
+     since 8vw doesn't drop under it until past 800px (request: "아래
+     심볼 목업사진과의 여백 조금 좁히자, 아워필라서피 타이틀이랑
+     영상사이 정도"). Widened again slightly (request: "영문 타이틀
+     아래 여백 조금더 넓히고"). */
+  .brandid__intro-stack { margin-top: clamp(32px, 6vw, 52px); }
+}
 /* z-index:1 (needs position for that) so it paints over "D" (the one
    IDENTITY letter without .brandid__intro-letter--front, which stays
    behind it) but under E/N/T/Y above. Matches .brandid__intro-row's
@@ -2968,6 +3721,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   z-index: 1;
   width: 100%;
   margin-bottom: clamp(48px, 7vw, 108px);
+}
+@media (max-width: 1025px) {
+  /* Trimmed down for compact — the space between the photo and the
+     Korean title+copy below it (request: "한글 그룹 위로 여백은 조금
+     줄이고"). Placed after the base rule above (equal specificity,
+     source order decides) — an earlier attempt landed before it and
+     got silently overridden. */
+  .brandid__intro-photo { margin-bottom: clamp(32px, 5vw, 60px); }
 }
 .brandid__intro-photo-frame {
   overflow: hidden;
@@ -3001,6 +3762,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: -.04em;
   color: var(--ink);
   word-break: keep-all;
+}
+@media (max-width: 1025px) {
+  /* Matched exactly to .statement__body .statement__lead's own
+     two-point formula (Our Philosophy's Korean lead line) — same
+     ceiling/floor and the same 1025->420 breakpoint, not this title's
+     own independent clamp (request: "한글 그룹 텍스트 스타일을 아워
+     필라서피 한글 그룹과 폰트 크기 스타일 바뀌는 지점 등을
+     통일하자"). */
+  .brandid__intro-title {
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+  }
 }
 /* flex: 0 1 auto, not 1 — this is what actually makes justify-content:
    flex-end on .brandid__intro-row shift the whole group right; a
@@ -3180,6 +3952,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   line-height: 1.22;
   letter-spacing: -.04em;
   color: var(--ink);
+}
+@media (max-width: 1025px) {
+  /* Was matched exactly to .brandid__intro-title (24-36px) — floor
+     nudged down a step to 22px on its own request ("쉐입디엔에이
+     영문 타이틀 아래 형태를 만드는 이 한글은 자연스럽게 줄다가
+     420이하에선 22로 사이즈 고정"), same 36px ceiling. */
+  .brandid__dna-title {
+    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+  }
 }
 /* position:absolute against .brandid__dna-right (the 60% column — see
    its own position:relative above), on request ("우측 레이아웃 60%
@@ -3367,18 +4148,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    of the entrance/cross-fade/numeral-roll work below would otherwise
    run every scroll tick for nothing. */
 @media (max-width: 1025px) {
-  .brandid__dna { min-height: auto; padding: 0 var(--edge); }
+  /* padding-top added — was 0, video sat flush against Visual
+     Identity's own bottom edge with nothing between them (request:
+     "쉐입 디엔에이 위쪽 심볼 영상 위로 여백 조금더 넓혀줘"). */
+  .brandid__dna { min-height: auto; padding: clamp(32px, 6vw, 48px) var(--edge) 0; }
   .brandid__dna-sticky {
     position: static;
     height: auto;
     max-width: none;
     flex-direction: column;
-    gap: clamp(24px, 6vw, 40px);
+    /* Was clamp(24px,6vw,40px) — narrowed along with .brandid__dna
+       -right's own padding-top below, same gap (request: "심볼 영상
+       아래 쉐입 디엔에이 타이틀 및 한글 그룹 위쪽으로 여백도 조금
+       좁혀줘"). */
+    gap: clamp(12px, 3vw, 20px);
   }
   .brandid__dna-media {
     flex: none;
     width: 100%;
-    height: 62vw;
+    /* Was 62vw — a bit taller (request: "쉐입디엔에이 심볼 영상
+       높이는 조금더 높여주고"). */
+    height: 78vw;
     padding-top: 0;
     padding-left: 0;
     padding-bottom: 0;
@@ -3386,7 +4176,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__dna-right {
     flex: none;
     width: 100%;
-    padding-top: clamp(40px, 10vw, 72px);
+    /* Was clamp(40px,10vw,72px), narrowed along with the sticky gap
+       above — same request. */
+    padding-top: clamp(20px, 6vw, 40px);
     padding-left: 0;
     padding-right: 0;
     align-items: stretch;
@@ -3402,10 +4194,33 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     white-space: normal;
     word-break: keep-all;
   }
+  /* Was clamp(32px,12vw,56px) — 12vw clears the 56px ceiling by
+     w=467px, so this sat flat at 56 for the top ~90% of the compact
+     range, the plateau problem fixed elsewhere already. Rebuilt as a
+     two-point exact line through the same two endpoints (56px at
+     1024px, 32px at 420px) so it actually scales the whole way. */
   .brandid__dna-index {
-    font-size: clamp(32px, 12vw, 56px);
+    /* Floor raised 32->28 — a gentler ratio than Visual Identity's
+       own title (request: "비쥬얼 아이덴티티 영문 타이틀보단 작은
+       비율로... 420이하에선 28사이즈로 고정"), same 56px ceiling. */
+    font-size: clamp(28px, calc(8.53px + 4.6358vw), 56px);
     white-space: normal;
+    /* Was the desktop base rule's own -.02em — unified with
+       .brandid__construction-index's own compact letter-spacing
+       (request: "쉐입디엔에이 영문 타이틀 자간은 심볼&워드마크
+       타이틀이랑 똑같이 통일"). */
+    letter-spacing: .1em;
   }
+  /* Was flat 50px/36px/24px, no compact scaling at all — two-point
+     exact lines through each element's own desktop value (matching
+     "1024이상에서의 크기") down to a floor at 420px (request: "쉐입
+     디엔에이 섹션의 타이틀과 아래 컨텐츠 4가지 공통으로... 1024~420까지
+     자연스럽게 줄어들다가 420에서 적절하게 고정"). */
+  /* Floors adjusted per explicit target values (request: "발란스 이런
+     영문들은 24, 균형 회색으로 된 폰트는 20(420이하 기준)"). */
+  .brandid__dna-name { font-size: clamp(24px, calc(5.92px + 4.3046vw), 50px); }
+  .brandid__dna-kr { font-size: clamp(20px, calc(8.87px + 2.649vw), 36px); }
+  .brandid__dna-copy { font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px); }
   /* No longer viewport-centered via position:absolute at this width —
      back in normal stacked flow, full width. */
   .brandid__dna-detail-col {
@@ -3454,6 +4269,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   padding-top: clamp(140px, 18vw, 300px);
   padding-bottom: clamp(20px, 3vw, 48px);
 }
+@media (max-width: 1025px) {
+  /* Was never scoped for compact at all — 18vw doesn't drop under the
+     140px floor until past 777px, so this sat flat at 140px (nearly
+     2.5x Vision's own top padding) across most of the compact range.
+     Matched to the shared clamp(56px,10vw,96px) every other section's
+     top padding uses (request: "심볼 및 워드마크 섹션 위쪽도 기타
+     비전섹션 위아래 여백과 비슷하게 조정"). */
+  .brandid__construction { padding-top: clamp(56px, 10vw, 96px); }
+}
 /* The square-grid+mark diagram is gone (removed on request, "사각
    그리드안의 심볼은 제거"). Breaks out of .frame--auto's own edge
    padding to span the full browser width, then re-applies a fixed
@@ -3473,6 +4297,26 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   display: flex;
   align-items: flex-start;
   gap: clamp(32px, 5vw, 80px);
+}
+@media (max-width: 1025px) {
+  /* Was a left-title/right-text side-by-side row (desktop) with no
+     compact override at all until 900px, and even there it only
+     stacked (align-items:stretch, still left-set text) rather than
+     centering. Stacked + centered across the whole compact range now
+     (request: "심볼 워드마크 섹션도 타이틀 및 한글 그룹 중앙정렬로
+     바꿔주고"). Padding overridden too — the desktop rule's fixed
+     200px each side (below) would otherwise still apply and, at
+     narrow widths, leave zero or negative content room. Placed after
+     the base rule above, not before — an earlier attempt in this
+     edit landed before it and got silently overridden (same
+     equal-specificity/source-order bug hit twice already this
+     session). */
+  .brandid__construction-row {
+    padding: 0 var(--edge);
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(24px, 6vw, 40px);
+  }
 }
 /* Same font-family/weight/line-height/letter-spacing/colour as
    .brandid__dna-index (Shape DNA's own "SHAPE DNA" word), on request
@@ -3497,6 +4341,29 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: -.02em;
   text-transform: uppercase;
   color: var(--ink);
+}
+@media (max-width: 1025px) {
+  /* Two-point exact line through the desktop clamp's own value at
+     1024px (71.68px) down to a 40px floor at 420px — no compact
+     override existed before, so this rode the flat 7vw formula the
+     whole way (request: "심볼&워드마크 섹션도 타이틀과 그아래 한글
+     그룹 똑같이 적용하자" — same 1024->420 technique as Shape DNA). */
+  .brandid__construction-index {
+    /* Floor raised 40->28, same "smaller ratio than Visual Identity"
+       request as the other three titles. */
+    font-size: clamp(28px, calc(-2.37px + 7.2318vw), 71.68px);
+    flex: none;
+    /* Back to left — was centered on an earlier request ("심볼과
+       워드마크 영문 타이틀만 센터 정렬"), reversed now ("심볼&워드마크
+       영문타이틀, 심볼, 워드마크 타이틀은 왼쪽 정렬하자"). */
+    text-align: left;
+    /* Was the desktop base rule's own -.02em/.86 — unified with
+       .brandid__intro-index (Visual Identity's own title, request:
+       "컬러 프린서플 영문 타이틀 자간 행간도 심볼 워드마크 섹션 자간
+       및 행간도 비쥬얼 아이덴티티 섹션 영문 타이틀과 통일 시켜줘"). */
+    letter-spacing: .1em;
+    line-height: 1;
+  }
 }
 /* Column again — the side-by-side layout (row, content-sized columns,
    last-baseline alignment, the per-line left/right split) was fully
@@ -3524,6 +4391,29 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
 }
 .brandid__construction-text .brandid__body { max-width: none; margin: 0; }
+@media (max-width: 1025px) {
+  /* Scoped to Symbol & Wordmark's own copy specifically — .brandid__lead
+     is shared with Blueprint and others, and this unification request
+     was about this section's Korean group only. Same two-point
+     technique as Shape DNA's own item text (request: "타이틀과 그아래
+     한글 그룹 똑같이 적용하자"). */
+  .brandid__construction-text .brandid__lead {
+    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+  }
+  /* Floor nudged 16->15 (request: "심볼 하고 워드마크 섹션 한글
+     타이틀 아래 본문 폰트 16에서 15로 조정"). */
+  .brandid__construction-text .brandid__body {
+    font-size: clamp(15px, calc(8.74px + 1.4901vw), 24px);
+  }
+  .brandid__construction-text {
+    flex: none;
+    /* Was centered on request ("타이틀 및 한글 그룹 중앙정렬로") —
+       reversed back to left now, only the English title above stays
+       centered (request: "심볼&워드마크 섹션 아래 한글 그룹 텍스트
+       왼쪽 정렬하자"). */
+    text-align: left;
+  }
+}
 /* Below the title+text row, standalone — no width/flex tie back to
    .brandid__construction-index or -text (confirmed on request, "구조상
    영문 타이틀에 묶여 있다면 분리해서"). Back to the original fixed
@@ -3574,6 +4464,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      넉넉히"). */
   gap: clamp(56px, 7vw, 96px);
   margin-top: clamp(48px, 7vw, 96px);
+}
+@media (max-width: 1025px) {
+  /* Top/bottom padding was asymmetric (240px/280px desktop, a 900px-
+     only override before this at +40/+80 past --edge — same 40px gap
+     between them, and nothing at all covered 901-1025px) — made equal
+     so the run of paper above the first logo and below the last one
+     reads as the same unit (request: "찢어진 종이 아래랑 로고 사이
+     여백도 조금 상하단 비슷해보이게 넉넉히 넓혀주고"). Gap between the
+     logos themselves narrowed from the desktop 56-96px, on request
+     ("로고간 갭차이 좁혀주고"). */
+  .brandid__sizes {
+    /* Widened again, top and bottom together so they still read as the
+       same unit (request: "종이 찢어진 부분 아래랑 로고 위쪽 여백
+       넓혀주고 로고 마지막 하단 여백도 넓혀주고"), then once more
+       (request: "찢어진 종이 위아래 여백 넉넉히 확보"). */
+    /* Left/right widened a bit past the shared var(--edge) alone
+       (request: "찢어진 종이 사이에 있는 로고 좌우 여백 조금더
+       확보"). */
+    padding: clamp(96px, 15vw, 150px) calc(var(--edge) + 16px);
+    gap: clamp(24px, 4vw, 40px);
+    /* Narrowed — the gap from the Korean group above down to the first
+       logo (request: "한글 그룹 아래 여백은 지금보단 조금 좁혀주고"). */
+    margin-top: clamp(32px, 5vw, 64px);
+  }
 }
 /* Same self-generated feTurbulence grain as before (no image asset, so
    it tiles cleanly at any size) — carries the "종이 질감" ask on its
@@ -3733,6 +4647,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    container, not the stroke/marker weights below (clarified: "전체
    크기를 조금 줄여봐달란 의미") — 52%→48%. */
 .brandid__blueprint-visual { flex: 0 0 48%; }
+@media (max-width: 1025px) {
+  /* Was left-aligned (900px-only: align-items:flex-start, .brandid
+     __blueprint-visual capped to a narrow clamp(160px,40vw,220px) box
+     sitting at the row's own left edge), briefly went fully centered
+     (graphic + text both), then walked back to left including the
+     graphic (request: "심볼과 워드마크 영문 타이틀만 센터 정렬
+     나머지는 왼쪽 정렬로"). The graphic itself goes back to centered
+     now — only the title/text stayed left (request: "심볼 섹션 위의
+     그려진 심볼 센터 정렬"). */
+  .brandid__blueprint-row {
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(28px, 6vw, 40px);
+  }
+  /* Was clamp(160px,40vw,220px) — 40vw clears the 220px ceiling by
+     w=550px, so this sat flat at 220 for most of the compact range;
+     rebuilt as a two-point exact line through the same two endpoints
+     (220px at 1024px, 160px at 420px) so it actually scales the whole
+     way (request: "심볼 섹션 심볼 로고는 다시 1024이상 크기에서
+     부터 1024~420까지 자연스럽게 줄고 늘었다 420 이하에서 적절한
+     크기로 고정"). Bumped up a size class, 160-220px -> 200-280px, on
+     request ("크기 키워줘"). */
+  .brandid__blueprint-visual {
+    flex: none;
+    width: clamp(200px, calc(144.37px + 13.245vw), 280px);
+  }
+  /* Text stays left (inherits from .brandid__blueprint-panel--diagram/
+     --wordmark's own text-align:left) — only the title itself centers,
+     see .brandid__blueprint-index's own compact rule below. */
+}
 .brandid__blueprint-svg { width: 100%; height: auto; display: block; }
 /* Stroke/marker weights all thinned down together, on request ("전체
    테두리는 얄쌍하게... 참조 이미지처럼 슬림하고 세련되게"), then the
@@ -3806,6 +4750,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      stay unified instead of independently tuned. */
   --bp-gap: clamp(40px, 6vw, 64px);
 }
+@media (max-width: 1025px) {
+  /* Zeroed — this extra right-only inset (on top of the panel's own
+     var(--edge)) was specific to the desktop side-by-side row; in the
+     stacked compact layout it just made the diagram panel's content
+     narrower on the right than the left, and narrower than the
+     wordmark panel's own (symmetric) inset below. Wordmark's own extra
+     inset zeroed the same way, so both panels net out to the same
+     var(--edge) on both sides (request: "워드 마크 섹션 좌우 여백
+     심볼 섹션과 통일"). */
+  /* width:100% explicit — the row's own align-items is centered now
+     (graphic's own request above), which would otherwise shrink-wrap
+     this block to its content width and center THAT box too, reading
+     as indented rather than truly left-set despite its own
+     text-align:left. */
+  .brandid__blueprint-text { padding-right: 0; width: 100%; }
+}
 /* Not .brandid__dna-index (that's the giant "SHAPE DNA" TITLE) — the
    ask was the English word style used inside Shape DNA's own four
    principle items instead (BALANCE/OPENNESS/CLARITY/FLOW, i.e.
@@ -3827,8 +4787,52 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      넓혀서 두개 여백 통일시키자"). See --bp-gap. */
   margin-bottom: var(--bp-gap);
 }
-@media (max-width: 900px) {
-  .brandid__blueprint-index { font-size: clamp(28px, 8vw, 50px); }
+/* Was @media(max-width:900px) { clamp(28px,8vw,50px) } — off the site's
+   shared 1025px convention, and 901-1024px got no scaling at all.
+   Two-point exact line instead, matching .brandid__dna-name's own
+   50->32 reduction in spirit but through this element's own 50/28
+   endpoints (request: "심볼 워드마크 섹션 아래 구간에 다 동일하게
+   적용해보자" — same 1024->420 technique as Shape DNA/Symbol &
+   Wordmark above it). */
+@media (max-width: 1025px) {
+  .brandid__blueprint-index {
+    font-size: clamp(28px, calc(12.7px + 3.6424vw), 50px);
+    /* Was centered on request ("심볼과 워드마크 영문 타이틀만 센터
+       정렬 나머지는 왼쪽 정렬로") — reversed back to left now
+       ("심볼&워드마크 영문타이틀, 심볼, 워드마크 타이틀은 왼쪽
+       정렬하자"). */
+    text-align: left;
+    /* letter-spacing already matches (.1em, base rule) — line-height
+       never was set at all here (inherits the page default), unified
+       with .brandid__intro-index now (request: "비쥬얼 아이덴티티
+       섹션 영문 타이틀과 통일 시켜줘"). */
+    line-height: 1;
+    /* Was the desktop base rule's own 500 — matched down to Shape
+       DNA's own title weight (request: "심볼 이랑 워드마크 영문
+       타이틀 굵기 쉐입디엔에이랑 똑같이 맞춰주고"). */
+    font-weight: 400;
+  }
+  /* --bp-gap (the margin below "SYMBOL"/"WORDMARK", shared by both
+     panels) — was the desktop clamp(40px,6vw,64px), which plateaued
+     flat at its own 40px floor for the whole 420-667px stretch. Two-
+     point line instead, ceiling matched to that floor (40px, so this
+     narrows it further as asked) down to 24px at 420px (request:
+     "심볼일아 워드마크 영문 타이틀 아래 여백은 좁혀주고"). */
+  .brandid__blueprint-text {
+    --bp-gap: clamp(24px, calc(12.87px + 2.649vw), 40px);
+  }
+  /* .brandid__lead/.brandid__body are shared base classes (flat
+     36px/24px) deliberately left unscoped generally — narrowed here,
+     scoped to this section's own copy specifically, same technique and
+     same endpoints as .brandid__construction-text's own fix above. */
+  .brandid__blueprint-text .brandid__lead {
+    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+  }
+  /* Floor nudged 16->15, same request as .brandid__construction-text's
+     own body fix above. */
+  .brandid__blueprint-text .brandid__body {
+    font-size: clamp(15px, calc(8.74px + 1.4901vw), 24px);
+  }
 }
 .brandid__blueprint-text .brandid__lead { margin-bottom: clamp(16px, 2vw, 24px); }
 /* Korean has no inter-word break opportunity by default — the browser
@@ -3900,9 +4904,31 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-70);
   word-break: keep-all;
 }
+@media (max-width: 1025px) {
+  /* Both were deliberately flat (not clamp()) previously, per the
+     comment above — but that was about size staying put regardless of
+     whether the Korean line wraps to one or two lines, a
+     content/wrap-state concern. A viewport-width clamp doesn't
+     reintroduce that (it depends on width, not wrap state), so it's
+     safe to extend the same 1024->420 technique used everywhere else
+     in this section down to these too (request: "그 아래 심볼 또는
+     워드마크 한글 그룹 본문 텍스트 그룹들도 다... 심볼 워드마크 섹션
+     아래 구간에 다 동일하게 적용해보자"). Placed after the base rules
+     above, not before — an earlier attempt in this same edit landed
+     before them and got silently overridden (equal specificity, same
+     bug hit once already this session on .brandid__intro-photo). */
+  .brandid__blueprint-principle-key {
+    font-size: clamp(13px, calc(9.52px + .8278vw), 18px);
+  }
+  .brandid__blueprint-principle-desc {
+    font-size: clamp(15px, calc(11.52px + .8278vw), 20px);
+  }
+}
 @media (max-width: 900px) {
-  .brandid__blueprint-row { flex-direction: column; align-items: flex-start; gap: clamp(28px, 6vw, 40px); }
-  .brandid__blueprint-visual { width: clamp(160px, 40vw, 220px); }
+  /* Own rules superseded — see the @media(max-width:1025px) block near
+     .brandid__blueprint-row's base rule, which now covers the
+     901-1024px range too and centers rather than left-aligning
+     (request: "그아래 심볼 타이틀 위의 심볼은 센터 정렬 해주고"). */
 }
 
 /* Pen-tool draw-in, take two: a single continuous dash animation over
@@ -4037,10 +5063,35 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      rather than agreeing at one size and drifting at the next. */
   padding: 0 clamp(24px, 4.7vw, 130px);
   /* Widened from clamp(28px, 5vh, 64px), on request ("워드마크랑 밑에
-     컨텐츠가 여백도 어느정도 확보해주고"). Still vh-driven so the mark
-     and the text below it keep fitting inside the 100svh sticky box on
-     shorter viewports instead of overflowing into its overflow:hidden. */
-  gap: clamp(40px, 9vh, 112px);
+     컨텐츠가 여백도 어느정도 확보해주고"), then again — the gap right
+     below the stroke-drawn letterforms specifically, on request
+     ("워드마크 스크로크로 그려진 부분 아래 여백 넉넉히 확보해줘").
+     Still vh-driven so the mark and the text below it keep fitting
+     inside the 100svh sticky box on shorter viewports instead of
+     overflowing into its overflow:hidden. Widened once more (request:
+     "스트로크로 그려진 워드마크 아래로 여백 더 넉넉히 확보해줘"). */
+  gap: clamp(72px, 15vh, 168px);
+}
+@media (max-width: 1025px) {
+  /* Own extra left/right inset zeroed — matches the diagram panel's
+     own zeroed padding-right above, both now net out to just the
+     shared panel-level var(--edge) (request: "워드 마크 섹션 좌우
+     여백 심볼 섹션과 통일"). align-items back to left (default,
+     removed the center override) — only the WORDMARK title itself
+     stays centered now (request: "심볼과 워드마크 영문 타이틀만 센터
+     정렬 나머지는 왼쪽 정렬로"). Briefly widened here directly
+     (request: "스트로크 워드마크 로고 좌우 여백은 조금더 넉넉히
+     확보") — but that widened BOTH the svg and the text block below
+     it together (this padding sits on their shared parent), and the
+     text block's own inset was specifically asked to go back to
+     matching the symbol panel's (request: "워드마크 섹션의 텍스트
+     그룹 좌우 여백 심볼쪽 좌우 여백이랑 달라 심볼쪽 여백으로
+     통일시켜주고"). Back to 0 here; the svg's own extra margin now
+     lives directly on .brandid__blueprint-wordmark-svg below instead,
+     so the two children can differ. */
+  .brandid__blueprint-wordmark-inner {
+    padding: 0;
+  }
 }
 /* Was a full-bleed breakout (calc(100% + 2*edge) with a matching
    negative margin) that ran the mark edge to edge and produced its side
@@ -4056,6 +5107,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: auto;
   display: block;
+}
+@media (max-width: 1025px) {
+  /* The stroke-drawn logo's own left/right margin — kept independent
+     of .brandid__blueprint-wordmark-inner (which now matches the
+     symbol panel's own zero extra inset, see its own compact rule)
+     so the svg can stay more generously inset without widening the
+     text block below it too (request: "스트로크 워드마크 로고 좌우
+     여백은 조금더 넉넉히 확보"). box-sizing:border-box (global reset)
+     means this eats into the 100% width rather than adding to it. */
+  .brandid__blueprint-wordmark-svg {
+    padding: 0 clamp(16px, 5vw, 48px);
+  }
 }
 /* No anchors/handles here, and no fill either, on request ("워드마크는
    앵커는 빼고... 라인만 그려지는 느낌으로 구현하고 색상은 채우지
@@ -4139,6 +5202,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (max-width: 900px) {
   .brandid__wordmark-row { gap: clamp(28px, 5vw, 44px); }
   .brandid__wordmark-row .brandid__blueprint-principles { flex: 1 1 auto; width: 100%; }
+  /* The desktop copy carries a hard <br> right after "아니라,", on
+     desktop's own wider column — hidden here so the sentence flows
+     continuously and only wraps where word-break:keep-all actually
+     needs it to (request: "워드마크 섹션 한글 타이틀은 아니라에서
+     줄바꿈 되지 않고 이어서"). */
+  .brandid__wordmark-lead-break { display: none; }
 }
 /* This panel stacks the mark ON TOP of the same text block the symbol
    panel sets BESIDE its diagram, so it's the taller of the two and the
@@ -4149,8 +5218,24 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    claws back ~100px, which is enough without touching the full-bleed
    width the mark was explicitly asked to keep. */
 @media (max-height: 860px) {
-  .brandid__blueprint-wordmark-inner { gap: clamp(24px, 4.5vh, 48px); }
-  .brandid__blueprint-text--wordmark { --bp-gap: clamp(24px, 4vh, 44px); }
+  /* Widened a step too (24-48px -> 32-64px), same request as the base
+     rule's own widening above ("워드마크 스크로크로 그려진 부분 아래
+     여백 넉넉히 확보해줘") — kept well short of the base rule's own
+     56-140px range on purpose, since this query exists specifically to
+     claw space back on short viewports so the panel still fits inside
+     the 100svh sticky without overflowing. */
+  .brandid__blueprint-wordmark-inner { gap: clamp(32px, 6vh, 64px); }
+  /* Was scoped to --wordmark only — on a short viewport that made the
+     margin below "SYMBOL" (still the unclamped clamp(40px,6vw,64px))
+     visibly wider than the margin below "WORDMARK" (this reduced
+     value), even though both share the same --bp-gap variable outside
+     this query. Un-scoped so both panels' titles match at every
+     height, not just tall ones (request: "심볼 영문 타이틀 아래
+     여백을 워드마크 영문 타이틀 아래 여백과 똑같이 맞추자 심볼 타이틀
+     영역 아래가 지금은 더 넓어보임"). */
+  /* Narrowed again in step with the width-based rule's own reduction
+     above (40-64px -> 24-40px), same request ("여백은 좁혀주고"). */
+  .brandid__blueprint-text { --bp-gap: clamp(16px, 3vh, 32px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .brandid__blueprint-wordmark-svg path { transition: none; }
@@ -4235,6 +5320,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   padding: 0 var(--edge) clamp(48px, 6vw, 96px);
   background-color: var(--paper);
   color: var(--ink);
+}
+/* Groups the title (English+Korean) and the 3-way touch-scroll row
+   (plus .hscroll-dots, inserted right after .brandid__color-caption)
+   as one explicit block in the DOM, on request ("컬러프린서플 구조를
+   영문 타이틀 + 한글 타이틀 + 3가지 터치스크롤 + 하단 원형 네비게이션
+   점 이렇게 한 섹션으로... 구조화"). display:contents on desktop —
+   this wrapper doesn't participate in .brandid__color-sticky's own
+   flex layout at all, so .brandid__color-head/-caption still behave
+   exactly as if they were direct flex children (zero visual change
+   above 1025px). Compact override turns it into a real flex column,
+   see the @media(max-width:1025px) block below. */
+.brandid__color-block {
+  display: contents;
 }
 /* Small symbol-only mark (same single path as .brandwall__symbol).
    Pulled out of the flex flow into a free-floating bounce, on request
@@ -4396,6 +5494,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     overflow: visible;
     padding: clamp(48px, 9vw, 88px) 0;
   }
+  /* Bottom split off from the shared rule above — was riding
+     .brandid__blueprint-sticky's own 48-88px, not the clamp(64px,
+     11vw,96px) every other section's bottom margin shares (request:
+     "네비게이션 아래로 여백 다른 섹션 하단과 통일시켜주고"). */
+  .brandid__color-sticky {
+    padding-bottom: clamp(64px, 11vw, 96px);
+  }
   .brandid__blueprint-panel {
     position: relative;
     inset: auto;
@@ -4404,8 +5509,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     transform: none !important;
     pointer-events: auto !important;
   }
+  /* Widened, 48-96px -> 72-128px — the wordmark panel's own top
+     margin, and its own bottom margin added (there wasn't one; the
+     panel just ran straight into the shared sticky's own bottom
+     padding) so both read as similarly generous (request: "워드마크
+     위아래 여백 넉넉히 확보"). Top widened once more on its own
+     (request: "워드마크 위쪽 여백은 조금더 넓히고"). */
   .brandid__blueprint-panel + .brandid__blueprint-panel {
-    margin-top: clamp(48px, 8vw, 96px);
+    margin-top: clamp(96px, 13vw, 160px);
+    margin-bottom: clamp(72px, 10vw, 128px);
   }
   .brandid__color-flash,
   .brandid__color-seal,
@@ -4422,13 +5534,60 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      내용뒷부분도 같이 포함해서... 한 구조인것처럼" — the two need to
      touch for that to read as one block, not two separately-coloured
      ones stacked with daylight between them. */
+  /* Was clamp(60px,7vw,128px), plateaued flat at 60px below ~857px
+     (same bug already fixed on .brandid__construction-index — this one
+     shares the exact same base clamp but never got the equivalent
+     override). Same two-point line, same endpoints (request: "컬러
+     프린서플 섹션도 1024이상 크기에서부터 1024~420까지 자연스럽게
+     줄어들고 늘어나다가 420에서 적절하게 고정해주고"). */
+  .brandid__color-sticky .brandid__color-index {
+    /* Font-size now fully matched to .brandid__intro-index too, not
+       just its own independent two-point line (request: "컬러
+       프린서플 타이틀은 비쥬얼 아이덴티티 스타일 자간 행간 폰트
+       크기등 통일시켜줘"). */
+    font-size: clamp(30px, 7.2vw, 160px);
+    /* Was the desktop base rule's own -.02em/.86 — unified with
+       .brandid__intro-index (request: "컬러 프린서플 영문 타이틀
+       자간 행간도... 비쥬얼 아이덴티티 섹션 영문 타이틀과 통일
+       시켜줘"). */
+    letter-spacing: .1em;
+    line-height: 1;
+  }
+  /* Was a flat 36px, no scaling at any width — matched to
+     .brandid__construction-text .brandid__lead's own fix (same base
+     source value, same technique). */
+  .brandid__color-lead {
+    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+  }
+  /* Was a flat 22px. */
+  .brandid__color-name {
+    font-size: clamp(16px, calc(11.83px + .9934vw), 22px);
+  }
+  /* Was a flat 24px, matched to .brandid__body's own pattern (same
+     24->16 reduction used on .brandid__dna-copy/.acycle__copy). */
+  .brandid__color-name span {
+    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+  }
+  /* Real flex column now (was display:contents, transparent to
+     desktop's own layout) — head, caption and (once JS inserts it)
+     the dots row all stack as one visual/structural block here. */
+  .brandid__color-block {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
   .brandid__color-head {
     opacity: 1;
     transform: none;
     filter: none;
     width: 100%;
     box-sizing: border-box;
-    padding: clamp(48px, 8vw, 96px) var(--edge) clamp(28px, 5vw, 44px);
+    /* Top cut hard, 48-96px -> 16-32px, then back up to the shared
+       clamp(56px,10vw,96px) every other section's own top padding
+       uses — the "대폭 줄여줘" cut turned out to be too far off that
+       standard (request: "컬러 프린서플 위아래... 섹션 여백 기타 다른
+       섹션 여백과 똑같이 맞춰주고"). */
+    padding: clamp(56px, 10vw, 96px) var(--edge) clamp(28px, 5vw, 44px);
     margin-top: 0;
     background-color: transparent;
     transition: background-color 260ms var(--ease), color 260ms var(--ease);
@@ -4444,6 +5603,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     -webkit-overflow-scrolling: touch;
     margin-top: 0;
   }
+  /* .brandid__color-sticky (this row's own parent) is display:flex
+     with align-items:center — .hscroll-dots, unlike its siblings above
+     (which all carry their own explicit width:100%), has no width of
+     its own, so it defaulted to shrink-to-fit and centered as a ~34px
+     island instead of spanning full width. Its own JS-set background
+     colour (updateColorHeadSync, main.js) was correctly filling that
+     island completely, just not reading as "the whole area" the way a
+     full-width strip would (request: "하단 네비게이션포함한 영역도
+     풀로 100%로 색이 가득차야하고"). */
+  .brandid__color-caption + .hscroll-dots {
+    width: 100%;
+  }
   .brandid__color-name {
     position: static;
     opacity: 1 !important;
@@ -4455,6 +5626,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     scroll-snap-stop: always;
     padding: clamp(56px, 12vw, 96px) var(--edge);
     transition: none;
+    /* This is a <p> — nothing in this ruleset ever zeroed its default
+       UA margin (1em top/bottom), which the flex row's own auto height
+       still counts even though it doesn't show up in the element's own
+       rect. That 1em (16px at this element's own font-size) is exactly
+       what was leaving a sliver of the page's own paper background
+       visible above and below every card (request: "참조 사진 보면
+       중간에 안붙어진 여백 그거 제거해주고"). */
+    margin: 0;
   }
   .brandid__color-name[data-color="0"] { background: var(--paper); color: var(--ink); }
   .brandid__color-name[data-color="1"] { background: var(--ink); color: var(--paper); }
@@ -4583,6 +5762,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink);
 }
 .brandid__colorstory-hex { margin-bottom: 4px; }
+@media (max-width: 1025px) {
+  /* Was a flat 24px, no compact scaling at any width — two-point
+     exact line, same 24->16 reduction used on .brandid__dna-copy/
+     .acycle__copy/etc (request: "컬러스토리 섹션 텍스트들도... 그렇게
+     적용해줘"). */
+  .brandid__colorstory-hex,
+  .brandid__colorstory-swatchname {
+    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+  }
+}
 /* No more scrim (was a leftward dark gradient) — on request ("왼쪽에
    검은 그라데이션도 제거하고"); each panel's own text colour (see
    -copy--ink below and the base paper colour further down) is chosen
@@ -4635,6 +5824,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   color: var(--signal-100);
 }
+@media (max-width: 1025px) {
+  /* 1vw hits the 15px floor by width 1500px, so this sat flat at 15px
+     across the whole compact range. Same two-point formula as
+     .vwipe__veng (another small red/mono English label): 16px at
+     1025px down to 13px at 420px. */
+  .brandid__colorstory-eng {
+    font-size: clamp(13px, calc(10.92px + .4959vw), 16px);
+  }
+}
 /* Matched exactly to .acycle__title (Our Approach's Korean lead line
    under its own big English word), on request ("나머지 한글은 아워
    어프로치의 빅영문 타이틀 아래에 있는 스타일과 똑같이"). paper is the
@@ -4656,6 +5854,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--paper);
   word-break: keep-all;
 }
+@media (max-width: 1025px) {
+  /* Was flat 36px, zero scaling — two-point line matching
+     .brandid__lead's own established fix. */
+  .brandid__colorstory-lead {
+    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+  }
+}
 /* Matched exactly to .acycle__body, same reasoning as -lead above. */
 .brandid__colorstory-body {
   max-width: 46rem;
@@ -4667,6 +5872,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--paper-70);
   word-break: keep-all;
   overflow-wrap: break-word;
+}
+@media (max-width: 1025px) {
+  /* 1.6vw hits the 16px floor by width 1000px, so this barely moved
+     (16.0-16.4px) across the whole compact range. Rebuilt as a
+     two-point line through the same 24px ceiling matching
+     .brandid__body's own pattern. */
+  .brandid__colorstory-body {
+    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+  }
 }
 .brandid__colorstory-copy--ink .brandid__colorstory-lead { color: var(--ink); }
 .brandid__colorstory-copy--ink .brandid__colorstory-body { color: var(--ink-70); }
@@ -4715,7 +5929,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__colorstory-card {
     position: static;
     transform: none;
-    margin: clamp(48px, 8vh, 96px) auto 0;
+    /* Narrowed a step, 48-96px -> 32-64px (request: "상단 여백은
+       지금보단 조금 좁히는걸로 통일"). */
+    margin: clamp(32px, 6vh, 64px) auto 0;
+    /* Was the desktop Polaroid-style 26/26/38px asymmetric frame —
+       narrowed to an even 20px all round (request: "컬러카드 하얀
+       박스 부분 테두리 20픽셀로 보이게 패딩 좁혀주고"). */
+    padding: 20px;
   }
   .brandid__colorstory-copy {
     position: static;
@@ -4744,6 +5964,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: static;
     height: auto;
     overflow: visible;
+    /* Was no padding at all — the section's own top/bottom margin
+       relied purely on wherever the first/last panel's own content
+       happened to start/end. Matched to the shared clamp(56px,10vw,
+       96px)/clamp(64px,11vw,96px) top/bottom every other section uses
+       (request: "컬러스토리 위아래 여백도 똑같이 맞춰주고"). */
+    padding: clamp(56px, 10vw, 96px) 0 clamp(64px, 11vw, 96px);
   }
   /* No gap between panels at all now — was clamp(48px,10vw,96px)
      between every one of them, which read as three disconnected chunks
@@ -4776,8 +6002,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      warmer orange-beige, and the flat brand orange sat behind the fade
      as a much harder, more saturated block than the photo above it
      actually is (request: "시그널 서페이스는 배경 이미지의 색감은 약간의
-     주황빛 도는 베이지색이 주로 많아서 그걸로 해야할듯"). */
-  .brandid__colorstory-panel[data-panel="2"] { background: #D9B892; }
+     주황빛 도는 베이지색이 주로 많아서 그걸로 해야할듯"). Re-sampled —
+     the earlier #D9B892 still read as noticeably more orange/saturated
+     than the actual photo (request: "하단 배경색의 주로 쓰인 베이지색이랑
+     조금 다른데 이미지에서 네가 추출해서 가장 비슷한색으로"). Measured
+     directly off bg_color_03.png via canvas pixel sampling, not eyeballed:
+     mean + mode over both the bottom 25% and the bottom 8% of the image
+     agree tightly (avg #bdaf9e/#c0b2a1, mode #c0b0a0/#c6b4a2) — landed on
+     their centre. */
+  .brandid__colorstory-panel[data-panel="2"] { background: #C0B2A1; }
   /* Was its own stacked block above the card/copy — moved behind them
      instead, anchored to the panel's bottom edge, on request ("컬러스토리는
      각 배경을 컨텐츠 텍스트 그룹 하단에 배치하여 상단쪽은 투명
@@ -4818,8 +6051,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     z-index: 1;
     /* Generous run of the panel's own (now solid, see above) colour
        below the text before the image band begins, on request
-       ("컨텐츠 텍스트 구룹 아래 여백도 어느정도 넉넉히 확보"). */
-    margin-bottom: clamp(40px, 8vw, 72px);
+       ("컨텐츠 텍스트 구룹 아래 여백도 어느정도 넉넉히 확보"), widened
+       once more (request: "각 색상 배경 하단여백은 지금보다 넉넉히
+       확보해주고"). */
+    margin-bottom: clamp(56px, 11vw, 96px);
   }
   .brandid__colorstory-curtain { display: none; }
 }
@@ -4864,6 +6099,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      row that holds this and the sub-copy together. */
   margin: 0;
 }
+@media (max-width: 1025px) {
+  /* .brandid__intro-title (this element's own stated match, see the
+     comment above) picked up its own compact two-point clamp since —
+     mirrored here with the identical formula so the "size... 통일"
+     parity holds in compact too, not just on desktop (request:
+     "컬러스토리 아래에 있는 모든 텍스트들 다... 적용해줘"). Safe to
+     resize — initClosingFit (main.js) has no isCompact() guard and
+     measures this element's live rendered size every call, adapting
+     the video/plate dimensions to whatever that turns out to be,
+     rather than assuming a fixed value. */
+  .brandid__closing-line {
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+  }
+}
 /* Inherits everything from .brandid__body — same 24px/1.4/-.03em and
    --ink-70 as the wordmark panel's sub-title copy. Only the 480px
    measure is undone: it exists to force wrapping in a column layout,
@@ -4882,6 +6131,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
   text-align: right;
   word-break: keep-all;
+}
+@media (max-width: 1025px) {
+  /* Inherits .brandid__body's own flat 24px (base rule) with no
+     compact scaling — two-point line matching the same 24->16
+     reduction used elsewhere. */
+  .brandid__closing-body {
+    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+  }
 }
 /* Title above the video, ranged left, starting on the video's own left
    edge — the section centres its children, so giving this the width the
@@ -4983,6 +6240,33 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      handover, inline, per scroll tick. Named here so the starting value
      lives with the rest of the section's styling rather than only in JS. */
   background-color: var(--paper);
+}
+@media (max-width: 1025px) {
+  /* This section carries the "frame" class too, which sets its own
+     min-height:100svh plus a flex column with justify-content:center
+     — never overridden here, so (same bug already found and fixed on
+     .brandid__intro) the box was always stretching to fill the full
+     viewport height and centering its content inside that rather than
+     sizing to its actual content (request: "이 텍스트 그룹 위로
+     여백도 다른섹션과 위아래 비슷하게 통일... 풀화면이 아니라 컨텐츠
+     높이 기준으로"). padding-top cut hard too, from the desktop
+     scroll-handover's own 120-280px down to the shared clamp(56,10vw,
+     96) every other section's top padding uses — the runway/pin
+     machinery below is fully disabled in compact now (JS bails via
+     isCompact()), so this doesn't need to reserve room for it. */
+  .brandid__closing {
+    min-height: 0;
+    padding-top: clamp(56px, 10vw, 96px);
+    padding-bottom: clamp(64px, 11vw, 96px);
+  }
+  /* Un-pinned — initClosingFit/Handoff/Entrance all bail on
+     isCompact() now, so nothing ever sets --plate-sticky-top past its
+     0px default; left as sticky it would just pin flush to the very
+     top instead of tracking a real offset. */
+  .brandid__closing-loop-wrap { position: static; top: auto; }
+  /* Decorative corner ticks — desktop-only flourish, on request
+     ("영상 프레임 양사방 모서리에서 뻗어나가는 라인은 제거"). */
+  .brandid__closing-tick { display: none; }
 }
 /* ---- Pinned/centred variant, disabled. Re-enable together with the
    .brandid__closing-sticky wrapper in index.html and the WIN-based
@@ -5222,6 +6506,40 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__closing-slot.is-ticked .brandid__closing-next {
   transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%) + var(--next-optical-offset, 0px)));
 }
+@media (max-width: 1025px) {
+  /* The ticker roll (.is-ticked) is JS-driven (initClosingHandoff),
+     which now bails on isCompact() along with the rest of this
+     section's scroll-scrubbed handover — .is-ticked never gets added
+     here, so APPLICATIONS (parked at top:100% waiting to roll into
+     view) would otherwise stay permanently hidden below the slot's own
+     clipped window. Settled straight into its own final resting state
+     instead: mark hidden (own override below, placed after its base
+     rule so it actually wins), slot released from its absolute/clipped
+     ticker-window sizing, APPLICATIONS shown in normal flow. */
+  .brandid__closing-slot {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+  .brandid__closing-next {
+    position: static;
+    width: auto;
+    height: auto;
+    transform: none;
+    transition: none;
+    display: block;
+    text-align: center;
+    /* Was matched to OUR PHILOSOPHY's own display formula — now
+       matched to Color Principle's title instead, same technique
+       (request: "어플리케이션 영문 타이틀은 컬러 프린서플 타이틀과
+       폰트 스타일 자간 행간 통일 시켜줘... 1024~420까지 자연스럽게
+       줄어들고 늘어나다가 420이하에서 적절한 크기로 고정"). */
+    font-size: clamp(30px, 7.2vw, 160px);
+    line-height: 1;
+    letter-spacing: .1em;
+  }
+}
 
 /* Empty scroll the pinned plate travels through — see the note on
    .brandid__closing for why it has to be its own element. */
@@ -5230,6 +6548,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: var(--closing-handoff-run, 0px);
   pointer-events: none;
+}
+@media (max-width: 1025px) {
+  /* Collapses to nothing — same reasoning as .apps__runway's own
+     compact override (no pin left for it to feed, JS bails on
+     isCompact() now). Placed after the base rule above, not before —
+     the same equal-specificity/source-order bug hit repeatedly this
+     session (.brandid__intro-photo, .brandid__construction-row,
+     .brandid__blueprint-principle-key/-desc). */
+  .brandid__closing-runway { height: 0; }
 }
 
 /* ---- Applications ----
@@ -5574,6 +6901,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     top: auto;
   }
   .apps__runway { height: 0; }
+  /* Was position:fixed at every width — a full-viewport backdrop that
+     stays pinned behind the whole photo stack while it scrolls past,
+     the same "PC 버전" pin trick as .apps__intro's own hold-then-dock
+     above (already released for compact). Absolute instead — it now
+     covers .apps itself (the nearest positioned ancestor) and scrolls
+     away with the section like a normal background image, not fixed
+     to the viewport (request: "어플리케이션 섹션도 기존 피시버전의
+     효과 다 제거하고 풀화면 풀고... 자연스럽게 나열해놔줘"). The glow
+     pseudo-element (::before) rides the same box, no separate rule
+     needed. */
+  .apps__ground { position: absolute; }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
@@ -5706,6 +7044,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      opened by the same amount so this isn't cut off). */
   bottom: -1.5px;
   pointer-events: none;
+}
+@media (max-width: 1025px) {
+  /* Hidden — see the compact block near .brandid__closing-next's own
+     base rule for why (the ticker's JS is disabled here, so this
+     settles on APPLICATIONS as the resting state instead of the mark).
+     Placed after this base rule, not before — the same equal-
+     specificity/source-order bug hit repeatedly this session. */
+  .brandid__closing-mark { display: none; }
 }
 .brandid__closing-slot.is-ticked .brandid__closing-mark {
   transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%)));
@@ -5854,16 +7200,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      (including its title/index wrap treatment) moved to the shared
      max-width:1024px block near its base rules — this 900px tier no
      longer carries anything DNA-specific. */
-  /* 200px fixed inset is a desktop-width assumption — falls back to the
-     section's own normal edge padding here instead; title/text stack
-     instead of sitting side by side. */
-  .brandid__construction-row { padding: 0 var(--edge); flex-direction: column; align-items: stretch; gap: clamp(24px, 6vw, 40px); }
+  /* Own rule superseded — see the @media(max-width:1025px) block near
+     .brandid__construction's own padding-top rule, which now covers
+     the 901-1024px range too and adds centering (request: "심볼 워드
+     마크 섹션도 타이틀 및 한글 그룹 중앙정렬로 바꿔주고"). */
   .brandid__construction-index { flex: none; }
   .brandid__construction-text { flex: none; }
-  /* Matches desktop's own uniform padding, scaled down to var(--edge),
-     with the same top/bottom bumps desktop got: top +40px, bottom
-     +80px (desktop went 200→240 top, 200→280 bottom overall). */
-  .brandid__sizes { padding: calc(var(--edge) + 40px) var(--edge) calc(var(--edge) + 80px); }
+  /* Own padding rule superseded — see the @media(max-width:1025px)
+     block near .brandid__sizes's base rule, which now covers this
+     width too (that asymmetric top/bottom padding is exactly what got
+     evened out there: request "찢어진 종이 아래랑 로고 사이 여백도
+     조금 상하단 비슷해보이게"). */
   /* Tracks the padding above — the clip is placed against the padding
      box, so its inset has to be told the same number the logos get. */
   .brandid__sizes-loop { right: var(--edge); }
@@ -5911,6 +7258,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .hero .frame__meta {
   right: 20px;
   bottom: calc(clamp(28px, 4vw, 48px) + 28px);
+}
+/* .frame__meta's own generic ≤560px rule (below) switches to a
+   left-aligned column — meant for OTHER frames' meta blocks (caption +
+   index, stacking on narrow screens), but it caught the hero's too,
+   since .hero .frame__meta doesn't touch align-items/flex-direction
+   itself. With only the one child here, that put the scroll cue flush
+   against the LEFT edge instead of staying anchored to the equalizer
+   in the right corner, on request ("우측 하단의 스크롤 위치는 어느구간
+   에서 왼쪽으로 옮겨지던데 계속 오른쪽에 위치하면 될듯"). Kept in a
+   media query of its own rather than just always setting align-items —
+   scoping the override to exactly where the generic rule fires keeps
+   this readable as "cancels that rule for the hero," not an unrelated
+   standing declaration. */
+@media (max-width: 560px) {
+  .hero .frame__meta { align-items: flex-end; }
 }
 /* Vertical cue: label rotated to read bottom-to-top, sitting above
    the line with a gap between the two. Only the label rotates —

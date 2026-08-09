@@ -792,6 +792,159 @@
 
   initStatementParallax();
 
+  /* ---------- Statement: compact-only.
+
+     Left edge of the Korean copy in the normal ("beside the video")
+     layout: tracks the VIDEO's own right edge + a consistent gap
+     (widened again, request: "좌측 영상과 우측 텍스트 그룹사이 지금보다
+     조금더 넉넉히 확보해주고"), not PHILO/SOPHY's own left edge — using
+     all the width the video's own sizing frees up, rather than capping
+     the copy to whatever narrow slice PHILO happened to leave. The
+     title (.statement__big) is pulled left instead, via transform, so
+     PHILO/SOPHY's own line lands on the SAME edge the copy uses —
+     measured as a delta off PHILO's own CURRENT (untransformed)
+     position rather than computed from font metrics, for the same
+     reason alignIntroWord measures instead of guessing.
+
+     The copy is measured beside the video first; if that would wrap it
+     past the video's own bottom edge, the WHOLE composition switches to
+     a second, simpler layout (.is-copy-below, see style.css) instead of
+     just dropping the copy alone: title collapses from the 3-line OUR/
+     PHILO/SOPHY corner-crossing read to one centered line (nothing to
+     cross any more, since the video isn't beside it), the video shrinks
+     to a fixed, centered 280px, and the copy sits below that — title,
+     then video, then copy, top to bottom (request: "우측 텍스트 그룹이
+     자연스럽게 줄바꿈되다가 좌측 영상 길이를 벗어나기 이전 시점에
+     영상 아래로 한글 그룹만 텍스트를 내려보자", then "한글 그룹이
+     아래로 떨어진 시점에서 영문 타이틀은 비전 섹션처럼 한줄로 나오게
+     하고... 아래 영상은 좌우 크기 280정도로 고정한채 가운데 정렬로
+     배치"). Driven by actual wrapped content height each resize, not a
+     flat viewport-width breakpoint, so it only switches at whichever
+     width the copy's own line count actually demands it.
+
+     .statement__stage's own height is set explicitly to whichever
+     element actually extends furthest in either layout — .statement__
+     body is position:absolute so it doesn't contribute to the stage's
+     own flow height on its own, meaning .statement's padding-bottom
+     would otherwise land in the wrong place (request: "한글이
+     줄바꿈되서 왼쪽 영상보다 길어지면 한글 그룹 기준으로 하단 섹션
+     여백이 비전섹션 하단과 똑같이 유지되면"). ---------- */
+  function initStatementCopyAlign() {
+    const stage = document.querySelector('.statement__stage');
+    const copy = document.querySelector('.statement__body');
+    const big = document.querySelector('.statement__big');
+    const lines = [...document.querySelectorAll('.statement__line')];
+    const philo = lines[1];
+    const fig = document.querySelector('.statement__figure');
+    if (!stage || !copy || !big || !philo || !fig || lines.length < 2) return;
+    const GAP = 44;
+    // Went negative (-28, -8, -16) then positive (24, then 12) and back
+    // again — the Korean copy overlaps the video's own bottom edge once
+    // more, on request ("한글 그룹떨어졌을 시점에 한글 그룹 다시 영상과
+    // 겹치게 조정").
+    const BELOW_OVERLAP = -16;
+    const TITLE_GAP = 32;
+
+    function resetToBeside() {
+      stage.classList.remove('is-copy-below');
+      lines.forEach(l => { l.style.display = ''; });
+      big.style.position = '';
+      big.style.left = '';
+      big.style.top = '';
+      copy.style.top = '';
+    }
+
+    function align() {
+      if (!isCompact()) {
+        resetToBeside();
+        copy.style.left = '';
+        big.style.transform = '';
+        fig.style.marginTop = '';
+        fig.style.width = '';
+        fig.style.maxWidth = '';
+        fig.style.marginLeft = '';
+        fig.style.marginRight = '';
+        stage.style.minHeight = '';
+        return;
+      }
+      // Reset to the "beside" layout before measuring, or a call that
+      // landed in "below" mode last time would measure its own below-
+      // mode state instead of fresh beside-mode geometry.
+      resetToBeside();
+      big.style.transform = '';
+      fig.style.width = '';
+      fig.style.maxWidth = '';
+      fig.style.marginLeft = '';
+      fig.style.marginRight = '';
+      const stageRect = stage.getBoundingClientRect();
+      const philoRect = philo.getBoundingClientRect();
+      const philoMid = (philoRect.top + philoRect.height / 2) - stageRect.top;
+      fig.style.marginTop = Math.max(0, philoMid).toFixed(1) + 'px';
+      // fig.offsetTop/offsetHeight, not getBoundingClientRect() — the
+      // figure carries .reveal's own scroll-triggered translateY, which
+      // getBoundingClientRect() would read straight through; this can
+      // run (on load, on fonts.ready) before that transform has ever
+      // settled to identity, which measured taller than the true rest
+      // position when checked. offsetTop/Height reflect the layout
+      // position only, unaffected by the transform, matching .statement
+      // __stage as the nearest positioned ancestor (offsetParent).
+      const figRect = fig.getBoundingClientRect();
+      const figBottom = fig.offsetTop + fig.offsetHeight;
+      const besideLeft = (figRect.right - stageRect.left) + GAP;
+      copy.style.left = besideLeft.toFixed(1) + 'px';
+      const besideBottom = copy.getBoundingClientRect().bottom - stageRect.top;
+
+      if (besideBottom <= figBottom) {
+        // ---- Beside layout stands. ----
+        const philoLeft = philoRect.left - stageRect.left;
+        big.style.transform = `translateX(${(besideLeft - philoLeft).toFixed(1)}px)`;
+        stage.style.minHeight = Math.max(figBottom, besideBottom).toFixed(1) + 'px';
+        return;
+      }
+
+      // ---- Switch to the stacked "below" layout. ----
+      // Line display (OUR block, PHILO/SOPHY inline) is CSS's job now
+      // (.statement__stage.is-copy-below .statement__line rules) — not
+      // set here, so OUR's own forced line break isn't immediately
+      // overwritten by an inline style beating that CSS out.
+      stage.classList.add('is-copy-below');
+      big.style.position = 'absolute';
+      big.style.left = '50%';
+      big.style.top = '0px';
+      big.style.transform = 'translateX(-50%)';
+      // Re-measured, not the stageRect captured above — adding
+      // is-copy-below just changed .statement's own padding-top (see
+      // the :has() rule in style.css), which shifts stage's viewport
+      // position; reusing the stale stageRect here undercounted
+      // titleBottom by exactly that padding delta.
+      const stageRectBelow = stage.getBoundingClientRect();
+      const titleBottom = big.getBoundingClientRect().bottom - stageRectBelow.top;
+      fig.style.width = '280px';
+      fig.style.maxWidth = '280px';
+      fig.style.marginLeft = 'auto';
+      fig.style.marginRight = 'auto';
+      fig.style.marginTop = (titleBottom + TITLE_GAP).toFixed(1) + 'px';
+      const figBottomBelow = fig.offsetTop + fig.offsetHeight;
+      // fig.offsetLeft as the base (the video is centered, not flush at
+      // the stage's own left edge, see above) plus TITLE_GAP — shifted
+      // right by that same amount on request ("영상과 위에 띄워진
+      // 여백과 동등하게 오른쪽으로 민 뒤"), so the copy's own left inset
+      // echoes the gap already sitting above the video.
+      copy.style.left = (fig.offsetLeft + TITLE_GAP) + 'px';
+      copy.style.top = (figBottomBelow + BELOW_OVERLAP).toFixed(1) + 'px';
+      const copyBottomBelow = copy.getBoundingClientRect().bottom - stageRectBelow.top;
+      stage.style.minHeight = Math.max(figBottomBelow, copyBottomBelow).toFixed(1) + 'px';
+    }
+
+    align();
+    window.addEventListener('resize', align, { passive: true });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(align);
+    }
+  }
+
+  initStatementCopyAlign();
+
   /* ---------- Statement: OUR / PHILO / SOPHY spills in letter by letter ---------- */
 
   function initPhilosophyScatter() {
@@ -2508,6 +2661,20 @@
       const cs = getComputedStyle(active);
       colorHead.style.backgroundColor = cs.backgroundColor;
       colorHead.style.color = cs.color;
+      // .hscroll-dots is injected right after .brandid__color-caption
+      // by initHorizontalScrollDots (main.js, runs later at page load
+      // than this function is first defined) — queried fresh here
+      // rather than cached above, since it doesn't exist yet the very
+      // first time this runs. Same sync as the head above, so the dots
+      // read as sitting inside the active card's own colour instead of
+      // on the page's neutral paper background (request: "아래
+      // 네비게이션 점도 색상 범위 안에 집어넣어서 한섹션 처럼
+      // 보이게").
+      const dots = colorCaption.nextElementSibling;
+      if (dots && dots.classList.contains('hscroll-dots')) {
+        dots.style.backgroundColor = cs.backgroundColor;
+        dots.style.color = cs.color;
+      }
     }
     if (isCompact()) {
       updateColorHeadSync();
@@ -4107,6 +4274,14 @@
     if (!el) return;
     el.addEventListener('wheel', (e) => {
       if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      // Only steal the gesture while the row still has somewhere to go in
+      // that direction — otherwise every vertical scroll over the row
+      // (trackpad/mouse wheel) got swallowed permanently, even once the
+      // row was already at its first/last card, which read as "page won't
+      // scroll" while the pointer sat over one of these rows.
+      const atStart = el.scrollLeft <= 0;
+      const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
+      if ((e.deltaY < 0 && atStart) || (e.deltaY > 0 && atEnd)) return;
       el.scrollLeft += e.deltaY;
       e.preventDefault();
     }, { passive: false });
@@ -4119,6 +4294,49 @@
       '.brandid__dna-items',
       '.brandid__color-caption',
     ].forEach(sel => enableWheelHorizontalScroll(document.querySelector(sel)));
+  }
+
+  /* Color Principle's title (.brandid__color-head) sits above its own
+     touch-scroll row (.brandid__color-caption) rather than inside it —
+     .brandid__color-head already mirrors the active card's own colour
+     (updateColorHeadSync above), reading as one continuous block, but
+     a touch/swipe starting ON the title itself did nothing, since
+     native horizontal scroll only ever responds to gestures that start
+     inside the actual overflow:auto element. Forwards head/dots
+     touches to the caption's own scrollLeft so the whole block —
+     title down through the nav dots — swipes as one unit (request:
+     "컬러 프린서플 섹션 아래 터치 스크롤과 한 그룹으로 묶여서
+     컬러프린서플 타이틀 및 한글 그룹에서 터치스크롤 해도 작동되게...
+     아래 네비게이션 점까지 포함해서 한 섹션으로 구성하자"). */
+  function enableTouchScrollForward(triggerEl, targetEl) {
+    if (!triggerEl || !targetEl) return;
+    let startX = 0, startY = 0, startScrollLeft = 0, dragging = null;
+    triggerEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      startScrollLeft = targetEl.scrollLeft;
+      dragging = null;
+    }, { passive: true });
+    triggerEl.addEventListener('touchmove', (e) => {
+      if (e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      // Same directional-dominance gate as enableWheelHorizontalScroll
+      // above — decide once per gesture (not every move) which axis
+      // this swipe belongs to, so a mostly-vertical page scroll that
+      // starts over the title never gets hijacked mid-gesture.
+      if (dragging === null) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        dragging = Math.abs(dx) > Math.abs(dy);
+      }
+      if (!dragging) return;
+      targetEl.scrollLeft = startScrollLeft - dx;
+      e.preventDefault();
+    }, { passive: false });
+  }
+  if (isCompact()) {
+    enableTouchScrollForward(document.querySelector('.brandid__color-head'), document.querySelector('.brandid__color-caption'));
   }
 
   /* ---------- Color Story: three photos cross-fade with a curtain wipe, one pinned stage ---------- */
@@ -4417,7 +4635,15 @@
     const section = document.querySelector('.brandid__closing');
     const line = document.querySelector('.brandid__closing-line');
     const video = document.querySelector('.brandid__closing-loop');
-    if (!section || !line || !video) return;
+    // Unlike every other pinned section on the page, this one had no
+    // isCompact() bail at all — the full desktop scroll-scrubbed
+    // handover (fit/entrance/handoff, all three functions below) was
+    // running unchanged on mobile, fighting .frame's own min-height:
+    // 100svh sizing (same bug already found and fixed on
+    // .brandid__intro) instead of just settling into content-driven
+    // flow (request: "이 텍스트 그룹 위로 여백도... 풀화면이 아니라
+    // 컨텐츠 높이 기준으로 위아래 여백 띄워지길 희망").
+    if (!section || !line || !video || isCompact()) return;
     // Reused across every fit() call to measure the ticker window's
     // required height (see below) — one canvas for the page's lifetime
     // rather than one per resize.
@@ -4952,7 +5178,7 @@
     // along for free (same fix already applied to .brandid__sizes-loop
     // for the same reason).
     const wrap = document.querySelector('.brandid__closing-loop-wrap');
-    if (!section || !line || !wrap || prefersReduced) return;
+    if (!section || !line || !wrap || prefersReduced || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smoothstep = t => t * t * (3 - 2 * t);
@@ -5173,7 +5399,7 @@
     const runway = document.querySelector('.brandid__closing-runway');
     const apps = document.querySelector('.apps');
     const ground = document.querySelector('.apps__ground');
-    if (!section || !wrap || !apps) return;
+    if (!section || !wrap || !apps || isCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smoothstep = t => t * t * (3 - 2 * t);
@@ -5800,6 +6026,27 @@
   }
 
   initHorizontalScrollDots();
+
+  // .hscroll-dots for Color Principle didn't exist yet at
+  // enableTouchScrollForward's own isCompact() block above (it's
+  // inserted right here, by the call just made) — wired up now that
+  // it's actually in the DOM, so a touch/swipe starting on the dots
+  // themselves also drives the caption's scroll (same request as the
+  // title: "아래 네비게이션 점까지 포함해서 한 섹션으로 구성하자").
+  if (isCompact()) {
+    const colorCaptionEl = document.querySelector('.brandid__color-caption');
+    const colorDotsEl = colorCaptionEl ? colorCaptionEl.nextElementSibling : null;
+    if (colorDotsEl && colorDotsEl.classList.contains('hscroll-dots')) {
+      enableTouchScrollForward(colorDotsEl, colorCaptionEl);
+    }
+    // updateColorHeadSync (initBrandIdentity, above) is scoped to that
+    // function and can't be called directly from here — its own first
+    // call, at page load, ran before .hscroll-dots existed, so the
+    // dots never got their initial colour sync. Re-firing its existing
+    // 'scroll' listener does the same job without needing to reach
+    // across the closure.
+    if (colorCaptionEl) colorCaptionEl.dispatchEvent(new Event('scroll'));
+  }
 
   // The ground used to pan through its own length here — the image is
   // 1800x2601, far taller than any viewport once it covers the width, so

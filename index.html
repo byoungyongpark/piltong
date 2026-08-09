@@ -13,7 +13,7 @@
 <!-- Archivo and Saira dropped with the switch to a single Latin face;
      IBM Plex Mono stays for the small labels, which are a separate role. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@100..900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026080702">
+<link rel="stylesheet" href="css/style.css?v=2026080775">
 </head>
 <body>
 
@@ -238,7 +238,7 @@
 
     <div class="acycle__list" id="acycleList">
       <div class="acycle__intro acycle__intro--onlight">
-        <h2 class="acycle__intro-title">OUR APPROACH</h2>
+        <h2 class="acycle__intro-title">OUR <br class="acycle__intro-title-break">APPROACH</h2>
       </div>
       <!-- Wrapper around just the 4 steps (not the intro) — at compact
            widths this becomes the horizontal touch-scroll strip (see
@@ -791,7 +791,7 @@
                    boundaries instead of splitting mid-word. -->
               <div class="brandid__wordmark-row">
                 <div class="brandid__wordmark-copy">
-                  <p class="brandid__lead">워드마크는 회사명을 표현하는 것이 아니라,<br>회사에 대한 첫인상을 만드는 얼굴입니다.</p>
+                  <p class="brandid__lead">워드마크는 회사명을 표현하는 것이 아니라,<br class="brandid__wordmark-lead-break">회사에 대한 첫인상을 만드는 얼굴입니다.</p>
                   <p class="brandid__body">누구나 쉽게 읽을 수 있고, 오래 기억될 수 있도록<br>불필요한 장식을 덜어내고 가장 명확한 형태로 설계했습니다.</p>
                 </div>
                 <ul class="brandid__blueprint-principles">
@@ -843,13 +843,26 @@
           <path d="M34.69,43.39h-11.67"/>
         </g>
       </svg>
-      <div class="brandid__color-head">
-        <span class="index brandid__color-index">COLOR PRINCIPLE</span>
-        <p class="brandid__color-lead">색은 장식이 아니라, 무엇을 먼저 보게 할지 결정하는 기준입니다.</p>
-      </div>
       <svg class="brandid__color-symbol" viewBox="0 0 70.87 70.87" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M23.02,43.39c-3.13,0-5.67-2.54-5.67-5.67v-14.65c0-3.13,2.54-5.67,5.67-5.67h24.68c3.13,0,5.67,2.54,5.67,5.67v11.65c0,3.12,2.55,5.67,5.67,5.67h11.83V14.17c0-7.83-6.35-14.17-14.17-14.17H14.17C6.35,0,0,6.35,0,14.17v42.52c0,7.83,6.35,14.17,14.17,14.17h26.19v-21.8c0-3.12-2.55-5.67-5.67-5.67h-11.67Z"/>
       </svg>
+      <!-- Title (English + Korean) + the 3-way touch-scroll row grouped
+           as one explicit block, with .hscroll-dots landing inside it
+           too (initHorizontalScrollDots inserts right after
+           .brandid__color-caption, which is now a child of THIS div,
+           not a direct sibling of .brandid__color-head) — on request
+           ("컬러프린서플 구조를 영문 타이틀 + 한글 타이틀 + 3가지
+           터치스크롤 + 하단 원형 네비게이션 점 이렇게 한 섹션으로
+           코드 다시 묶어서 구조화 해줘"). display:contents on desktop
+           (style.css) keeps this invisible to the sticky's own flex
+           layout there — .brandid__color-head/-caption behave exactly
+           as if still direct children, zero visual change above
+           1025px; only compact turns it into a real flex column. -->
+      <div class="brandid__color-block">
+        <div class="brandid__color-head">
+          <span class="index brandid__color-index">COLOR PRINCIPLE</span>
+          <p class="brandid__color-lead">색은 장식이 아니라, 무엇을 먼저 보게 할지 결정하는 기준입니다.</p>
+        </div>
         <div class="brandid__color-caption">
           <p class="brandid__color-name" data-color="0">PILTONG Paper<span>여백과 사고를 위한 기본 배경</span></p>
           <p class="brandid__color-name" data-color="1">PILTONG Ink<span>신뢰와 구조를 만드는 기준색</span></p>
@@ -1403,6 +1416,6 @@
      listener and getBoundingClientRect read on this page keeps
      working unchanged. -->
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-<script src="js/main.js?v=2026080702"></script>
+<script src="js/main.js?v=2026080729"></script>
 </body>
 </html>
