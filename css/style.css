@@ -3895,7 +3895,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   flex: 0 0 60%;
   padding-top: 100px;
   padding-left: 100px;
-  padding-right: var(--edge);
+  /* Was var(--edge), which grew to ~77-96px on wider screens — notably
+     more than the video's own 60px left inset (.brandid__dna-media
+     padding-left), so the section looked lopsided (request: "우측 여백도
+     좌측 심볼 영상 왼쪽 여백과 비슷하게... 1280에서부터"). Matched to that
+     60px so the left video edge and the right text edge sit the same
+     distance off their screen edges. (Compact overrides this to 0.) */
+  padding-right: 60px;
   display: flex;
   flex-direction: column;
   /* Top-left for .brandid__dna-group (SHAPE/DNA + the title reads as a
