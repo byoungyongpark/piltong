@@ -755,6 +755,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      directly rather than this being expressed as a CSS rule — see the
      comment on .statement__figure further up for why. */
 }
+/* 1024-1400px: hold the REST-state photo-to-copy gap at the same size
+   it reads at 1400px, rather than letting it keep narrowing on down to
+   1024px (request: "1400 구간부터 1024에 이르기까지... 좌측 영상과
+   우측 컨텐츠 그룹 사이 여백 1400구간에서 보이는 여백정도로 최대한
+   유지"). The base rule's `left` cancels --st-gap exactly (see its own
+   comment) down to gap = --big * --line3-ink-l - --st-overlap - 60px —
+   both --big and --st-overlap keep scaling down with the viewport, so
+   that gap drifts from ~71px at 1400px to ~36px at 1024px (measured).
+   Overriding `left` directly to (target - --st-gap) reproduces
+   whatever --st-gap resolves to at each width and cancels it the same
+   way, landing on the same fixed ~71.38px gap at every width in this
+   band instead — solved from the base formula at w=1400 (--big=100.8,
+   --st-overlap=25.2): 100.8*1.5534 - 25.2 - 60 = 71.38, so this is
+   exactly continuous with the un-touched formula right above 1400px,
+   not a new number invented separately.
+   Deliberately NOT touching --st-overlap itself (which would have been
+   the more obvious lever) — the O-clip-path and .statement__big's own
+   title-crossing distance both read --st-overlap too, and solving for
+   a constant gap all the way to 1024px would drive it negative, which
+   breaks that unrelated corner-crossing composition. This only touches
+   .statement__body's own rest position, leaving the title's crossing
+   and the PRESSED-state target (initStatementStickyPress reads --st-
+   gap/--st-overlap independently, for the deliberate on-photo overlap
+   while the column is actually pinned, not a "gap" at all) exactly as
+   designed. */
+@media (min-width: 1024px) and (max-width: 1400px) {
+  .statement__body {
+    left: calc(71.38px - var(--st-gap));
+  }
+}
 
 /* Hero content sits left, vertically centered on the viewport,
    over the lit highlight in bg.png. Positioned absolutely (rather
