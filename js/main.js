@@ -841,8 +841,14 @@
     // Went negative (-28, -8, -16) then positive (24, then 12) and back
     // again — the Korean copy overlaps the video's own bottom edge once
     // more, on request ("한글 그룹떨어졌을 시점에 한글 그룹 다시 영상과
-    // 겹치게 조정").
-    const BELOW_OVERLAP = -16;
+    // 겹치게 조정"). Nudged up another notch (request: "영상 아래로
+    // 내려오는 지점에서... 전체 -1~-2정도만 위로 올려보자"), then to
+    // -22 (request: ".statement__body 인라인 엘러먼트 탑 값이 400이
+    // 되어야 원하는 바가 될것 같은데 (542구간 부터)" — copy.style.top
+    // was landing at 404px at 542px width, -22 turned that into exactly
+    // 400px), then -19 (request: "BELOW_OVERLAP을 -18→-19로 해보자"),
+    // now -20 (request: "20으로").
+    const BELOW_OVERLAP = -20;
     const TITLE_GAP = 32;
 
     function resetToBeside() {
@@ -6370,7 +6376,81 @@
     // logo reading the wrong colour (and therefore low-contrast/
     // "greyish") for part of the approach, on request ("여전히...
     // 브랜드월에서 왼쪽 상단 로고 회색으로 보여").
-    function isLightAt(el, scope) {
+    // Real photographs (Applications' own showcase/gallery stack —
+    // .apps__photo, .apps__gallery-img) vary in local brightness far
+    // more than a single flat background-color can capture: a
+    // data-eq-bg override picks one mood for the whole element, and the
+    // plain background-color walk below can't see into a raster image
+    // at all. This samples the actual pixels under the point instead,
+    // so the switch tracks whatever the equalizer happens to be sitting
+    // over as it scrolls past a real photo (request: "목업 이미지
+    // 배경색 네 판단하에 이미지 기준 자동으로 잘보이는 색으로 바꿔줄수
+    // 있어?"). Generic over any <img> rather than scoped to the
+    // Applications classes specifically — no other section currently
+    // puts a plain <img> under either target, and keeping this
+    // untargeted is what makes it "그대로 전 구간에서 적용" for free: it
+    // isn't gated by scope or width, so it already runs everywhere
+    // isLightAt does.
+    const imageSampleCache = new WeakMap();
+    function sampleImageLuminance(img, clientX, clientY) {
+      if (!img.complete || !img.naturalWidth || !img.naturalHeight) return null;
+      const rect = img.getBoundingClientRect();
+      if (!rect.width || !rect.height) return null;
+      const relX = (clientX - rect.left) / rect.width;
+      const relY = (clientY - rect.top) / rect.height;
+      if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return null;
+      // object-fit:cover crops the natural bitmap to fill the box —
+      // .apps__gallery-img:last-child is the one image on the page that
+      // uses it (the rest render at their own natural ratio, so a plain
+      // rect-to-natural scale is correct there). Same cover-crop math
+      // .brandid__closing-loop's own JS fit already relies on elsewhere.
+      let nx, ny;
+      if (getComputedStyle(img).objectFit === 'cover') {
+        const scale = Math.max(rect.width / img.naturalWidth, rect.height / img.naturalHeight);
+        const dispW = img.naturalWidth * scale, dispH = img.naturalHeight * scale;
+        const offX = (dispW - rect.width) / 2, offY = (dispH - rect.height) / 2;
+        nx = (relX * rect.width + offX) / scale;
+        ny = (relY * rect.height + offY) / scale;
+      } else {
+        nx = relX * img.naturalWidth;
+        ny = relY * img.naturalHeight;
+      }
+      const SAMPLE = 24; // small patch, not one pixel — smooths over noise/compression right under the point
+      const sx = Math.max(0, Math.min(img.naturalWidth - SAMPLE, nx - SAMPLE / 2));
+      const sy = Math.max(0, Math.min(img.naturalHeight - SAMPLE, ny - SAMPLE / 2));
+      const sw = Math.min(SAMPLE, img.naturalWidth - sx);
+      const sh = Math.min(SAMPLE, img.naturalHeight - sy);
+      if (sw <= 0 || sh <= 0) return null;
+      // One canvas per image, reused every call — this runs on every
+      // scroll-driven update(), same rAF cadence as the rest of this
+      // function, so allocating a fresh canvas each time would be
+      // needlessly wasteful.
+      let entry = imageSampleCache.get(img);
+      if (!entry) {
+        const canvas = document.createElement('canvas');
+        canvas.width = SAMPLE;
+        canvas.height = SAMPLE;
+        entry = { canvas, ctx: canvas.getContext('2d', { willReadFrequently: true }) };
+        imageSampleCache.set(img, entry);
+      }
+      try {
+        entry.ctx.clearRect(0, 0, SAMPLE, SAMPLE);
+        entry.ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+        const data = entry.ctx.getImageData(0, 0, sw, sh).data;
+        let sum = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          sum += relLuminance(data[i], data[i + 1], data[i + 2]);
+          count++;
+        }
+        return count ? sum / count : null;
+      } catch (e) {
+        // Cross-origin/tainted canvas or a decode failure — fall through
+        // to the background-colour check below rather than throwing.
+        return null;
+      }
+    }
+
+    function isLightAt(el, scope, x, y) {
       let node = el;
       const scopedKey = scope ? 'eqBg' + scope[0].toUpperCase() + scope.slice(1) : null;
       while (node && node !== document.documentElement) {
@@ -6379,6 +6459,10 @@
           if (node.dataset.eqBg) return node.dataset.eqBg === 'light';
         }
         node = node.parentElement;
+      }
+      if (el.tagName === 'IMG') {
+        const sampled = sampleImageLuminance(el, x, y);
+        if (sampled !== null) return sampled > .5;
       }
       node = el;
       while (node && node !== document.documentElement) {
@@ -6411,6 +6495,15 @@
     function activeOverlayOverride(scope) {
       const overlays = document.querySelectorAll('[data-eq-bg]');
       for (const el of overlays) {
+        // data-eq-bg-geo opts an overlay OUT of this unconditional
+        // "visible anywhere = applies everywhere" check — see
+        // geometricOverlayOverride below, which checks these by actual
+        // screen position instead. Without this exclusion, a geo-marked
+        // zone (present in the DOM the whole time it's compact, just
+        // like this one) would win here FIRST and apply its colour to
+        // every scroll position, not just while the target is actually
+        // over it.
+        if (el.dataset.eqBgGeo !== undefined) continue;
         if (getComputedStyle(el).pointerEvents !== 'none') continue;
         if (parseFloat(getComputedStyle(el).opacity) <= .05) continue;
         const restrictTo = el.dataset.eqBgScope;
@@ -6420,20 +6513,52 @@
       return null;
     }
 
+    // For decorative dark/light zones that are real, static blocks (not
+    // scroll-pinned/animated) but still pointer-events:none, so
+    // elementFromPoint skips them and a hit-test can never find them —
+    // .apps__eq-zone (index.html) is the first case: it backs .apps's
+    // own ::before dark band, which a plain ancestor walk can't see
+    // either since a pseudo-element is invisible to both hit-testing and
+    // DOM traversal (request: "타이틀 구간(검은색 배경)... 이퀄라이저가
+    // 이 섹션 지나갈때는 페이퍼색으로 바뀌어야할것 같아"). Checked by
+    // actual screen position (not "visible anywhere", unlike
+    // activeOverlayOverride above) because this zone is always present
+    // in the DOM at compact widths — only ITS OWN geometry says whether
+    // the target is currently over it or has scrolled past into the
+    // paper section below.
+    function geometricOverlayOverride(scope, x, y) {
+      const overlays = document.querySelectorAll('[data-eq-bg][data-eq-bg-geo]');
+      for (const el of overlays) {
+        const restrictTo = el.dataset.eqBgScope;
+        if (restrictTo && restrictTo !== scope) continue;
+        const r = el.getBoundingClientRect();
+        if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+          return el.dataset.eqBg === 'light';
+        }
+      }
+      return null;
+    }
+
     let ticking = false;
 
     function update() {
       ticking = false;
       targets.forEach(({ el, scope }) => {
+        const rect = el.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        const geoOverlay = geometricOverlayOverride(scope, x, y);
+        if (geoOverlay !== null) {
+          el.classList.toggle('is-on-light', geoOverlay);
+          return;
+        }
+
         const overlay = activeOverlayOverride(scope);
         if (overlay !== null) {
           el.classList.toggle('is-on-light', overlay);
           return;
         }
-
-        const rect = el.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
 
         // elementFromPoint would just return EL itself at its own
         // centre — hide it for the one synchronous hit-test, same
@@ -6442,7 +6567,7 @@
         const hit = document.elementFromPoint(x, y);
         el.style.visibility = '';
         if (!hit) return;
-        el.classList.toggle('is-on-light', isLightAt(hit, scope));
+        el.classList.toggle('is-on-light', isLightAt(hit, scope, x, y));
       });
     }
 

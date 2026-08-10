@@ -13,7 +13,7 @@
 <!-- Archivo and Saira dropped with the switch to a single Latin face;
      IBM Plex Mono stays for the small labels, which are a separate role. -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@100..900&display=swap">
-<link rel="stylesheet" href="css/style.css?v=2026080775">
+<link rel="stylesheet" href="css/style.css?v=2026080813">
 </head>
 <body>
 
@@ -791,7 +791,7 @@
                    boundaries instead of splitting mid-word. -->
               <div class="brandid__wordmark-row">
                 <div class="brandid__wordmark-copy">
-                  <p class="brandid__lead">워드마크는 회사명을 표현하는 것이 아니라,<br class="brandid__wordmark-lead-break">회사에 대한 첫인상을 만드는 얼굴입니다.</p>
+                  <p class="brandid__lead">워드마크는 회사명을 표현하는 것이 아니라,<br class="brandid__wordmark-lead-break"> 회사에 대한 첫인상을 만드는 얼굴입니다.</p>
                   <p class="brandid__body">누구나 쉽게 읽을 수 있고, 오래 기억될 수 있도록<br>불필요한 장식을 덜어내고 가장 명확한 형태로 설계했습니다.</p>
                 </div>
                 <ul class="brandid__blueprint-principles">
@@ -860,7 +860,7 @@
            1025px; only compact turns it into a real flex column. -->
       <div class="brandid__color-block">
         <div class="brandid__color-head">
-          <span class="index brandid__color-index">COLOR PRINCIPLE</span>
+          <span class="index brandid__color-index">COLOR<br class="brandid__color-index-break"> PRINCIPLE</span>
           <p class="brandid__color-lead">색은 장식이 아니라, 무엇을 먼저 보게 할지 결정하는 기준입니다.</p>
         </div>
         <div class="brandid__color-caption">
@@ -1051,6 +1051,20 @@
          pinned — the wordmark lands ON this, and everything below sits
          inside it. -->
     <div class="apps__ground" aria-hidden="true"></div>
+    <!-- Compact only (see style.css) — a real (not ::before) marker over
+         the same dark band .apps::before paints, purely so the
+         equalizer's own contrast switch (initContrastSwitchers, main.js)
+         can find it. A pseudo-element is invisible to elementFromPoint
+         AND to a plain DOM ancestor walk, so without this the equalizer
+         read .apps's OWN background-color instead (paper, compact's
+         resting colour below the dark band) and switched to ink over a
+         backdrop that's actually still dark (request: "타이틀 구간(검은색
+         배경) 우측 하단 이퀄라이저가 이 섹션 지나갈때는 페이퍼색으로
+         바뀌어야할것 같아"). pointer-events:none — decorative only, must
+         never intercept clicks; the JS checks it geometrically (its own
+         getBoundingClientRect), not via hit-testing, specifically because
+         pointer-events:none makes elementFromPoint skip it too. -->
+    <div class="apps__eq-zone" data-eq-bg="dark" data-eq-bg-scope="equalizer" data-eq-bg-geo aria-hidden="true"></div>
     <!-- Compact only (see style.css) — the desktop ticker
          (.brandid__closing-next, previous section) rolls "APPLICATIONS"
          into the wordmark's own slot instead; that whole mechanic is
@@ -1427,6 +1441,6 @@
      listener and getBoundingClientRect read on this page keeps
      working unchanged. -->
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
-<script src="js/main.js?v=2026080729"></script>
+<script src="js/main.js?v=2026080735"></script>
 </body>
 </html>
