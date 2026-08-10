@@ -3396,8 +3396,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      video always keeps a real, familiar margin at any compact width —
      this does mean it's no longer chasing extra height via width (that
      was in direct tension with "more margin" anyway, given a fixed
-     aspect ratio and a fixed viewport can't grow both at once). */
-  width: calc(100% - 2 * var(--edge));
+     aspect ratio and a fixed viewport can't grow both at once).
+     Widened a step further past plain var(--edge) since — a real,
+     dedicated margin of its own rather than sharing the site's
+     smallest/default inset (request: "와이필통 심볼 영상 좌우로 여백
+     조금 더 넓히고"). */
+  width: calc(100% - 2 * clamp(32px, 8vw, 120px));
   /* Removed — desktop's shadow (below), even scaled down, still read
      as an unwanted mark under the video at compact sizes (request:
      "영상 아래 그림자는 제거 하자"). */
@@ -3429,13 +3433,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      and the second cut brought the top down further than the bottom,
      not an even split (request: "와이필통 한글 컨텐츠 그룹 위아래
      여백도 조금더 축소하는데 상단은 조금 더 축소"). */
-  /* Side inset moved off this row's own padding — see the note on
-     .whyp__step's padding-left/-right below for why (request: "와이필통
-     텍스트 그룹 터치스크롤 되는부분 컨텐츠 그룹이 가운데 오게 정리
-     현재 다음 터치스크롤 될 부분이 보인다"). Back to plain var(--edge),
-     matching the same pattern .acycle__steps/.vwipe__vision already use
-     (their own compact rules: "padding: 0 var(--edge) ..."). */
-  padding: clamp(16px, 3vw, 32px) var(--edge) clamp(28px, 5vw, 44px);
+  /* Side inset moved OFF this row's own padding entirely — see the
+     note on .whyp__step's padding-left/-right below for why (request:
+     "와이필통 텍스트 그룹 터치스크롤 되는부분 컨텐츠 그룹이 가운데
+     오게 정리 현재 다음 터치스크롤 될 부분이 보인다"). Was briefly
+     var(--edge), matching .acycle__steps/.vwipe__vision's own compact
+     pattern — but unlike those two, THIS row's cards also carry their
+     own wide inner padding (below), so stacking var(--edge) on top of
+     it double-inset the text past its original, intended width
+     (request: "터치 스크롤 되는부분 좌우로 뭔가 여백이 생긴듯한데...
+     원래대로 좁혀서 100%로 컨텐츠 나오게 해줘"). 0 here, so the card's
+     own padding is the ONLY horizontal inset — same total text width
+     as the original single-padding setup, while the card's OUTER box
+     still spans the row's full, true width (no peek). */
+  padding: clamp(16px, 3vw, 32px) 0 clamp(28px, 5vw, 44px);
 }
 .whyp--compact .whyp__step {
   position: static;
