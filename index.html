@@ -961,7 +961,21 @@
            rule ever changes. -->
       <p class="brandid__body brandid__closing-body">이제 그 기준은 모든 경험으로 이어집니다.</p>
     </div>
-    <div class="brandid__closing-loop-wrap">
+    <!-- data-eq-bg marks this as a dark zone for the equalizer's own
+         contrast switch (initContrastSwitchers, main.js) — the actual
+         dark colour comes from this element's own ::before (style.css),
+         which a plain background-color ancestor walk can't see (a
+         pseudo-element is invisible to both hit-testing and DOM
+         traversal), the same gap already fixed for Applications' own
+         dark title band via .apps__eq-zone. No data-eq-bg-geo/scope
+         needed here the way that fix needed them: this IS a real,
+         directly hit-testable element (unlike .apps::before), and it
+         reads as the dark plate at every width (desktop's own pinned
+         video included), so a plain, unconditional tag is correct
+         everywhere, not just compact (request: "우측 이퀄라이저가
+         1024이하 기준 우리는 로고를 만든것이 아래에 있는 심볼 영상
+         워드마크 검은바를 지나갈때는 페이퍼색으로"). -->
+    <div class="brandid__closing-loop-wrap" data-eq-bg="dark">
       <video class="brandid__closing-loop" autoplay muted loop playsinline aria-hidden="true">
         <source src="images/symbol_seamless_loop.mp4" type="video/mp4">
         <!-- Previous footage. Swap the two <source> lines to restore it —

@@ -7170,18 +7170,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      ("영상 중심점을 기준으로 가장 작았다가... 탁 펼쳐지는"), matching
      what was originally (wrongly) set on the video element itself. */
   transform-origin: center;
-  /* Both sampled from the footage rather than picked to taste: mean
-     over four rows at twelve points through the 20s clip. Sampled AT
-     THE CROP LINES (CROP_TOP/CROP_BOTTOM in initClosingFit), not at the
-     frame's own edges — cover-cropping means those edges are no longer
-     what shows, and the picture gets lighter toward the middle. At the
-     frame's true edges the pair read (21,24,29)/(32,33,38); at the
-     current crop lines they read (23,25,30)/(37,38,42), and using the
-     first pair under the second's picture left a step at the lower seam.
-     They differ by ~14 per channel top to bottom, so one colour cannot
-     serve both ends — hence the gradient below rather than a plain
-     background. */
-  --loop-ceiling: #17191E;
+  /* Was two sampled tones (mean over four rows at twelve points through
+     the 20s clip, at the crop lines: (23,25,30) top / (37,38,42)
+     bottom) with a gradient between them, reasoned as necessary since
+     the footage itself reads ~14 per channel lighter at the bottom than
+     the top. That held at rest, but the handover's own scale-up
+     (--plate-spread-x/-y below) stretches this backdrop out past the
+     video's real edges into an expanding field of flat colour that no
+     longer corresponds to any actual sampled row of the footage — the
+     two-tone split just reads as an internal seam there instead, on
+     request ("화면이 확대될때 뒷배경색과 영상 상하좌우 쪽 색상이
+     달라서... 한개의 화면인것처럼 자연스럽게 보이고 싶어"). Unified to
+     the floor tone (also what --handoff-flood, the Applications
+     hand-off target a few sections down, already uses — one fewer
+     independently-tuned dark value in the file). Costs the vertical
+     seam-matching precision at REST that the two-tone split bought;
+     --loop-ceiling is kept as its own variable (not deleted/inlined)
+     so a future fix can still special-case the rest state if the
+     single tone reads wrong there once actually seen. */
+  --loop-ceiling: #25262A;
   --loop-floor: #25262A;
   /* The block runs on past the footage at both ends, on request ("영상
      위에도 그라데이션 처리하고 영상 상단 배경색이랑 비슷한거 깔아서
@@ -8380,14 +8387,32 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      corner point never fades at all), on request ("영상 투명 그라데이션을
      대각선 양사방으로도 줘서"). Sized past the symbol's own footprint so
      it only ever touches the four corners, not the mark. */
+  /* Grown in step with the handover's own spread instead of staying a
+       fixed size against a fixed-size video box (the <video> itself
+       never scales — only the backdrop behind it does, see ::before's
+       own comment on why) — proposed as an alternative to flattening
+       the ceiling/floor sampling into one colour (request: "심볼 영상에
+       올려진 방사형 마스크도 그럼 뒤에 확대되는 배경이랑 같이
+       커지면?"). Each fade's WIDTH (not just its stop position) scales
+       by the relevant spread factor, so as the plate expands, the
+       video's own edge-dissolve widens to match rather than staying a
+       fixed slice of a box that no longer matches the now-larger scene
+       around it — at spread 1 (rest) every term reduces back to exactly
+       the original value, so nothing changes until the handover
+       actually runs. Top/left grow from 0 (their own transparent-to-
+       opaque ramp starts at 0 regardless); bottom/right grow from their
+       own stop toward 100%, so `(100% - stop) * spread` is the ramp's
+       own width, not the raw stop value. The radial corner ellipse
+       scales both axes directly — a bigger radius stretches its own
+       65%-100% ring over more actual pixels. */
   -webkit-mask-image:
-    linear-gradient(to bottom, transparent 0, #000 var(--loop-mask-top, 7%), #000 var(--loop-mask-bottom, 94%), transparent 100%),
-    linear-gradient(to right, transparent 0, #000 var(--loop-mask-left, 12%), #000 var(--loop-mask-right, 88%), transparent 100%),
-    radial-gradient(ellipse 78% 78% at center, #000 65%, transparent 100%);
+    linear-gradient(to bottom, transparent 0, #000 calc(var(--loop-mask-top, 7%) * var(--plate-spread-y, 1)), #000 calc(100% - (100% - var(--loop-mask-bottom, 94%)) * var(--plate-spread-y, 1)), transparent 100%),
+    linear-gradient(to right, transparent 0, #000 calc(var(--loop-mask-left, 12%) * var(--plate-spread-x, 1)), #000 calc(100% - (100% - var(--loop-mask-right, 88%)) * var(--plate-spread-x, 1)), transparent 100%),
+    radial-gradient(ellipse calc(78% * var(--plate-spread-x, 1)) calc(78% * var(--plate-spread-y, 1)) at center, #000 65%, transparent 100%);
   mask-image:
-    linear-gradient(to bottom, transparent 0, #000 var(--loop-mask-top, 7%), #000 var(--loop-mask-bottom, 94%), transparent 100%),
-    linear-gradient(to right, transparent 0, #000 var(--loop-mask-left, 12%), #000 var(--loop-mask-right, 88%), transparent 100%),
-    radial-gradient(ellipse 78% 78% at center, #000 65%, transparent 100%);
+    linear-gradient(to bottom, transparent 0, #000 calc(var(--loop-mask-top, 7%) * var(--plate-spread-y, 1)), #000 calc(100% - (100% - var(--loop-mask-bottom, 94%)) * var(--plate-spread-y, 1)), transparent 100%),
+    linear-gradient(to right, transparent 0, #000 calc(var(--loop-mask-left, 12%) * var(--plate-spread-x, 1)), #000 calc(100% - (100% - var(--loop-mask-right, 88%)) * var(--plate-spread-x, 1)), transparent 100%),
+    radial-gradient(ellipse calc(78% * var(--plate-spread-x, 1)) calc(78% * var(--plate-spread-y, 1)) at center, #000 65%, transparent 100%);
   -webkit-mask-composite: source-in, source-in;
   mask-composite: intersect;
 }
