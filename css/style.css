@@ -7180,16 +7180,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      longer corresponds to any actual sampled row of the footage — the
      two-tone split just reads as an internal seam there instead, on
      request ("화면이 확대될때 뒷배경색과 영상 상하좌우 쪽 색상이
-     달라서... 한개의 화면인것처럼 자연스럽게 보이고 싶어"). Unified to
-     the floor tone (also what --handoff-flood, the Applications
-     hand-off target a few sections down, already uses — one fewer
-     independently-tuned dark value in the file). Costs the vertical
-     seam-matching precision at REST that the two-tone split bought;
-     --loop-ceiling is kept as its own variable (not deleted/inlined)
-     so a future fix can still special-case the rest state if the
-     single tone reads wrong there once actually seen. */
-  --loop-ceiling: #25262A;
-  --loop-floor: #25262A;
+     달라서... 한개의 화면인것처럼 자연스럽게 보이고 싶어"). First
+     unified to the floor tone (#25262A, also what --handoff-flood, the
+     Applications hand-off target a few sections down, already uses),
+     then darkened once more to match the mask's own OUTERMOST edge
+     instead of the crop-line tone — the video fades out via mask, not
+     a crop, so its visually "last" colour is whatever showed at the
+     frame's true edge, measured darker than the crop-line sample this
+     was resting on (21,24,29) top / (32,33,38) bottom — averaged
+     (request: "통일된 색상을 영상 투명 그라데이션된 가장 바깥쪽
+     색상이랑 비슷하게... 지금색보단 조금 어두워야"). --loop-ceiling is
+     kept as its own variable (not deleted/inlined) so a future fix can
+     still special-case the rest state if a single tone ever reads
+     wrong there. */
+  --loop-ceiling: #1B1D22;
+  --loop-floor: #1B1D22;
   /* The block runs on past the footage at both ends, on request ("영상
      위에도 그라데이션 처리하고 영상 상단 배경색이랑 비슷한거 깔아서
      위쪽도 넓혀보자 아랫쪽은 조금 더 넉넉히") — the lower band is the
