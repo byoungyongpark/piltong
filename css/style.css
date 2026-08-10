@@ -9153,3 +9153,105 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
 }
 
+/* ---------- Outro: closing CTA + info ----------
+   New last section on the page (site's own live content ends at
+   Applications now — everything after it in the markup is the parked
+   "01 Philosophy → end" block). First pass, loosely modelled on a
+   reference screenshot: a wide left title+lead next to a narrower
+   stack of labelled info blocks, thin divider, copyright row below.
+   Right column is placeholder content on request ("우측 정보는 임의로
+   넣어놓으면 정리할께") — kept visually consistent with the rest of
+   the block so it reads as finished structure, not a stub, even though
+   the actual values will change. */
+.outro__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(40px, 6vw, 120px);
+}
+.outro__lead {
+  flex: 1 1 55%;
+  max-width: 640px;
+}
+/* Sentence-case, not the all-caps display treatment the section index
+   words (SHAPE DNA, SYMBOL & WORDMARK, etc.) use elsewhere — this is a
+   real two-line question+statement, not a short label. */
+.outro__title {
+  font-family: var(--font-en);
+  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -.015em;
+  color: var(--ink);
+}
+.outro__kr {
+  margin-top: clamp(16px, 2.2vw, 28px);
+  font-size: clamp(17px, 1.6vw, 21px);
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink-70);
+  word-break: keep-all;
+}
+.outro__info {
+  flex: 0 1 380px;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 3.6vw, 48px);
+  text-align: left;
+}
+.outro__block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.outro__label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+.outro__value {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.outro__value--muted { color: var(--ink-70); }
+.outro__value--link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--ink-12);
+  transition: text-decoration-color 200ms var(--ease);
+}
+.outro__value--link:hover { text-decoration-color: var(--ink-45); }
+.outro__bottom {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: clamp(56px, 8vw, 96px);
+  padding-top: clamp(20px, 3vw, 28px);
+  border-top: 1px solid var(--ink-12);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .02em;
+  color: var(--ink-45);
+}
+.outro__note { text-align: right; }
+@media (max-width: 1023px) {
+  .outro__row {
+    flex-direction: column;
+    gap: clamp(40px, 8vw, 64px);
+  }
+  .outro__lead { max-width: none; }
+  .outro__info { flex: none; width: 100%; }
+  .outro__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .outro__note { text-align: left; }
+}
+
