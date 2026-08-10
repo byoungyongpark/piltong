@@ -5577,14 +5577,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        sticky specifically below, same as before this edit). */
     padding: clamp(12px, 2vw, 20px) 0 0;
   }
-  /* The paper margin below the whole coloured block. The nav dots now
-     carry their OWN generous coloured bottom padding (see
-     .brandid__color-cards-row + .hscroll-dots above), which is the
-     section's real bottom breathing space now — so this paper margin
-     drops to a modest section separator rather than stacking a second
-     big gap on top of it. */
+  /* Bottom padding removed entirely (request: "컬러 프린서플 섹션의
+     하단 여백 제거") — the nav dots already carry their own generous
+     coloured bottom padding as the section's real bottom breathing
+     space, and Color Story below now starts flush (its own top padding
+     dropped to 0 too), so this paper separator is gone. */
   .brandid__color-sticky {
-    padding-bottom: clamp(28px, 5vw, 44px);
+    padding-bottom: 0;
   }
   .brandid__blueprint-panel {
     position: relative;
@@ -6128,12 +6127,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: static;
     height: auto;
     overflow: visible;
-    /* Was no padding at all — the section's own top/bottom margin
-       relied purely on wherever the first/last panel's own content
-       happened to start/end. Matched to the shared clamp(56px,10vw,
-       96px)/clamp(64px,11vw,96px) top/bottom every other section uses
-       (request: "컬러스토리 위아래 여백도 똑같이 맞춰주고"). */
-    padding: clamp(56px, 10vw, 96px) 0 clamp(64px, 11vw, 96px);
+    /* Top padding dropped to 0 so the FIRST panel (PILTONG Paper) has no
+       extra space above its card that panels 2/3 lack — its only top
+       space is now the same per-card margin they all share, unifying the
+       three (request: "맨 첫번째 필통 페이퍼 위쪽 여백... 나머지 아래
+       두컬러 섹션 위쪽과 통일"). Paired with Color Principle's own bottom
+       padding going to 0 (see .brandid__color-sticky), so the two
+       sections meet flush. Bottom kept — it's this section's own margin
+       before Closing. */
+    padding: 0 0 clamp(64px, 11vw, 96px);
   }
   /* No gap between panels at all now — was clamp(48px,10vw,96px)
      between every one of them, which read as three disconnected chunks
@@ -6209,10 +6211,24 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: relative;
     left: auto;
     z-index: 1;
+    /* Widened from the ≤1600px tier's clamp(32px,6vh,64px) — a bit more
+       space above every card (request: "카드별 섹션 위쪽의 여백 조금더
+       넓히고"), and this same value is now the ONLY top space panel 1
+       gets too (its sticky top padding is gone above), so all three
+       panels' card-top spacing matches. */
+    margin-top: clamp(48px, 9vw, 80px);
   }
   .brandid__colorstory-copy {
     position: relative;
     z-index: 1;
+    /* Left-aligned to the browser edge instead of centred (request:
+       "영문 포함 한글 텍스트 그룹은 브라우저의 좌측 정렬로 바꾸자") —
+       overrides the ≤1600px tier's `margin: 24px auto 0` centring:
+       left margin pinned to var(--edge), right stays auto so the block
+       hugs the left. Its own children (eng label / lead / body) are
+       already left-set. */
+    margin-left: var(--edge);
+    margin-right: auto;
     /* Generous run of the panel's own (now solid, see above) colour
        below the text before the image band begins, on request
        ("컨텐츠 텍스트 구룹 아래 여백도 어느정도 넉넉히 확보"), widened
