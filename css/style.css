@@ -1608,7 +1608,23 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      is derived from; it can't manufacture overflow the word's own peak
      size never reaches at a given aspect ratio). 6.5 gives that same
      screen ~1650px of ink — genuinely past 1440, with real margin. */
-  --vwipe-base: 14vw;
+  /* --vwipe-base was PURE 14vw, so the guarantee above only actually
+     held at the one aspect ratio (16:9) it was measured against — a
+     narrower/taller window (e.g. 1024x768, the newly-exposed bottom of
+     the desktop band) needs a peak of ~7.6x at the same 14vw coefficient
+     to reach its own viewport height, so main.js's overflow-triggered
+     fade (initVisionWipe's pOverflow) never actually saw overflow there
+     and just faded at raw peak instead — the word visibly stopped short
+     of the top/bottom edge (request: "비전섹션 확장되는 비전 영문
+     타이틀은 브라우저 상하를 넘치는 크기까지 확장된 뒤 자연스럽게
+     사라지게, 2560이하 전구간"). max() with a vh-based floor fixes this
+     for ANY aspect ratio rather than re-tuning peak for one more
+     resolution: solving peak*INK_RATIO(.708)*base >= 100vh for base
+     gives base >= 21.73vh at this peak; 24vh adds the same kind of
+     margin the 5.5->6.5 peak bump did. At wide/short windows (16:9 and
+     wider) 14vw still exceeds 24vh and wins, so the tuned-for-2560
+     look is unchanged there. */
+  --vwipe-base: max(14vw, 24vh);
   --vwipe-peak: 6.5;
   /* Read by main.js: the fraction of this section's total scroll spent
      on the zoom (260/500). Kept as a variable rather than duplicated as
@@ -2519,7 +2535,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .acycle__title {
   max-width: 46rem;
   margin: 0 0 clamp(14px, 1.8vw, 20px);
-  font-size: clamp(22px, 2.4vw, 40px);
+  /* Was clamp(22px,2.4vw,40px) — same 40px ceiling .vwipe__vtitle
+     carries, but reached it 288px later (1667px vs 1379px) since the
+     coefficient was shallower, so across the whole common desktop
+     range (roughly 1024-1667px) this read noticeably smaller than
+     Vision's own title even though the two match at their shared max
+     (request: "아워 어프로치... 한글 그룹 유독 작아보이는데... 비전
+     섹션이랑 비슷해 보이는 사이즈여야 할것 같아"). Matched exactly to
+     .vwipe__vtitle's own clamp instead of just its ceiling. */
+  font-size: clamp(28px, 2.9vw, 40px);
   line-height: 1.22;
   font-weight: 700;
   letter-spacing: -.02em;
@@ -2529,7 +2553,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .acycle__body {
   max-width: 46rem;
   margin: 0;
-  font-size: clamp(16px, 1.6vw, 24px);
+  /* Same fix as -title above, matched to .vwipe__vbody's clamp
+     (was clamp(16px,1.6vw,24px), shared 24px ceiling reached 237px
+     later than Vision's). */
+  font-size: clamp(18px, 1.9vw, 24px);
   line-height: 1.4;
   font-weight: 500;
   letter-spacing: -.015em;
@@ -2807,14 +2834,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   will-change: transform, filter;
 }
 .whyp__row--solid { animation: whypMarqueeL 95s linear infinite; }
-/* Pulled up to close/overlap the solid row above it, since gap: 0
-   above only removes flexbox's own spacing, not the type's natural
-   line-height air — margin-top is the only way left to bring the two
-   rows genuinely tight. */
+/* Was pulled up with a negative margin to overlap the solid row above
+   it — reversed on request ("와이필통의 흘러가는 타이틀은 위아래...
+   겹치지 않게 해줘, 모든구간"): the two rows must stay clear of each
+   other at every width now, not just close. 0 relies on gap:0 above
+   (no flex spacing) plus the two rows sharing the same font-size
+   clamp, so their line boxes stack edge-to-edge with no negative
+   offset pulling them into each other. */
 .whyp__row--outline {
   position: relative;   /* anchors .whyp__row-photos' overlay below */
   animation: whypMarqueeR 118s linear infinite;
-  margin-top: clamp(-56px, -7vw, -18px);
+  margin-top: 0;
 }
 .whyp__track {
   flex-shrink: 0;
@@ -3194,14 +3224,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   height: auto;
   padding: clamp(56px, 10vw, 96px) 0 clamp(32px, 6vw, 48px);
 }
-/* Desktop's clamp(-56px,-7vw,-18px) pulls the outline row up to
-   overlap/hug the solid row above it. Two-point exact line, same
-   ceiling as the desktop formula's own value at 1025px (-56px, so
-   there's no jump entering compact) down to a shallower -20px at
-   420px — less overlap, the two rows read as more separated (request:
-   "좌우로 흘러가는 글자 스트로크 된 영문과 사이 조금 떨어뜨려주고"). */
+/* Same reversal as the desktop rule above — no negative pull-up at
+   any compact width either, so the two rows stay clear of each other
+   across the whole range (request: "겹치지 않게 해줘, 모든구간"). */
 .whyp--compact .whyp__row--outline {
-  margin-top: clamp(-56px, calc(4.99px - 5.9504vw), -20px);
+  margin-top: 0;
 }
 .whyp--compact .whyp__media {
   position: static;
@@ -5229,6 +5256,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: auto;
   display: block;
+  /* SVG clips content to its viewBox by default. The .15-unit padding
+     baked into the viewBox is only enough room for the .7px
+     non-scaling stroke at the widths it was checked at — at narrower
+     rendered widths (e.g. the 1024px band, where --edge + this
+     element's own side padding leaves less column to draw into) the
+     same .7px stroke is a larger fraction of a user unit, so the G's
+     right edge clips (request: "1024구간에서... 오른쪽 G우측 부분이
+     미세하게 잘려보인다"). overflow:visible removes that clip
+     entirely rather than re-tuning the viewBox pad for one width. */
+  overflow: visible;
 }
 @media (max-width: 1023px) {
   /* The stroke-drawn logo's own left/right margin — kept independent
