@@ -4317,7 +4317,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__construction-row {
   width: 100vw;
   margin-inline: calc(50% - 50vw);
-  padding: 0 200px;
+  /* Side inset was a flat 200px — fine on a wide screen, but as the
+     viewport narrows toward the 1024px breakpoint it starved the right-
+     hand Korean column (title takes 42%, so 1024 - 400 padding left only
+     ~310px for the text, which wrapped mid-word). Scales down from 200px
+     at ~1880px to ~60px at 1024px so the text keeps room (request: "1880
+     지점 부터 심볼&워드마크 섹션 좌우의 여백 축소해서... 1024해상도에
+     갔을때 저런 모양 안되게"). Below 1024 the compact rule takes over
+     with its own var(--edge). Two-point line: 200px@1880, 60px@1024. */
+  padding: 0 clamp(60px, calc(16.35vw - 107.4px), 200px);
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
