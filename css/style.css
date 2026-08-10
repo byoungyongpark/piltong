@@ -5263,12 +5263,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (max-width: 900px) {
   .brandid__wordmark-row { gap: clamp(28px, 5vw, 44px); }
   .brandid__wordmark-row .brandid__blueprint-principles { flex: 1 1 auto; width: 100%; }
-  /* The desktop copy carries a hard <br> right after "아니라,", on
-     desktop's own wider column — hidden here so the sentence flows
-     continuously and only wraps where word-break:keep-all actually
-     needs it to (request: "워드마크 섹션 한글 타이틀은 아니라에서
-     줄바꿈 되지 않고 이어서"). */
-  .brandid__wordmark-lead-break { display: none; }
+  /* The hard <br> after "아니라," used to be hidden here so the sentence
+     flowed continuously — reversed on request ("워드마크 섹션의 한글
+     타이틀 아니라, 에서 줄바꿈 되게하자"): it now breaks at 아니라 across
+     the whole compact range (the <br> already shows at 901-1025px and on
+     desktop, so removing this hide is all that's needed). */
 }
 /* This panel stacks the mark ON TOP of the same text block the symbol
    panel sets BESIDE its diagram, so it's the taller of the two and the
