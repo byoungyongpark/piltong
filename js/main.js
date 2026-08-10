@@ -4404,8 +4404,18 @@
       if (Math.abs(dx) < THRESH || Math.abs(dx) <= Math.abs(dy)) return;
       const maxLeft = el.scrollWidth - el.clientWidth;
       if (maxLeft <= 0) return;
-      if (sLeft >= maxLeft - 2 && dx < 0) el.scrollTo({ left: 0, behavior: 'smooth' });
-      else if (sLeft <= 2 && dx > 0) el.scrollTo({ left: maxLeft, behavior: 'smooth' });
+      // Round the START position to its nearest card index rather than
+      // testing an exact-pixel boundary. A flick to the last card often
+      // settles a few px short of the true max, so `sLeft >= maxLeft - 2`
+      // missed the very next swipe and only caught the one AFTER (once the
+      // snap had settled exactly) — which is the "한번 더 해야 넘어가는"
+      // the user hit. Rounding absorbs that few-px gap so a SINGLE forward
+      // swipe on the last card wraps.
+      const stepW = el.clientWidth || 1;
+      const lastIdx = Math.round(maxLeft / stepW);
+      const startIdx = Math.round(sLeft / stepW);
+      if (startIdx >= lastIdx && dx < 0) el.scrollTo({ left: 0, behavior: 'smooth' });
+      else if (startIdx <= 0 && dx > 0) el.scrollTo({ left: maxLeft, behavior: 'smooth' });
     }, { passive: true });
   }
 
