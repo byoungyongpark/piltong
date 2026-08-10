@@ -3688,7 +3688,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      정렬해서 자연스럽게 줄게"). */
   .brandwall { padding-left: 0; align-items: center; }
   .brandwall__logo {
-    transform: none;
+    /* Was none — "plain centering" still read slightly low here too,
+       same "glyph weight sits toward the baseline" reason the desktop
+       rule's own -3.5vh nudge exists for, just needing a lighter touch
+       since this box is shorter (request: "1023구간에서 브랜드 월 로고
+       위치 살짝만 위로 해서 시각적으로 가운데 보이게"). */
+    transform: translateY(-2vh);
     /* Was the desktop clamp(240px,40vw,660px) — scaled down to a
        smaller ratio so the logo doesn't dominate the now-shrunk
        (30svh) box quite as much, growing/shrinking more gently across
@@ -4059,6 +4064,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Nudged left off the default 50% centre — the turning symbol read as
+     sitting slightly right of centre as it rotates (request: "심볼이
+     좌우로 돌아갈때 약간 오른쪽에 치우친 느낌이 강한데... 딱 중앙에
+     보이게"). Lower object-position-X shows more of the footage's own
+     left side (crops more off the right), pulling the subject back
+     toward centre. */
+  object-position: 42% center;
   /* transform set inline every frame (updateDna) — will-change hints
      the browser this element animates, same reasoning as
      .brandwall__bg's own will-change below. */
@@ -4413,9 +4425,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__dna-media {
     flex: none;
     width: 100%;
-    /* Was 62vw, then 78vw — taller again (request: "쉐입디엔에이 위의
-       위치한 심볼 영상의 높이값은 더 주면 좋겠고"). */
-    height: 95vw;
+    /* Was a vw-based height (62vw, then 78vw, then 95vw — chasing a
+       taller box with an approximate ratio each time). Switched to an
+       explicit square instead of another vw guess (request: "1023구간
+       부터 영상 비율은 정사각형 비율로 하자") — exact 1:1 at any width,
+       rather than 95vw's own ~1.05:1 (width:height, at width=100%). */
+    aspect-ratio: 1 / 1;
     padding-top: 0;
     padding-left: 0;
     padding-bottom: 0;
@@ -5561,6 +5576,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      타이틀 아니라, 에서 줄바꿈 되게하자"): it now breaks at 아니라 across
      the whole compact range (the <br> already shows at 901-1025px and on
      desktop, so removing this hide is all that's needed). */
+}
+@media (max-width: 420px) {
+  /* Same reversal, one more time, narrower still — both the lead's own
+     "아니라," break AND the body's own two-clause break read as forced
+     mid-thought wraps at this smallest width rather than the deliberate
+     two-line reads they are above it (request: "워드마크 섹션 영문
+     타이틀 아래 한글 타이틀 및 본문 420이하 구간에서 줄바꿈 없이
+     한줄로 처리하고 단어별로 자동으로 줄바꿈"). word-break:keep-all
+     (.brandid__blueprint-text .brandid__lead/.brandid__body, shared
+     with the SYMBOL panel's own identical fix) is already in effect,
+     so hiding the <br>s is all this needs — wrapping falls back to
+     natural word boundaries. */
+  .brandid__wordmark-copy .brandid__lead br,
+  .brandid__wordmark-copy .brandid__body br {
+    display: none;
+  }
 }
 /* Narrow-desktop band: the 3 principles beside the copy read cramped
    here, so drop them onto their own full-width row BELOW the copy in
@@ -7519,6 +7550,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      BLOCK itself at the section's own left inset rather than centred
      — only the text's own alignment inside that block needed fixing. */
   .apps__lead { text-align: left; }
+  /* Was the base rule's 2.75rem — technically already responsive (the
+     global html{font-size} pilot scales EVERY rem down to 320px), but
+     on its own curve: ~32.7px at 1024px against .brandid__closing-line
+     (this section's own visual reference point)'s 36px there, and the
+     two only agree exactly at 2560px where both are pinned to their
+     own ceilings. Matched to closing-line/-body's own exact clamp
+     formulas instead so the two read as the same size through the
+     whole compact range, not just at one end of it (request: "하나의
+     아이덴티티 타이틀 및 오른쪽 본문도 1024이상 해상도에서의 폰트
+     사이즈부터... 1023구간에서 볼때 위의 우리는 로고를 만든 것이
+     아니라... 이제 그 기준은... 여기랑 비슷해 보여야할듯"). */
+  .apps__lead { font-size: clamp(24px, calc(15.67px + 1.98vw), 36px); }
+  .apps__body { font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px); }
   /* The relocated "APPLICATIONS" title — see index.html for why.
      Centred (request: "가운데 정렬로 위치"), same display formula the
      old ticker settled into for compact (.brandid__closing-next's own
