@@ -5343,6 +5343,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     margin-top: clamp(32px, 4vw, 56px);
   }
 }
+/* Same drop-below treatment, one step down: 901-1023px falls inside
+   COMPACT by the numbers (isCompact() is <= 1023), but the full-width
+   stacking rule above only kicks in at <= 900px, so this slice was
+   still running the desktop row (flex + wrap) — cramped for the same
+   reason the 1024-1280px band above was (request: "1023해상도에
+   워드마크섹션 세가지 항목 아래로 떨어뜨리자"). */
+@media (min-width: 901px) and (max-width: 1023px) {
+  .brandid__wordmark-row .brandid__blueprint-principles {
+    flex: 1 1 100%;
+    width: 100%;
+    margin-top: clamp(32px, 4vw, 56px);
+  }
+}
 /* This panel stacks the mark ON TOP of the same text block the symbol
    panel sets BESIDE its diagram, so it's the taller of the two and the
    first to run out of room inside the 100svh sticky box — measured at
@@ -6181,6 +6194,41 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     bottom: auto;
     width: min(480px, calc(100% - var(--edge) * 2));
     margin: 24px auto 0;
+  }
+}
+/* 1024-1600px: keep the ≥1600px tier's side-by-side structure (card +
+   copy, not stacked) instead of falling back to the block above, but
+   position the pair as ONE group centred on the viewport rather than
+   the ≥1600px layout's own off-centre absolute placement (copy fixed
+   at left:14%, card fixed dead-centre — request: "1600구간에서
+   컬러스토리 섹션 레이아웃을 1600이상과 똑같이 좌측 우측으로
+   유지하되 텍스트 그룹 + 카드 그룹을 브라우저 화면 기준 중앙에
+   위치시키는 레이아웃으로"). A flex row does the centring for free —
+   card + gap + copy shrink-wrap and land in the middle regardless of
+   either child's own width, which absolute left/top offsets can't do
+   for a pair as a unit. order:-1 on the copy keeps it visually left
+   of the card, matching the ≥1600px reading (text, then swatch). */
+@media (min-width: 1024px) and (max-width: 1600px) {
+  .brandid__colorstory-panel {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(40px, 5vw, 96px);
+  }
+  .brandid__colorstory-img { position: absolute; inset: 0; }
+  .brandid__colorstory-card {
+    position: static;
+    transform: none;
+    margin: 0;
+  }
+  .brandid__colorstory-copy {
+    order: -1;
+    position: static;
+    left: auto;
+    top: auto;
+    bottom: auto;
+    width: min(360px, 30vw);
+    margin: 0;
   }
 }
 
