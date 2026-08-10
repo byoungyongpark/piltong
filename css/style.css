@@ -3858,9 +3858,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 /* Narrow-desktop band (down to the new 1024px breakpoint): the video's
    40% column reads a touch cramped there, so widen its share a step
    (request: "쉐입디엔에이 섹션 좌측 영상 가로 비율 조금 늘려줘
-   (1280~1024기준)"). Only this band — wider desktop keeps the 40%. */
+   (1280~1024기준)"). Only this band — wider desktop keeps the 40%.
+   The right column MUST drop to the complementary 54%: both are
+   flex:0 0 (no shrink), so leaving it at 60% totalled 106% and pushed
+   the whole right column off-screen — its right edge ran 77px past the
+   viewport and the big background numeral 27px past it, which is the
+   "오른쪽 영역이 밀려난" the user saw. 46+54 = 100 keeps it in frame with
+   its own 60px right padding intact, matching the video's 60px left
+   inset (request: "우측 마진이 좌측 영상 좌측 여백과 비슷한 여백이
+   존재해야"). */
 @media (min-width: 1024px) and (max-width: 1280px) {
   .brandid__dna-media { flex-basis: 46%; }
+  /* .brandid__dna-right's own half lives AFTER its base rule below —
+     placing it here would lose the equal-specificity tie on source
+     order (the same trap this file has hit several times). */
 }
 .brandid__dna-media-video {
   display: block;
@@ -3909,6 +3920,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      request "좌측 상단 왼쪽 정렬"). */
   align-items: flex-start;
   justify-content: flex-start;
+}
+/* The complement of .brandid__dna-media's 46% in the same band (see its
+   own rule above). Both columns are flex:0 0 (no shrink), so leaving
+   this at 60% totalled 106% and pushed the whole right column off-
+   screen — its right edge ran 77px past the viewport and the big
+   background numeral 27px past it, which is the "오른쪽 영역이 밀려난"
+   the user saw. 46+54 = 100 keeps it in frame with its own 60px right
+   padding intact, matching the video's 60px left inset (request: "우측
+   마진이 좌측 영상 좌측 여백과 비슷한 여백이 존재해야"). Placed AFTER
+   the base rule so it wins the equal-specificity tie on source order. */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .brandid__dna-right { flex-basis: 54%; }
 }
 /* SHAPE/DNA + the title — the "영문 타이틀 그룹" (English title group),
    on request. .brandid__dna-detail-col (the 4 principles) is a
