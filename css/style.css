@@ -6211,12 +6211,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: relative;
     left: auto;
     z-index: 1;
-    /* Widened from the ≤1600px tier's clamp(32px,6vh,64px) — a bit more
-       space above every card (request: "카드별 섹션 위쪽의 여백 조금더
-       넓히고"), and this same value is now the ONLY top space panel 1
-       gets too (its sticky top padding is gone above), so all three
-       panels' card-top spacing matches. */
-    margin-top: clamp(48px, 9vw, 80px);
+    /* Matched to Color Principle's own top space above its title
+       (.brandid__color-head padding-top, clamp(56,10vw,96)) so every
+       colour's top margin here lines up with that section's (request:
+       "각 컬러별 위쪽 여백 컬러프린서플 위쪽이랑 통일"). Since the sticky
+       top padding above panel 1 is gone, this same value is the ONLY top
+       space all three panels get, so they stay matched to each other too. */
+    margin-top: clamp(56px, 10vw, 96px);
   }
   .brandid__colorstory-copy {
     position: relative;
@@ -6229,6 +6230,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        already left-set. */
     margin-left: var(--edge);
     margin-right: auto;
+    /* More space above the text group than the ≤1600px tier's flat 24px
+       (request: "컬러스토리 영문 및 한글 텍스트 그룹 위쪽으로 여백도 조금
+       더 넓히자") — the gap between the swatch card and the copy. */
+    margin-top: clamp(36px, 7vw, 56px);
     /* Generous run of the panel's own (now solid, see above) colour
        below the text before the image band begins, on request
        ("컨텐츠 텍스트 구룹 아래 여백도 어느정도 넉넉히 확보"), widened
