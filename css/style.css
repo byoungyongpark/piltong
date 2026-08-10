@@ -566,7 +566,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    initPhilosophyScatter's letter-pour and initStatementParallax's
    photo rise are separately gated on isCompact() below since neither
    depends on this element's position at all. */
-@media (min-width: 1025px) {
+@media (min-width: 1024px) {
   /* Photo left and bled off that edge; type and copy in a column to its
      right. A grid rather than absolute positioning so the copy's height
      still drives the section — nothing here has to be measured by hand.
@@ -811,7 +811,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    chosen over 16px on desktop (stem pixel-snapping), and a phone's own
    higher DPR is what makes stepping down further safe here without
    reopening that. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .hero-logo { height: 14px; }
 }
 .hero-logo.is-nav-fixed {
@@ -930,7 +930,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    the 1025px boundary rather than swapping to an unrelated shape
    (request: "히어로 섹션 영문 폰트 사이즈도 1024~420까지는 1024이상에서
    작동했던 방향대로 자연스럽게 폰트 줄어들게"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .hero {
     --hero-big: clamp(36px, min(9.2vw, var(--hero-measure) / 8.36, var(--hero-vfit)), 200px);
   }
@@ -990,7 +990,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    above, not before — same specificity, so source order is what decides
    the winner, and the earlier placement lost to the unconditional base
    rule regardless of the media query matching. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .hero-eyebrow {
     /* Was a flat 16px — 16 is now just the mobile-width floor of a
        clamp so it grows toward tablet width along with --hero-big
@@ -1274,7 +1274,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    vtitle's own clamp (was a flat 40px at every width, on request:
    "아워 필라서피 섹션의 한글 타이틀... 폰트 스타일은 비전과 똑같이
    맞춰줘 글자색 빼고", "1025이하 기준"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was clamp(24px, 5vw, 36px) — that plateaued at 36 by 720px and at
      24 by 480px, not actually transitioning across the full requested
      range. Rebuilt as an exact two-point line (offset + vw, not vw
@@ -1327,7 +1327,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   transform: translateX(0);
 }
 
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Float (video floats left, title wraps beside it) was tried here and
      reverted again: once every line sits within the float's own height,
      the float's exclusion zone always wins over each line's own
@@ -1806,7 +1806,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    scroll-snap row instead of cross-blurring in one spot. initVisionWipe
    (main.js) stops touching any of this past 1024px and just clears its
    inline styles so these are the only rules in effect. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* One continuous background behind title AND cards together, not a
      separate band above them (request: "타이틀이랑 아래 내용이 같은
      그룹으로 묶이고 그 바깥쪽 섹션쪽에 배경을 깔고... 같은 배경이
@@ -2383,7 +2383,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   will-change: opacity, transform;
 }
 .acycle__ground.is-active { opacity: 1; }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* First card's own background (bg_approach.png, behind "Essential")
      specifically — background-position:center (base rule) was
      centering its subject, cropping away the photo's own stand/leg on
@@ -2571,7 +2571,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    active at this width (updateHorizontal, main.js), since the steps
    no longer move through the viewport on the page's own vertical
    scroll. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was position:sticky at a fixed 45svh "peek window" (matching the
      desktop 100svh version, just shorter) — confirmed by measurement
      that the pin RELEASES partway through .acycle__steps' own trailing
@@ -3023,7 +3023,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    down to 18px at 420px (request: "와이필통 영상 좌측 상단에 있는
    와이필통도 1024이상 크기에서부터 1024~420까지 자연스럽게 줄어들고
    늘어나다가 420이하에서 적절한 크기로 고정"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Floor lowered again, 18px -> 14px (request: "와이필통 심볼 영상의
      좌측 상단 와이필통 영문 폰트 크기 420이하에선 14~15로 축소"). */
   .whyp__media-label { font-size: clamp(14px, calc(-4.08px + 4.3046vw), 40px); }
@@ -3435,10 +3435,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandwall__bg { object-position: 8% center; }
 }
 
-/* Also (max-width: 1025px) — same resting state compact mode wants
+/* Also (max-width: 1023px) — same resting state compact mode wants
    (request: "브랜드월 섹션도 풀로 풀어서 위치시켜주고"), reusing this
    rather than a second copy of it. */
-@media (prefers-reduced-motion: reduce), (max-width: 1025px) {
+@media (prefers-reduced-motion: reduce), (max-width: 1023px) {
   .bw-glyph { opacity: 1; transform: none; }
   .brandwall__bg { transform: none; }
   /* No scroll-driven scale here to grow the video to cover the
@@ -3454,7 +3454,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    needs, which widens the visible window back out — enough of the
    frame's right side returns into view without touching crop position
    itself (request: "배경의 우측 부분이 어느정도 보이는 높이로"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* 70svh (first pass) still read as too tall on request ("브랜드월
      섹션 높이도 확 줄여줘") — the logo lockup itself needs nowhere near
      that much room (its own height, at its clamp()'d width, comes out
@@ -3547,7 +3547,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-70);
 }
 .brandid__body:last-child { margin-bottom: 0; }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Scoped to the intro section's own copy specifically — .brandid__body
      is shared by Symbol Construction/Blueprint/Wordmark too, and this
      unification request was about the intro's Korean group only.
@@ -3580,6 +3580,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    여백만큼 확보"), narrowed back down a step from matching padding-top
    exactly, on request ("지금보단 조금 좁히자"). */
 .brandid__intro { background-color: var(--paper); padding-top: clamp(160px, 22vw, 360px); padding-bottom: clamp(100px, 15vw, 240px); overflow: hidden; }
+/* Narrow-desktop band (down to the new 1024px breakpoint): the VISUAL/
+   IDENTITY word and the symbol mockup photo it overlaps sit only
+   var(--edge) (~61px) off each side there — cramped now this band shows
+   the desktop layout. Extra side padding insets the whole intro (head +
+   photo stack together, so their overlap alignment holds) for more
+   breathing room (request: "1024 해상도에서 비쥬얼 아이덴티티 섹션 영문
+   타이틀 및 겹쳐진 심볼 목업 사진 좌우로 여백 더 확보"). */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .brandid__intro {
+    padding-left: clamp(88px, 11vw, 140px);
+    padding-right: clamp(88px, 11vw, 140px);
+  }
+}
 /* Desktop's own padding (above) never had a compact override at all —
    at every width below 1025px both values sat flat at their own clamp
    floor (160px top / 100px bottom, since 22vw/15vw don't reach those
@@ -3587,7 +3600,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    section's shared compact padding. Matched to that shared pair
    instead (request: "비쥬얼 아이덴티티 섹션도 위아래 여백
    통일시켜줘"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__intro {
     padding-top: clamp(56px, 10vw, 96px);
     /* Cut hard again, 64-96px -> 20-32px — Shape DNA right below
@@ -3619,7 +3632,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0 auto;
   text-align: left;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was left (matching the desktop word-crossing-the-photo layout,
      where VISUAL/IDENTITY has to stay left-hung for D/E to land on the
      photo) — that composition doesn't exist in the stacked compact
@@ -3652,7 +3665,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    420px. Same exact formula now, so it tracks them 1:1 (request:
    "비쥬얼 아이덴티티 영문 타이틀 반응하는 작동 스타일을... 섹션의
    영문타이틀과... 똑같은 크기로 고정 해보자"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__intro-index {
     font-size: clamp(30px, 7.2vw, 160px);
     /* Was -.02em/.86 (the desktop base rule's own values, never
@@ -3700,7 +3713,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: clamp(64px, 8vw, 160px) auto 0;
   text-align: left;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Narrowed to roughly Our Philosophy's own title-to-video gap
      (TITLE_GAP, 32px flat in initStatementCopyAlign/main.js) — the
      desktop clamp's own floor (64px) never even applied in compact,
@@ -3722,7 +3735,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   margin-bottom: clamp(48px, 7vw, 108px);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Trimmed down for compact — the space between the photo and the
      Korean title+copy below it (request: "한글 그룹 위로 여백은 조금
      줄이고"). Placed after the base rule above (equal specificity,
@@ -3763,7 +3776,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink);
   word-break: keep-all;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Matched exactly to .statement__body .statement__lead's own
      two-point formula (Our Philosophy's Korean lead line) — same
      ceiling/floor and the same 1025->420 breakpoint, not this title's
@@ -3790,7 +3803,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    be permanently blank. .brandid__intro-photo needs no equivalent
    override — its resting transform is simply `none` (no scale/slide),
    already correct with nothing setting it. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__intro-letter { opacity: 1; }
   .brandid__intro-row .brandid__reveal { opacity: 1; }
 }
@@ -3841,6 +3854,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      여백 다시 60으로 돌리자"). */
   padding-left: 60px;
   padding-bottom: 60px;
+}
+/* Narrow-desktop band (down to the new 1024px breakpoint): the video's
+   40% column reads a touch cramped there, so widen its share a step
+   (request: "쉐입디엔에이 섹션 좌측 영상 가로 비율 조금 늘려줘
+   (1280~1024기준)"). Only this band — wider desktop keeps the 40%. */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .brandid__dna-media { flex-basis: 46%; }
 }
 .brandid__dna-media-video {
   display: block;
@@ -3953,7 +3973,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: -.04em;
   color: var(--ink);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was matched exactly to .brandid__intro-title (24-36px) — floor
      nudged down a step to 22px on its own request ("쉐입디엔에이
      영문 타이틀 아래 형태를 만드는 이 한글은 자연스럽게 줄다가
@@ -4147,7 +4167,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    updateDna (main.js) already returns early at isCompact(), before any
    of the entrance/cross-fade/numeral-roll work below would otherwise
    run every scroll tick for nothing. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* padding-top added — was 0, video sat flush against Visual
      Identity's own bottom edge with nothing between them (request:
      "쉐입 디엔에이 위쪽 심볼 영상 위로 여백 조금더 넓혀줘"). */
@@ -4274,7 +4294,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   padding-top: clamp(140px, 18vw, 300px);
   padding-bottom: clamp(20px, 3vw, 48px);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was never scoped for compact at all — 18vw doesn't drop under the
      140px floor until past 777px, so this sat flat at 140px (nearly
      2.5x Vision's own top padding) across most of the compact range.
@@ -4303,7 +4323,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   align-items: flex-start;
   gap: clamp(32px, 5vw, 80px);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was a left-title/right-text side-by-side row (desktop) with no
      compact override at all until 900px, and even there it only
      stacked (align-items:stretch, still left-set text) rather than
@@ -4355,7 +4375,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   color: var(--ink);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Two-point exact line through the desktop clamp's own value at
      1024px (71.68px) down to a 40px floor at 420px — no compact
      override existed before, so this rode the flat 7vw formula the
@@ -4406,7 +4426,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
 }
 .brandid__construction-text .brandid__body { max-width: none; margin: 0; }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Scoped to Symbol & Wordmark's own copy specifically — .brandid__lead
      is shared with Blueprint and others, and this unification request
      was about this section's Korean group only. Same two-point
@@ -4480,7 +4500,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   gap: clamp(56px, 7vw, 96px);
   margin-top: clamp(48px, 7vw, 96px);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Top/bottom padding was asymmetric (240px/280px desktop, a 900px-
      only override before this at +40/+80 past --edge — same 40px gap
      between them, and nothing at all covered 901-1025px) — made equal
@@ -4568,7 +4588,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    autoplay loop from decoding/looping for a clip nobody can see) and
    makes the "hidden" intent explicit in CSS rather than implicit in an
    opacity value (request: "우측에 따라오던 영상클립도 안나타나게 숨김"). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__sizes-loop { display: none; }
 }
 
@@ -4662,7 +4682,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    container, not the stroke/marker weights below (clarified: "전체
    크기를 조금 줄여봐달란 의미") — 52%→48%. */
 .brandid__blueprint-visual { flex: 0 0 48%; }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was left-aligned (900px-only: align-items:flex-start, .brandid
      __blueprint-visual capped to a narrow clamp(160px,40vw,220px) box
      sitting at the row's own left edge), briefly went fully centered
@@ -4737,7 +4757,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   stroke: var(--ink-70);
   stroke-width: .09;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Matches .brandid__blueprint-wordmark-svg path's own stroke exactly
      (colour + weight), on request ("심볼과 워드마크 섹션의 스트로크로
      그려진 심볼 및 워드마크는 워드마크 스타일의 스트로크 색상 및
@@ -4764,7 +4784,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   stroke: var(--ink-12);
   stroke-width: .06;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* More visible at this width, on request ("심볼쪽에 그려진 그리드는
      조금더 표나게 해주고") — ink-12 read as barely-there next to the
      symbol's own outline, which is now full ink at .7px non-scaling
@@ -4796,7 +4816,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      stay unified instead of independently tuned. */
   --bp-gap: clamp(40px, 6vw, 64px);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Zeroed — this extra right-only inset (on top of the panel's own
      var(--edge)) was specific to the desktop side-by-side row; in the
      stacked compact layout it just made the diagram panel's content
@@ -4840,7 +4860,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    endpoints (request: "심볼 워드마크 섹션 아래 구간에 다 동일하게
    적용해보자" — same 1024->420 technique as Shape DNA/Symbol &
    Wordmark above it). */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__blueprint-index {
     /* Was its own independent clamp (28-50px) — now the exact same
        triple .brandid__dna-index/.brandid__construction-index share
@@ -4956,7 +4976,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-70);
   word-break: keep-all;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Both were deliberately flat (not clamp()) previously, per the
      comment above — but that was about size staying put regardless of
      whether the Korean line wraps to one or two lines, a
@@ -5124,7 +5144,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      "스트로크로 그려진 워드마크 아래로 여백 더 넉넉히 확보해줘"). */
   gap: clamp(72px, 15vh, 168px);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Own extra left/right inset zeroed — matches the diagram panel's
      own zeroed padding-right above, both now net out to just the
      shared panel-level var(--edge) (request: "워드 마크 섹션 좌우
@@ -5169,7 +5189,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   height: auto;
   display: block;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* The stroke-drawn logo's own left/right margin — kept independent
      of .brandid__blueprint-wordmark-inner (which now matches the
      symbol panel's own zero extra inset, see its own compact rule)
@@ -5269,6 +5289,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      the whole compact range (the <br> already shows at 901-1025px and on
      desktop, so removing this hide is all that's needed). */
 }
+/* Narrow-desktop band: the 3 principles beside the copy read cramped
+   here, so drop them onto their own full-width row BELOW the copy in
+   advance rather than waiting for a narrower width (request: "1026에서
+   워드마크 섹션 세가지 항목은 아래로 미리 떨어뜨려줘"). flex-wrap:wrap
+   (base .brandid__wordmark-row) sends the 100%-basis item to the next
+   line; margin-top opens the gap to the copy above. */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .brandid__wordmark-row .brandid__blueprint-principles {
+    flex: 1 1 100%;
+    width: 100%;
+    margin-top: clamp(32px, 4vw, 56px);
+  }
+}
 /* This panel stacks the mark ON TOP of the same text block the symbol
    panel sets BESIDE its diagram, so it's the taller of the two and the
    first to run out of room inside the 100svh sticky box — measured at
@@ -5277,9 +5310,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    mark-to-text gap, and --bp-gap's two uses inside the text block)
    claws back ~100px, which is enough without touching the full-bleed
    width the mark was explicitly asked to keep. */
-/* min-width:1026px added — this query exists to claw space back inside
-   the PINNED 100svh sticky on a short desktop window; at compact widths
-   the stage is unpinned entirely (position:static, no height cap), so
+/* min-width guard (matched to the breakpoint, now 1024px) — this query
+   exists to claw space back inside the PINNED 100svh sticky on a short
+   desktop window; at compact widths the stage is unpinned entirely
+   (position:static, no height cap), so
    there's nothing to overflow and this no longer applies. Without the
    min-width, it was firing on any short-but-narrow viewport too (most
    phones in portrait are well under 860px tall) and clobbering the
@@ -5288,7 +5322,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    computed to ~50.64px (6vh at an 844px-tall phone) instead of the
    intended clamp(28px,6vw,40px), since this rule came later in source
    and won the tie at equal specificity. */
-@media (max-height: 860px) and (min-width: 1026px) {
+@media (max-height: 860px) and (min-width: 1024px) {
   /* Widened a step too (24-48px -> 32-64px), same request as the base
      rule's own widening above ("워드마크 스크로크로 그려진 부분 아래
      여백 넉넉히 확보해줘") — kept well short of the base rule's own
@@ -5560,7 +5594,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    background colour directly, so swiping between them needs no JS.
    initBlueprintDraw/initBlueprintTransition/initColorPinball/
    updateColor (main.js) all gain a matching isCompact() early return. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__blueprint-wordmark-svg path { transition: none; }
   .brandid__blueprint-stage,
   .brandid__color-stage { height: auto; }
@@ -5924,7 +5958,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink);
 }
 .brandid__colorstory-hex { margin-bottom: 4px; }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was a flat 24px, no compact scaling at any width — two-point
      exact line, same 24->16 reduction used on .brandid__dna-copy/
      .acycle__copy/etc (request: "컬러스토리 섹션 텍스트들도... 그렇게
@@ -5986,7 +6020,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   color: var(--signal-100);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* 1vw hits the 15px floor by width 1500px, so this sat flat at 15px
      across the whole compact range. Same two-point formula as
      .vwipe__veng (another small red/mono English label): 16px at
@@ -6016,7 +6050,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--paper);
   word-break: keep-all;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Was flat 36px, zero scaling — two-point line matching
      .brandid__lead's own established fix. */
   .brandid__colorstory-lead {
@@ -6035,7 +6069,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* 1.6vw hits the 16px floor by width 1000px, so this barely moved
      (16.0-16.4px) across the whole compact range. Rebuilt as a
      two-point line through the same 24px ceiling matching
@@ -6120,7 +6154,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    no overlay. initColorStory (main.js) stops touching any of this
    past 1024px and just clears its inline styles so these are the
    only rules in effect. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .brandid__colorstory { height: auto; }
   .brandid__colorstory-sticky {
     position: static;
@@ -6283,7 +6317,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      row that holds this and the sub-copy together. */
   margin: 0;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* .brandid__intro-title (this element's own stated match, see the
      comment above) picked up its own compact two-point clamp since —
      mirrored here with the identical formula so the "size... 통일"
@@ -6316,7 +6350,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-align: right;
   word-break: keep-all;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Inherits .brandid__body's own flat 24px (base rule) with no
      compact scaling — two-point line matching the same 24->16
      reduction used elsewhere. */
@@ -6425,7 +6459,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      lives with the rest of the section's styling rather than only in JS. */
   background-color: var(--paper);
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* This section carries the "frame" class too, which sets its own
      min-height:100svh plus a flex column with justify-content:center
      — never overridden here, so (same bug already found and fixed on
@@ -6690,7 +6724,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__closing-slot.is-ticked .brandid__closing-next {
   transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%) + var(--next-optical-offset, 0px)));
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* The ticker roll (.is-ticked) is JS-driven (initClosingHandoff),
      which now bails on isCompact() along with the rest of this
      section's scroll-scrubbed handover — .is-ticked never gets added
@@ -6733,7 +6767,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   height: var(--closing-handoff-run, 0px);
   pointer-events: none;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Collapses to nothing — same reasoning as .apps__runway's own
      compact override (no pin left for it to feed, JS bails on
      isCompact() now). Placed after the base rule above, not before —
@@ -7079,7 +7113,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    effect — .apps__lead/-body's own base color (paper, against the
    section's own base --apps-fill) is already the correct resting
    contrast with no transition needed. */
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   .apps__intro {
     position: static;
     top: auto;
@@ -7229,7 +7263,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   bottom: -1.5px;
   pointer-events: none;
 }
-@media (max-width: 1025px) {
+@media (max-width: 1023px) {
   /* Hidden — see the compact block near .brandid__closing-next's own
      base rule for why (the ticker's JS is disabled here, so this
      settles on APPLICATIONS as the resting state instead of the mark).

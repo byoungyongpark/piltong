@@ -14,7 +14,7 @@
   // (unlike an OS motion preference) routinely changes mid-session —
   // devtools resize, tablet rotation — and callers check it live, every
   // scroll/resize tick, not just once at setup.
-  const isCompact = () => window.innerWidth <= 1025;
+  const isCompact = () => window.innerWidth <= 1023;
 
   // Every isCompact() branch across this file (and every max-width:
   // 1025px rule in style.css) only evaluates once — at setup, not
