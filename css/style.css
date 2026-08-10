@@ -4514,7 +4514,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      Matched to the shared clamp(56px,10vw,96px) every other section's
      top padding uses (request: "심볼 및 워드마크 섹션 위쪽도 기타
      비전섹션 위아래 여백과 비슷하게 조정"). */
-  .brandid__construction { padding-top: clamp(56px, 10vw, 96px); }
+  /* Narrowed further, off that shared value, now that the Shape-DNA-
+     to-Symbol&Wordmark divider line (.brandid__construction-row's own
+     border-top) sits right after this padding — the space above the
+     line read noticeably wider than below it (70px vs 28px at 700px
+     wide), on request ("현재 구분라인 기준 위쪽으로 여백 조금 줄인뒤
+     그 여백으로 아래도 통일"). .brandid__construction-row's own
+     padding-top (the below-line space) is set to this SAME value right
+     below, so the two stay unified rather than just both changing
+     independently. */
+  .brandid__construction { padding-top: clamp(40px, 7vw, 64px); }
 }
 /* The square-grid+mark diagram is gone (removed on request, "사각
    그리드안의 심볼은 제거"). Breaks out of .frame--auto's own edge
@@ -4574,11 +4583,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        "쉐입 디엔에이 섹션과 심볼&워드마크 섹션 사이 자연스러운
        구분라인"). Same hairline convention as every other divider in
        this file (var(--ink-12), see .brandid__blueprint-principle's
-       own compact border-top). Sits inside the existing ~70px gap
-       .brandid__dna-sticky's own bottom spacing already leaves above
-       this row, so padding-top splits that gap rather than adding a
-       new one on top of it. */
-    padding-top: clamp(24px, 4vw, 40px);
+       own compact border-top).
+       Matched to .brandid__construction's own (now-narrowed) top
+       padding — was its own independent clamp(24,4vw,40), noticeably
+       tighter than the ~70px .brandid__construction's padding-top left
+       above the line, on request ("현재 구분라인 기준 위쪽으로 여백
+       조금 줄인뒤 그 여백으로 아래도 통일"): the section's own padding
+       came down to clamp(40,7vw,64) for this same reason (see its own
+       comment), and this is set to the identical value so the line
+       sits with the same space on both sides. */
+    padding-top: clamp(40px, 7vw, 64px);
     border-top: 1px solid var(--ink-12);
   }
 }
@@ -5898,9 +5912,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     /* Divider between SYMBOL and WORDMARK, same request/convention as
        .brandid__construction-row's own new border-top above (request:
        "심볼과 워드마크 섹션 사이에도 넣어주고"). Sits at the top of the
-       existing margin-top gap, with its own small padding-top so the
-       wordmark graphic doesn't start flush against the line. */
-    padding-top: clamp(24px, 4vw, 40px);
+       existing margin-top gap, with its own padding-top so the
+       wordmark graphic doesn't start flush against the line.
+       padding-top matched to this same rule's own margin-top (above
+       the line) — was its own smaller independent clamp(24,4vw,40),
+       noticeably tighter than the space above the line, on request
+       ("심볼과 워드마크 사이 구분라인 위아래 여백도 현재 구분라인
+       위쪽 여백과 비슷하게 아래 여백도 통일"). Unlike the Shape-DNA
+       divider above, the ABOVE value here isn't being reduced — only
+       below is being brought up to match it. */
+    padding-top: clamp(72px, 13vw, 92px);
     border-top: 1px solid var(--ink-12);
   }
   .brandid__color-flash,
