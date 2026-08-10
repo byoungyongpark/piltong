@@ -7561,6 +7561,35 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .apps__intro {
     position: static;
     top: auto;
+    /* Was relying on .apps's own section-level side padding
+       (clamp(var(--edge),24vw,300px), ~168px at 700px wide) — matched
+       to var(--edge) instead, same margin .apps__title and Color
+       Story's own copy/cards already use, so the text group fills
+       much more of the screen instead of sitting in a narrow inset
+       column (request: "하나의 아이덴티티... 좌우 여백 컬러스토리
+       섹션 카드 3개 좌우 여백이랑 똑같이... 좌측에서부터 우측까지
+       가득 채우는 구조로"). Same full-bleed-then-repad technique as
+       .apps__title (and .apps__photo before that) — .apps's own
+       padding is left untouched so .apps__photo's own breakout math
+       (which cancels that exact padding value) stays correct. */
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
+    margin-right: calc(-1 * clamp(var(--edge), 24vw, 300px));
+    padding-left: var(--edge);
+    padding-right: var(--edge);
+    box-sizing: border-box;
+    /* Was only stacking (flex-direction:column) at <=900px (a legacy
+       breakpoint, same "gap above 1024's old compact threshold" trap
+       hit repeatedly this session for other elements) — 901-1023px was
+       silently still on the desktop row layout, which squeezed
+       .apps__body into a narrow side column and made it wrap to many
+       more lines than the full-width stacked version (measured: 436px
+       tall at 1023px wide vs the intended flow). Duplicated here rather
+       than widening the older @media(max-width:900px) rule, so this
+       stays the one place compact's own .apps__intro rules live. */
+    flex-direction: column;
+    gap: clamp(16px, 3vw, 28px);
   }
   .apps__runway { height: 0; }
   /* Was position:fixed at every width — a full-viewport backdrop that
@@ -7665,7 +7694,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-right: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-top: 0;
-    margin-bottom: clamp(28px, 5vw, 48px);
+    /* Was clamp(28px,5vw,48px) — zeroed, on request ("에플리케이션
+       타이틀 밑... 여백은 없어야 하고"). */
+    margin-bottom: 0;
     padding-left: var(--edge);
     padding-right: var(--edge);
     box-sizing: border-box;
@@ -7678,13 +7709,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     text-align: center;
     color: var(--paper);
   }
-  /* Widened to cover the new title + its own margin on top of the
-     intro area it already had to cover (was clamp(380px,50vh,460px),
-     sized for intro alone) — re-measured with the title in place
-     (tall viewport, so wrapping is purely width-driven): 484-486px
-     fairly consistently across 375/700/1023px wide, so a 500px floor
-     leaves real margin over the actual max. */
-  .apps::before { height: clamp(500px, 60vh, 600px); }
+  /* Re-measured after zeroing .apps__title's margin-bottom and
+     .apps__showcase's margin-top just below, and after fixing
+     .apps__intro's own 901-1023px row-layout gap (a couple rules up) —
+     both changes shrank the real content height a lot (the previous
+     500-600px fixed value was overshooting into the first photo by a
+     couple hundred px). Content height is purely width-driven (font-
+     sizes are vw-based, not vh), so this is now a vw formula instead
+     of vh: fit through the actual measured needs at three widths
+     (227.7px@375, 296.2px@700, 386.0px@1023) with a consistent ~50-60px
+     margin over each. */
+  .apps::before { height: clamp(260px, calc(155px + 28vw), 460px); }
+  /* Was clamp(80px,6vw,100px) — zeroed, on request ("하단 텍스트
+     그룹 아래로 여백은 없어야 하고"): the intro group now runs
+     straight into the first photo with no gap. Desktop keeps the
+     base rule's own value. */
+  .apps__showcase { margin-top: 0; }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
@@ -7881,6 +7921,26 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     radial-gradient(ellipse 78% 78% at center, #000 65%, transparent 100%);
   -webkit-mask-composite: source-in, source-in;
   mask-composite: intersect;
+}
+@media (max-width: 1023px) {
+  /* Strip the footage down to a plain, unmasked rectangle — no
+     top/bottom/left/right feather, no corner fade — leaving just the
+     pure video (request: "심볼 영상 상하좌우 그라데이션 들어간거
+     해제하고... 순수 영상만 남겨줘"). Placed after the base rule so it
+     wins the equal-specificity tie, the same trap this file keeps
+     hitting. */
+  .brandid__closing-loop {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* The two backdrop layers this same request also asked to remove —
+     ::before is the dark gradient plate BEHIND the video (the padding
+     bands' own colour), ::after is the radial dimming layer sitting IN
+     FRONT of it. Both gone, same reasoning. */
+  .brandid__closing-loop-wrap::before,
+  .brandid__closing-loop-wrap::after {
+    display: none;
+  }
 }
 /* Dims the footage's own content toward the plate's ACTUAL background
    colour everywhere except the centre (the symbol and its own
