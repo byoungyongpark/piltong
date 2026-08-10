@@ -1051,6 +1051,17 @@
          pinned — the wordmark lands ON this, and everything below sits
          inside it. -->
     <div class="apps__ground" aria-hidden="true"></div>
+    <!-- Compact only (see style.css) — the desktop ticker
+         (.brandid__closing-next, previous section) rolls "APPLICATIONS"
+         into the wordmark's own slot instead; that whole mechanic is
+         JS-driven and bails on isCompact(), where it was settling into
+         a static caption overlaid on the closing video instead — not
+         this section's own title at all (request: "어플리케이션
+         타이틀이 참조사진의 위치에 있는 것이 아니라 그 아래 하나의
+         아이덴티티... 텍스트 그룹 위쪽에 가운데 정렬로 위치하길
+         원해"). This is also the section's first real accessible
+         heading — the ticker's own copy is aria-hidden (decorative). -->
+    <h2 class="apps__title">APPLICATIONS</h2>
     <div class="apps__intro">
       <p class="apps__lead">하나의 아이덴티티,<br>모든 경험으로.</p>
       <p class="apps__body">아이덴티티는 형태에서 완성되지 않습니다.<br>사람이 마주하는 모든 순간,<br>같은 생각과 같은 경험으로 이어집니다.</p>

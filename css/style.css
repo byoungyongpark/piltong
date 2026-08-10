@@ -6533,9 +6533,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        three (request: "맨 첫번째 필통 페이퍼 위쪽 여백... 나머지 아래
        두컬러 섹션 위쪽과 통일"). Paired with Color Principle's own bottom
        padding going to 0 (see .brandid__color-sticky), so the two
-       sections meet flush. Bottom kept — it's this section's own margin
-       before Closing. */
-    padding: 0 0 clamp(64px, 11vw, 96px);
+       sections meet flush.
+       Bottom was kept at first — "this section's own margin before
+       Closing" — but that stacked with .brandid__colorstory-copy's OWN
+       margin-bottom (which every panel already carries) on top of
+       .brandid__closing's own top padding, three spacings deep for one
+       transition: measured 224px total (77+77+70 at 700px wide) from
+       the last panel's actual text down to the Closing title, which is
+       what read as an oversized gap (request: "우리는 로고를 만든것이
+       아니라... 텍스트 그룹 위로 여백 혹시 컬러스토리 하단쪽에 여백이
+       남아서 여백이 넓어보이는건지 체크해서 제거하던지 조절"). Set to 0
+       — the last panel's own copy margin-bottom plus Closing's own top
+       padding is already a real, deliberate two-part gap; this was the
+       redundant third. */
+    padding: 0;
   }
   /* No gap between panels at all now — was clamp(48px,10vw,96px)
      between every one of them, which read as three disconnected chunks
@@ -7124,23 +7135,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     height: auto;
     clip-path: none;
   }
-  .brandid__closing-next {
-    position: static;
-    width: auto;
-    height: auto;
-    transform: none;
-    transition: none;
-    display: block;
-    text-align: center;
-    /* Was matched to OUR PHILOSOPHY's own display formula — now
-       matched to Color Principle's title instead, same technique
-       (request: "어플리케이션 영문 타이틀은 컬러 프린서플 타이틀과
-       폰트 스타일 자간 행간 통일 시켜줘... 1024~420까지 자연스럽게
-       줄어들고 늘어나다가 420이하에서 적절한 크기로 고정"). */
-    font-size: clamp(30px, 7.2vw, 160px);
-    line-height: 1;
-    letter-spacing: .1em;
-  }
+  /* No longer shown here at all — relocated to .apps__title, its own
+     centred section title above "하나의 아이덴티티" rather than a
+     caption overlaid on the closing video (request: "어플리케이션
+     타이틀이 참조사진의 위치에 있는 것이 아니라 그 아래... 위치하길
+     원해"). The video/mark visual (.brandid__closing-loop) is
+     untouched — only this text is gone from here. */
+  .brandid__closing-next { display: none; }
 }
 
 /* Empty scroll the pinned plate travels through — see the note on
@@ -7286,6 +7287,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    0). initApplicationsGroundFade releases it explicitly instead
    (translateY, once the hold is spent), which is exact and needs no
    compensating for a browser quirk. */
+/* Hidden by default — desktop keeps "APPLICATIONS" on the closing
+   section's own wordmark ticker (.brandid__closing-next); this is the
+   compact-only replacement, see its own comment in index.html and the
+   compact rule below. */
+.apps__title { display: none; }
 .apps__intro {
   position: sticky;
   top: clamp(90px, 13vh, 200px);
@@ -7513,6 +7519,32 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      BLOCK itself at the section's own left inset rather than centred
      — only the text's own alignment inside that block needed fixing. */
   .apps__lead { text-align: left; }
+  /* The relocated "APPLICATIONS" title — see index.html for why.
+     Centred (request: "가운데 정렬로 위치"), same display formula the
+     old ticker settled into for compact (.brandid__closing-next's own
+     compact rule: Color Principle's title style, "1024~420까지
+     자연스럽게 줄어들고 늘어나다가 420이하에서 적절한 크기로 고정"),
+     kept identical so relocating it doesn't also change how it reads. */
+  .apps__title {
+    display: block;
+    width: 100%;
+    margin: 0 0 clamp(28px, 5vw, 48px);
+    font-family: var(--font-sq);
+    font-size: clamp(30px, 7.2vw, 160px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--paper);
+  }
+  /* Widened to cover the new title + its own margin on top of the
+     intro area it already had to cover (was clamp(380px,50vh,460px),
+     sized for intro alone) — re-measured with the title in place
+     (tall viewport, so wrapping is purely width-driven): 484-486px
+     fairly consistently across 375/700/1023px wide, so a 500px floor
+     leaves real margin over the actual max. */
+  .apps::before { height: clamp(500px, 60vh, 600px); }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
