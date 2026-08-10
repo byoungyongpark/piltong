@@ -5577,12 +5577,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        sticky specifically below, same as before this edit). */
     padding: clamp(12px, 2vw, 20px) 0 0;
   }
-  /* Bottom split off from the shared rule above — was riding
-     .brandid__blueprint-sticky's own 48-88px, not the clamp(64px,
-     11vw,96px) every other section's bottom margin shares (request:
-     "네비게이션 아래로 여백 다른 섹션 하단과 통일시켜주고"). */
+  /* The paper margin below the whole coloured block. The nav dots now
+     carry their OWN generous coloured bottom padding (see
+     .brandid__color-cards-row + .hscroll-dots above), which is the
+     section's real bottom breathing space now — so this paper margin
+     drops to a modest section separator rather than stacking a second
+     big gap on top of it. */
   .brandid__color-sticky {
-    padding-bottom: clamp(64px, 11vw, 96px);
+    padding-bottom: clamp(28px, 5vw, 44px);
   }
   .brandid__blueprint-panel {
     position: relative;
@@ -5640,9 +5642,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
   /* Was a flat 36px, no scaling at any width — matched to
      .brandid__construction-text .brandid__lead's own fix (same base
-     source value, same technique). */
+     source value, same technique). margin-bottom cut right down from
+     the base clamp(48,7vw,80): with the head's own padding-bottom now 0
+     (request: "위쪽 영역 여백은 0"), this lead margin is the ONLY space
+     left between the title and the first card, so it's the thing to
+     trim to bring the two tight together. */
   .brandid__color-lead {
     font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+    margin-bottom: clamp(12px, 2.5vw, 20px);
   }
   /* Was a flat 22px. */
   .brandid__color-name {
@@ -5680,18 +5687,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     left: 0;
     width: 100%;
     box-sizing: border-box;
-    /* The space below the title used to be margin-bottom — but margin
-       is TRANSPARENT, so it showed the page's paper through it as a
-       stripe between the (coloured) title and the (coloured) cards,
-       making them read as two separate sections (request: "한섹션이면
-       저사이에 여백이 없어야"). Moved into padding-bottom instead: same
-       breathing room, but now it's part of the title's own coloured
-       box, so the title runs seamlessly into the card row with no paper
-       seam. margin-bottom:0. */
+    /* The space below the title used to be margin-bottom (transparent →
+       showed a paper stripe), then padding-bottom (coloured breathing
+       room). Now the space above the cards is zeroed entirely (request:
+       "3가지 터치스크롤 위쪽 영역 여백은 0") — the only remaining space
+       between the title text and the first card is the Korean lead's own
+       (reduced) bottom margin, see .brandid__color-lead's compact rule.
+       margin-bottom:0 keeps no paper stripe either. */
     padding-top: clamp(56px, 10vw, 96px);
     padding-left: var(--edge);
     padding-right: var(--edge);
-    padding-bottom: clamp(28px, 6vw, 48px);
+    padding-bottom: 0;
     margin-top: 0;
     margin-bottom: 0;
     background-color: var(--paper);
@@ -5744,6 +5750,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: sticky;
     left: 0;
     width: 100%;
+    /* Generous COLOURED padding below the dots — a bit more than the
+       section's own top space above the title (.brandid__color-head's
+       padding-top, clamp(56,10vw,96)), on request ("하단 네비게이션
+       하단쪽으로 패딩 프린서플 섹션 위쪽 여백보다 조금 더 넉넉히
+       확보해줘"). Because it's the dots' own padding it takes the synced
+       colour, so the whole nav strip reads as part of the coloured
+       block rather than floating dots. Top kept modest — just clears
+       the card content above. */
+    padding: clamp(20px, 4vw, 32px) 0 clamp(64px, 12vw, 108px);
   }
   .brandid__color-name {
     position: static;
@@ -5754,7 +5769,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     box-sizing: border-box;
     scroll-snap-align: center;
     scroll-snap-stop: always;
-    padding: clamp(56px, 12vw, 96px) var(--edge);
+    /* Top padding 0 — the "위쪽 영역 여백은 0" for the card row itself,
+       so the first card's content sits right under the (now tight)
+       title instead of floating in a tall centred box. Bottom cut down
+       from the old symmetric clamp(56,12vw,96) too ("하단 여백도 조금
+       줄이고"). */
+    padding: 0 var(--edge) clamp(36px, 7vw, 56px);
     transition: none;
     /* This is a <p> — nothing in this ruleset ever zeroed its default
        UA margin (1em top/bottom), which the flex row's own auto height

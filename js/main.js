@@ -2660,49 +2660,62 @@
 
     // Title (.brandid__color-head), the 3-card row (.brandid__color-
     // caption) and .hscroll-dots (injected after the row, further down)
-    // read as ONE bound group that all agree on a single colour at a
-    // time, rather than the title being just one more swipeable slide —
-    // on request ("영문타이틀+한글타이틀 그룹 + 3가지 색상 컨텐츠 그룹 +
-    // 하단 네비게이션 이 전체 그룹을 하나로 묶어서 이 통째로 색상이
-    // 바뀌는 구조를 말한거야"), reverting the previous round's "title
-    // is its own slide" structure. Copies the ACTIVE CARD's own computed
-    // colours directly onto both head and dots, rather than duplicating
-    // a colour table here — .brandid__color-name[data-color] in
-    // style.css is the one place these colours are defined. No CSS
-    // transition on either target (style.css) — this runs every scroll
-    // tick already, so an eased transition on top of that is exactly
-    // what read as the colour changing a beat AFTER the actual swipe
-    // rather than with it ("터치스크롤 하면 뒤늦게 색상이 같이 바뀌는
-    // 것처럼 되는데").
+    // read as ONE bound group whose colour cross-fades together with the
+    // card slide — on request ("영문타이틀+한글타이틀 그룹 + 3가지 색상
+    // 컨텐츠 그룹 + 하단 네비게이션 이 전체 그룹을 하나로 묶어서 이
+    // 통째로 색상이 바뀌는 구조", then "자연스러운 페이드로 통일").
+    // Interpolates between the two cards' own computed colours by scroll
+    // position (updateColorHeadSync below) rather than snapping to the
+    // nearest — .brandid__color-name[data-color] in style.css is the one
+    // place these colours are defined. No CSS transition on either
+    // target (style.css): the interpolation IS the fade, driven straight
+    // off scroll position, so it neither lags (the old 260ms transition:
+    // "뒤늦게") nor snaps (the old nearest-card pick: "깜빡이는").
+    const parseRGB = str => {
+      const n = (String(str).match(/[\d.]+/g) || []).map(Number);
+      return [n[0] || 0, n[1] || 0, n[2] || 0];
+    };
+    const lerpRGB = (a, b, t) => {
+      const c = i => Math.round(a[i] + (b[i] - a[i]) * t);
+      return `rgb(${c(0)}, ${c(1)}, ${c(2)})`;
+    };
     function updateColorHeadSync() {
       if (!isCompact() || !colorCaption || !colorNames.length) return;
-      const wrapRect = colorCaption.getBoundingClientRect();
-      const center = wrapRect.left + wrapRect.width / 2;
-      let active = colorNames[0], best = Infinity;
-      colorNames.forEach(el => {
-        const r = el.getBoundingClientRect();
-        const dist = Math.abs((r.left + r.width / 2) - center);
-        if (dist < best) { best = dist; active = el; }
-      });
-      const cs = getComputedStyle(active);
+      // The cards SLIDE (a real horizontal scroll); the title + dots used
+      // to just SNAP to the nearest card's colour at the 50% midpoint,
+      // which read as an abrupt blink out of step with that smooth slide
+      // (request: "위쪽은 그냥 깜빡이는 페이드 느낌으로 되어서 통일감이
+      // 없으니 자연스러운 페이드로 통일"). Now they CROSS-FADE: the
+      // continuous scroll position gives a fractional card index, and the
+      // head/dots colour is interpolated between the two cards it sits
+      // between, so the colour moves in lock-step with the scroll — a
+      // natural fade, no snap, no lag. clientWidth is the per-card scroll
+      // step (each card is exactly one scrollport wide).
+      const stepW = colorCaption.clientWidth ||
+        (colorNames[0].getBoundingClientRect().width) || 1;
+      const raw = Math.max(0, Math.min(colorNames.length - 1, colorCaption.scrollLeft / stepW));
+      const i0 = Math.floor(raw);
+      const i1 = Math.min(colorNames.length - 1, i0 + 1);
+      const t = raw - i0;
+      const cs0 = getComputedStyle(colorNames[i0]);
+      const cs1 = getComputedStyle(colorNames[i1]);
+      const bg = lerpRGB(parseRGB(cs0.backgroundColor), parseRGB(cs1.backgroundColor), t);
+      const fg = lerpRGB(parseRGB(cs0.color), parseRGB(cs1.color), t);
       if (colorHead) {
-        colorHead.style.backgroundColor = cs.backgroundColor;
-        colorHead.style.color = cs.color;
+        colorHead.style.backgroundColor = bg;
+        colorHead.style.color = fg;
       }
       // .hscroll-dots is injected INSIDE .brandid__color-caption (right
       // after .brandid__color-cards-row) by initHorizontalScrollDots
       // (main.js, runs later at page load than this function is first
       // defined) — so it's a DESCENDANT of the caption, not its next
       // sibling. Queried fresh here rather than cached above, since it
-      // doesn't exist yet the very first time this runs. (An earlier
-      // version looked at colorCaption.nextElementSibling, from before
-      // the dots were moved inside the scroll container — that stopped
-      // matching anything once they moved, which is why the nav strip
-      // never picked up the active colour.)
+      // doesn't exist yet the very first time this runs. Gets the exact
+      // same interpolated colour so the whole strip fades as one.
       const dots = colorCaption.querySelector('.hscroll-dots');
       if (dots) {
-        dots.style.backgroundColor = cs.backgroundColor;
-        dots.style.color = cs.color;
+        dots.style.backgroundColor = bg;
+        dots.style.color = fg;
       }
     }
     if (isCompact()) {
