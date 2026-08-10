@@ -5010,6 +5010,32 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     font-size: clamp(15px, calc(11.52px + .8278vw), 20px);
   }
 }
+/* Desktop: the SYMBOL (diagram) panel's type was flat px, so it never
+   responded to resizing above the 1024px breakpoint. Now each size scales
+   gently off the 2560px reference — its current value held as the ceiling
+   at 2560px (the "1x" point, capped above that) down to ~88% at 1024px
+   (request: "2560 1x지점에서 해상도 리사이징 하다가 반응해서... 영문
+   타이틀 아래 및 그섹션에 속한 한글 텍스트 그룹들도 미세하게 자연스럽게
+   줄어들거나 늘어나게"). Scoped to this panel so the WORDMARK panel and
+   the Symbol & Wordmark row (shared classes) are untouched; desktop-only
+   because compact has its own scaling and reloads at the boundary. */
+@media (min-width: 1024px) {
+  .brandid__blueprint-panel--diagram .brandid__blueprint-index {
+    font-size: clamp(44px, calc(40px + 0.3906vw), 50px);
+  }
+  .brandid__blueprint-panel--diagram .brandid__lead {
+    font-size: clamp(32px, calc(29.33px + 0.2604vw), 36px);
+  }
+  .brandid__blueprint-panel--diagram .brandid__body {
+    font-size: clamp(21px, calc(19px + 0.1953vw), 24px);
+  }
+  .brandid__blueprint-panel--diagram .brandid__blueprint-principle-key {
+    font-size: clamp(16px, calc(14.67px + 0.1302vw), 18px);
+  }
+  .brandid__blueprint-panel--diagram .brandid__blueprint-principle-desc {
+    font-size: clamp(17.5px, calc(15.83px + 0.1628vw), 20px);
+  }
+}
 @media (max-width: 900px) {
   /* Own rules superseded — see the @media(max-width:1025px) block near
      .brandid__blueprint-row's base rule, which now covers the
