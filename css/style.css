@@ -3470,13 +3470,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      (just gap apart), so once scroll-snap-align:center centred a card
      — itself only (container width − 2×padding) wide — the leftover
      space on either side, exactly padding-wide, wasn't empty: it was
-     the next/previous card's own edge poking in. Text still reads at
-     the same width as before (same clamp value, just applied per-card
-     now instead of per-row), but each card's own BOX is the full
-     scroll width, so nothing adjacent is ever in view at rest. */
+     the next/previous card's own edge poking in. Each card's own BOX
+     is the full scroll width, so nothing adjacent is ever in view at
+     rest.
+     The clamp itself is a genuine two-point line now, not the flat
+     88px reused from .whyp__copy-sticky's own desktop 1024-1280px
+     band — that one only starts moving past 800px wide (11vw first
+     clears its own 88px floor there), so it sat flat at 88px for the
+     entire 375-800px span instead of actually scaling with it (request:
+     "1023아래 구간에선 여기 좌우 여백을 달리줘야할것 같아"). Real two-
+     point line instead: 28px@375 up to 112px@1023 (matching the old
+     formula's own value right at the 1023/1024 seam, so there's no
+     jump crossing into desktop's band), scaling the whole way instead
+     of holding flat through most of the range. */
   box-sizing: border-box;
-  padding-left: clamp(88px, 11vw, 140px);
-  padding-right: clamp(88px, 11vw, 140px);
+  padding-left: clamp(28px, calc(-20.61px + 12.963vw), 112px);
+  padding-right: clamp(28px, calc(-20.61px + 12.963vw), 112px);
   scroll-snap-align: center;
   scroll-snap-stop: always;
   opacity: 1;
@@ -8130,7 +8139,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__closing-loop-wrap::before {
     display: block;
     inset: auto 0 0 0;
-    height: var(--loop-band-bottom);
+    /* Was exactly var(--loop-band-bottom) — flush with the video's OWN
+       true bottom edge, which was correct back when the video was a
+       hard, unmasked cutoff there. Now that .brandid__closing-loop
+       fades to transparent over the last 25% of its own box (above),
+       that fading quarter sits ABOVE this line, inside the video's own
+       box — not covered by this rect at all — so the fade was
+       revealing whatever's behind the WRAP there instead of the floor
+       colour, reading as an uncomposited gap rather than a dissolve
+       (request: "심볼 영상 하단부 투명그라데이션 된 영역 아래에 하단부
+       배경색이 깔려서 자연스럽게 합성된것처럼 보여야해"). Extended
+       upward by an extra term sized to that same ~25%-of-video-height
+       fade span so the floor colour backs the ENTIRE fade, not just
+       the flat band below the video — first-guess sizing (~47px@375 up
+       to ~126px@1023, measured against the video's own rendered height
+       at those widths), needs visual confirmation like the fade span
+       and mark overlap it's paired with. z-index:-1 (base rule) keeps
+       this behind the video regardless, so extending it costs nothing
+       where the footage is still fully opaque. */
+    height: calc(var(--loop-band-bottom) + clamp(50px, calc(4px + 12.35vw), 130px));
     background: var(--loop-floor);
     opacity: 1;
     transform: none;
