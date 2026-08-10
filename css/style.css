@@ -4637,6 +4637,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     gap: clamp(16px, 4vw, 28px);
+    /* Base rule's own max-width:100% (desktop's grid-column constraint)
+       still applies here and clamps width:100vw straight back down to
+       the parent's own (narrower) content width otherwise — same
+       max-width-beats-width trap, needs an explicit override. */
+    max-width: none;
+    /* Full-bleed out of .brandid__dna's own section padding (var(--edge)
+       each side) — this row previously just sat inside that inset like
+       any other in-flow content, so each "100%-wide" card was actually
+       only the section's own narrower content width, with the section's
+       edge padding reading as a fixed side margin around every card
+       (request: "1024이하 기준으로 쉐입디엔에이 터치스크롤 되는 부분
+       좌우 여백없이 풀화면에서 브라우저 좌우로 터치스크롤 되게").
+       Same technique .brandid__construction-row/.brandid__sizes already
+       use for their own full-bleed rows. .brandid__dna-item's own
+       padding (below) reinsets the TEXT by that same var(--edge), so
+       reading width is unchanged — only the row/card's outer box now
+       runs true edge-to-edge. */
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
   }
   .brandid__dna-item {
     position: static;
@@ -4644,6 +4663,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     flex: 0 0 100%;
     min-width: 0;
     max-width: none;
+    box-sizing: border-box;
+    padding-left: var(--edge);
+    padding-right: var(--edge);
     scroll-snap-align: center;
     scroll-snap-stop: always;
     opacity: 1;
