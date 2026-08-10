@@ -3075,6 +3075,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   place-items: center;
   padding: 0 var(--edge);
 }
+/* var(--edge) alone (61.44px at 1024px) barely trims anything here —
+   .whyp__step's own max-width:900px is the actual binding constraint
+   at this width (1024 - 2*61.44 = 901px, ~1px of slack), so the copy
+   reads as flush edge-to-edge with no real side margin (request:
+   "와이필통 1024해상도에서 좌우 여백 조금 더 늘려줘"). Same band/value
+   as .brandid__intro's own narrow-desktop-band override, so the two
+   read consistently. */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .whyp__copy-sticky { padding: 0 clamp(88px, 11vw, 140px); }
+}
 /* A scroll-gated backdrop (opacity set in initWhyPiltong, main.js) —
    sits behind the ::before paper wash, which still does the same job
    of keeping copy legible over it. z-index: -1 rather than a lower
@@ -6627,6 +6637,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__closing-loop-wrap { position: static; top: auto; }
   /* Decorative corner ticks — desktop-only flourish, on request
      ("영상 프레임 양사방 모서리에서 뻗어나가는 라인은 제거"). */
+  .brandid__closing-tick { display: none; }
+}
+/* Same removal, one band up: at 1024-1600px the ticks are still on
+   (the rule above only covers <=1023px) but read as clutter at this
+   narrower width too (request: "1600구간에서... 아래 영상 모서리
+   뻗어나가는 선은 숨겨줘"). Desktop's own pinned scroll-handover stays
+   fully active here (isCompact() is false), so nothing else about the
+   section changes — just the ticks. */
+@media (min-width: 1024px) and (max-width: 1600px) {
   .brandid__closing-tick { display: none; }
 }
 /* ---- Pinned/centred variant, disabled. Re-enable together with the
