@@ -2486,6 +2486,14 @@
     // request ("영상은 관성 스크롤에 의해 브랜드 월처럼 자연스럽게 확대").
     const DNA_SCALE_START = .62;
     const DNA_SCALE_END = 1;
+    // Shared with initDnaVideoWobble below: updateDna computes the
+    // scroll-driven scale (as before) but no longer writes .transform
+    // directly, since the wobble function now owns that property every
+    // frame and needs to compose the scale with its own translateX
+    // rather than the two fighting over the same inline style. 1 (not
+    // DNA_SCALE_START) is the compact/idle default — compact never
+    // runs the zoom at all, same as before.
+    let dnaVideoScale = 1;
     // Top padding animates from the same value .brandid__intro's own
     // top padding resolves to (clamp(160px,22vw,360px), computed here
     // since it drives an inline style, not read from CSS) down to a
@@ -2547,7 +2555,7 @@
       // indefinitely — same reasoning as the >900px branch this
       // replaces, just checked once up front instead of every frame.
       if (isCompact()) {
-        if (dnaVideo) dnaVideo.style.transform = '';
+        dnaVideoScale = 1;
         if (dnaMedia) dnaMedia.style.paddingTop = '';
         if (dnaIndexEl) { dnaIndexEl.style.opacity = ''; dnaIndexEl.style.transform = ''; }
         if (dnaTitleEl) { dnaTitleEl.style.opacity = ''; dnaTitleEl.style.transform = ''; }
@@ -2582,8 +2590,7 @@
       const entryP = clamp01(1 - r.top / window.innerHeight);
       const eased = smoothstep(entryP);
       if (dnaVideo) {
-        const scale = lerp(DNA_SCALE_START, DNA_SCALE_END, eased);
-        dnaVideo.style.transform = `scale(${scale.toFixed(3)})`;
+        dnaVideoScale = lerp(DNA_SCALE_START, DNA_SCALE_END, eased);
       }
       const padTop = lerp(dnaPadMax(), DNA_MEDIA_PAD_REST, eased).toFixed(1) + 'px';
       if (dnaMedia) dnaMedia.style.paddingTop = padTop;
@@ -3033,6 +3040,43 @@
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
+
+    // ---- Shape DNA: correct the symbol video's own off-centre lean
+    // while it turns ----
+    // The footage's rotating symbol reads as biased right of frame
+    // specifically WHILE it turns that way, and looks centred again
+    // once it turns back — not a constant offset, so a flat
+    // object-position (tried first) was wrong for most of the loop
+    // (request: "심볼이 오른쪽으로 돌아갈때는 영상을 왼쪽으로 쫌 땡겨서
+    // 보완하고 돌아올때는 원래 위치로... 가능하면 전구간 다 적용").
+    // Runs continuously off the VIDEO's own currentTime (not scroll —
+    // playback advances on its own) at every width, composing a small
+    // translateX with updateDna's own scroll-driven scale so the two
+    // don't fight over the same inline transform.
+    if (dnaVideo && !prefersReduced) {
+      // Exposed as CSS custom properties (read live off the element,
+      // not hardcoded) specifically so they can be tuned in DevTools
+      // without a rebuild — I can't see the actual footage to know
+      // exactly when in the loop the rightward lean peaks or how far
+      // it drifts, so these starting values (a modest 14px pull, peak
+      // assumed at the very start of the loop) are a first guess, not
+      // a measured fit. --dna-wobble-amp is the peak pull in px;
+      // --dna-wobble-phase shifts WHEN in the loop (0-1, one full turn)
+      // that peak lands — nudge it until the correction and the actual
+      // turn line up.
+      let wobbleRafId = null;
+      function wobbleFrame() {
+        wobbleRafId = requestAnimationFrame(wobbleFrame);
+        if (!dnaVideo.duration) return;
+        const cs = getComputedStyle(dnaVideo);
+        const amp = parseFloat(cs.getPropertyValue('--dna-wobble-amp')) || 0;
+        const phase = parseFloat(cs.getPropertyValue('--dna-wobble-phase')) || 0;
+        const t = (dnaVideo.currentTime / dnaVideo.duration + phase) % 1;
+        const pull = -amp * Math.sin(t * Math.PI * 2);
+        dnaVideo.style.transform = `translateX(${pull.toFixed(2)}px) scale(${dnaVideoScale.toFixed(3)})`;
+      }
+      wobbleRafId = requestAnimationFrame(wobbleFrame);
+    }
   }
 
   initBrandIdentity();

@@ -3688,12 +3688,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      정렬해서 자연스럽게 줄게"). */
   .brandwall { padding-left: 0; align-items: center; }
   .brandwall__logo {
-    /* Was none — "plain centering" still read slightly low here too,
-       same "glyph weight sits toward the baseline" reason the desktop
-       rule's own -3.5vh nudge exists for, just needing a lighter touch
-       since this box is shorter (request: "1023구간에서 브랜드 월 로고
-       위치 살짝만 위로 해서 시각적으로 가운데 보이게"). */
-    transform: translateY(-2vh);
+    /* Was none, then -2vh — that read as too far up ("로고가 너무
+       위로 올라갔다"), overshooting the "살짝만" (just a touch) the
+       request actually asked for. Eased back to a genuinely light
+       touch. */
+    transform: translateY(-0.8vh);
     /* Was the desktop clamp(240px,40vw,660px) — scaled down to a
        smaller ratio so the logo doesn't dominate the now-shrunk
        (30svh) box quite as much, growing/shrinking more gently across
@@ -4064,16 +4063,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Nudged left off the default 50% centre — the turning symbol read as
-     sitting slightly right of centre as it rotates (request: "심볼이
-     좌우로 돌아갈때 약간 오른쪽에 치우친 느낌이 강한데... 딱 중앙에
-     보이게"). Lower object-position-X shows more of the footage's own
-     left side (crops more off the right), pulling the subject back
-     toward centre. */
-  object-position: 42% center;
-  /* transform set inline every frame (updateDna) — will-change hints
-     the browser this element animates, same reasoning as
-     .brandwall__bg's own will-change below. */
+  /* A flat object-position shift was tried here first, but the actual
+     complaint turned out to be time-varying, not a constant offset —
+     the symbol only reads off-centre WHILE it's turning right, and
+     looks centred again once it turns back (request: "오른쪽으로
+     돌아갈때는 영상을 왼쪽으로 쫌 땡겨서 보완하고 돌아올때는 원래
+     위치로"). A static shift would have been wrong for the rest of the
+     loop. Fixed instead by the wobble loop in initBrandIdentity
+     (main.js) — reads the video's own currentTime and drives a small
+     periodic translateX synced to the loop, composed with this
+     element's existing scroll-driven scale rather than fighting it.
+     --dna-wobble-amp/-phase are its tuning knobs, read live off this
+     element every frame so they're adjustable directly in DevTools —
+     I can't see the actual footage to know exactly when the rightward
+     lean peaks or how far it drifts, so these are a first guess:
+     14px, peak assumed at the very start of the loop (phase 0). Nudge
+     phase in 0.05-ish steps (a fraction of the loop, 0-1) until the
+     pull lines up with the actual turn, and amp until the distance
+     feels right. */
+  --dna-wobble-amp: 14px;
+  --dna-wobble-phase: 0;
+  /* transform set inline every frame (updateDna's scale, composed with
+     the wobble loop's own translateX) — will-change hints the browser
+     this element animates, same reasoning as .brandwall__bg's own
+     will-change below. */
   will-change: transform;
 }
 /* padding-top/left: flat 100px, not scroll-tied — the word/title's own
@@ -7216,8 +7229,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      to the shared cross-section convention) — on request ("심볼 영상
      아래 여백 더 넓히고"). Placed after the base rule above, not
      before — the same equal-specificity/source-order bug hit
-     repeatedly this session. */
-  .brandid__closing-runway { height: clamp(24px, 4vw, 48px); }
+     repeatedly this session.
+     clamp(24,4vw,48) read as too wide once added ("심볼 영상 하단
+     여백 너무 넓어졌다 조금 좁히고") — trimmed back. */
+  .brandid__closing-runway { height: clamp(16px, 2.5vw, 32px); }
 }
 
 /* ---- Applications ----
@@ -7558,7 +7573,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      background switches to paper, and a fixed-height dark ::before
      covers just the intro's own area (measured 322-376px across
      375-1023px width; 380-460px clamp leaves margin above the max). */
-  .apps { background-color: var(--paper); z-index: 0; }
+  /* padding-top was the base rule's own clamp(90px,13vh,200px) — a
+     vh-based formula unrelated to the shared clamp(56px,10vw,96px)
+     top-padding convention every other section uses, and the gap
+     above .apps__title (the first real content here) read noticeably
+     different from those (request: "상단 여백은 다른 섹션 위쪽
+     여백과 똑같이 맞춰줘"). Matched to that shared value for compact;
+     desktop keeps its own vh-based formula. */
+  .apps { background-color: var(--paper); z-index: 0; padding-top: clamp(56px, 10vw, 96px); }
   .apps::before {
     content: '';
     position: absolute;
@@ -7603,16 +7625,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        that box has at narrower compact widths (measured: text run
        407.5px wide against a 364px box at 700px wide), so it overflowed
        past the box's own right edge instead of actually centering.
-       Full-bleed (same technique as .apps__photo) instead, so it
-       centers against the true viewport width with room to spare —
-       matches "화면 기준 정중앙으로 정렬" literally too (centered on
-       the SCREEN, not the section's own padded box). */
+       Broken out full-bleed first (same technique as .apps__photo), so
+       centering has the true viewport to work with — matches "화면
+       기준 정중앙으로 정렬" literally too. Then padded back in with
+       plain var(--edge) instead of .apps's own wide clamp(var(--edge),
+       24vw,300px) — matched to the Closing video's own left-right
+       margin above it instead (request: "좌우는 위 심볼 영상 좌우랑
+       똑같이 맞춰주고"): that video sits inside .brandid__closing's
+       plain .frame padding (var(--edge)), noticeably narrower than
+       .apps's own. Both margins stay symmetric, so centering on the
+       true viewport still holds. */
     width: 100vw;
     max-width: 100vw;
     margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-right: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-top: 0;
     margin-bottom: clamp(28px, 5vw, 48px);
+    padding-left: var(--edge);
+    padding-right: var(--edge);
+    box-sizing: border-box;
     font-family: var(--font-sq);
     font-size: clamp(30px, 7.2vw, 160px);
     font-weight: 400;
