@@ -850,8 +850,8 @@
     // then -20 (request: "20으로"), then -30 (request: "타이틀 및 아래
     // 본문을 위로 조금 더 당겨보자") — that overshot, back to -20
     // (request: "지금보단 내려야 할것 같아"), then -22 (request: "-22"),
-    // now -21 (request: "-21").
-    const BELOW_OVERLAP = -21;
+    // then -21 (request: "-21"), now -16 (request: "-16").
+    const BELOW_OVERLAP = -16;
     const TITLE_GAP = 32;
 
     function resetToBeside() {
