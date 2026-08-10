@@ -3064,6 +3064,19 @@
       // --dna-wobble-phase shifts WHEN in the loop (0-1, one full turn)
       // that peak lands — nudge it until the correction and the actual
       // turn line up.
+      //
+      // The video is object-fit:cover inside an overflow:hidden box, so
+      // translateX alone would slide its own edge into view on one side
+      // (or open a gap on the other) the instant the pull is non-zero.
+      // WOBBLE_SAFETY_SCALE pre-zooms the footage a little first, purely
+      // inside the box .brandid__dna-media already clips to — the
+      // visible FRAME never changes size, only how much of the footage
+      // is zoomed into within it — so there's slack to pan the pull
+      // within without ever exposing an edge (request: "살짝 확대해서
+      // 원래 사이즈 벗어나지 않게 확대 후 크롭해서 움직이게"). 1.12 gives
+      // ~19px of slack per side even at a 320px-wide box, comfortably
+      // past the 14px default amplitude with room for it to be tuned up.
+      const WOBBLE_SAFETY_SCALE = 1.12;
       let wobbleRafId = null;
       function wobbleFrame() {
         wobbleRafId = requestAnimationFrame(wobbleFrame);
@@ -3073,7 +3086,8 @@
         const phase = parseFloat(cs.getPropertyValue('--dna-wobble-phase')) || 0;
         const t = (dnaVideo.currentTime / dnaVideo.duration + phase) % 1;
         const pull = -amp * Math.sin(t * Math.PI * 2);
-        dnaVideo.style.transform = `translateX(${pull.toFixed(2)}px) scale(${dnaVideoScale.toFixed(3)})`;
+        const scale = dnaVideoScale * WOBBLE_SAFETY_SCALE;
+        dnaVideo.style.transform = `translateX(${pull.toFixed(2)}px) scale(${scale.toFixed(3)})`;
       }
       wobbleRafId = requestAnimationFrame(wobbleFrame);
     }

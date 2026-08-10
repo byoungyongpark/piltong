@@ -6912,8 +6912,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Un-pinned — initClosingFit/Handoff/Entrance all bail on
      isCompact() now, so nothing ever sets --plate-sticky-top past its
      0px default; left as sticky it would just pin flush to the very
-     top instead of tracking a real offset. */
-  .brandid__closing-loop-wrap { position: static; top: auto; }
+     top instead of tracking a real offset.
+     NOTE: this declaration alone doesn't actually win — it sits BEFORE
+     the base rule (which sets position:sticky) in source order, so the
+     base rule's later, equal-specificity declaration overrode it and
+     the video stayed sticky/scroll-reactive at compact the whole time
+     (confirmed via computed style: position read "sticky" here, not
+     "static" — request: "우리는 로고를 만든것이 아니라 아래 심볼 영상
+     스크롤시 반응하는 뭔가가 적용된듯한데 1023구간부터는 해제해줘").
+     The actual override now lives in the compact block further down,
+     placed AFTER the base rule for exactly this reason (see that
+     block's own comment — the closing-band fix hit the identical trap
+     two commits ago); the ineffective declaration that used to sit
+     right here has been removed, this comment kept as the record of
+     why. */
   /* Decorative corner ticks — desktop-only flourish, on request
      ("영상 프레임 양사방 모서리에서 뻗어나가는 라인은 제거"). */
   .brandid__closing-tick { display: none; }
@@ -7034,6 +7046,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__closing-loop-wrap {
     --loop-band-top: clamp(32px, 5vw, 72px);
     --loop-band-bottom: clamp(28px, 4.5vw, 64px);
+    /* The actual un-pin — see the long note on the earlier, ineffective
+       attempt at this further up. */
+    position: static;
+    top: auto;
   }
 }
 /* The plate's own surface, moved off the wrapper and onto a layer of its
@@ -7599,6 +7615,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      BLOCK itself at the section's own left inset rather than centred
      — only the text's own alignment inside that block needed fixing. */
   .apps__lead { text-align: left; }
+  /* .apps__intro's own align-items:flex-start (base rule) shrink-wraps
+     its children to their own content width rather than stretching
+     them — .apps__lead/-body were sizing to their own widest line
+     instead of using the section's full available width (request:
+     "하나의 아이덴티티 여기 텍스트 그룹 100%로 풀어줘"). */
+  .apps__lead,
+  .apps__body {
+    width: 100%;
+  }
   /* Was the base rule's 2.75rem — technically already responsive (the
      global html{font-size} pilot scales EVERY rem down to 320px), but
      on its own curve: ~32.7px at 1024px against .brandid__closing-line
