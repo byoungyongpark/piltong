@@ -652,8 +652,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        padding here — invisible, after the image — is what that pinned
        stretch was too short (a bare few hundred px) directly buys more
        of. Padding rather than a taller image, so the photo's own size
-       and crop stay exactly as designed. */
-    padding-bottom: clamp(80px, 12vh, 200px);
+       and crop stay exactly as designed.
+       Widened ~25% (80/12vh/200 -> 100/15vh/240), on request ("좌측
+       영상 하단 여백도 윗 섹션보다 조금 더 넉넉한 느낌으로"), for a
+       visibly more generous gap below the photo than the section
+       above it reads with. */
+    padding-bottom: clamp(100px, 15vh, 240px);
   }
   /* No height on the media on purpose. Pinning one would force a crop,
      so the width alone sets the size and the image's own ratio sets the
@@ -3265,8 +3269,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      line instead, ceiling matched to that formula's own value at
      1025px (943px, so entering compact doesn't jump) down to a flat
      280px at 420px and fixed there below it (request: "영상도 대략
-     420이하 지점에선 280정도로 고정하자"). */
-  width: clamp(280px, calc(-180.28px + 109.59vw), 943px);
+     420이하 지점에선 280정도로 고정하자"). Both ends widened ~5% since
+     (943->990, 280->294) — no independent height control exists here
+     (.whyp__media-img is width:100%/height:auto, tracking the video's
+     own aspect ratio on purpose, so the artwork is never cropped —
+     see that rule), so growing the video's height at all means growing
+     this width, which scales height with it proportionally (request:
+     "심볼 영상 위아래 높이도 조금 늘려줘"). */
+  width: clamp(294px, calc(-190px + 115.23vw), 990px);
   /* Removed — desktop's shadow (below), even scaled down, still read
      as an unwanted mark under the video at compact sizes (request:
      "영상 아래 그림자는 제거 하자"). */
@@ -3298,7 +3308,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      and the second cut brought the top down further than the bottom,
      not an even split (request: "와이필통 한글 컨텐츠 그룹 위아래
      여백도 조금더 축소하는데 상단은 조금 더 축소"). */
-  padding: clamp(16px, 3vw, 32px) var(--edge) clamp(28px, 5vw, 44px);
+  /* Side inset widened from plain var(--edge) to the same clamp
+     .whyp__copy-sticky's own 1024-1280px band uses (request: "1024포함
+     그 이하 구간에서 와이필통 좌우에 여백 좀 넓혀주고") — same formula,
+     so there's no jump at the 1023/1024 seam (both resolve to ~112.6px
+     right at that boundary), and it eases down to var(--edge)'s own
+     ~88px floor territory well before the smallest phones. */
+  padding: clamp(16px, 3vw, 32px) clamp(88px, 11vw, 140px) clamp(28px, 5vw, 44px);
 }
 .whyp--compact .whyp__step {
   position: static;
@@ -7029,71 +7045,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   background-color: var(--apps-fill);
   opacity: 0;
   pointer-events: none;
-  /* A slow, barely-there drift on the lit ellipse only — the photo
-     layer's own position (second value, "top center") never moves —
-     so the one bright patch reads as gently alive rather than a flat,
-     static cutout, on request ("라이팅이 된 부분이 자연스럽게
-     무빙되면서 일렁이는 느낌"). Same technique as .vwipe__ground--to's
-     own drift: background-position is animatable directly, and a
-     different property from the opacity this element's fade is
-     already driven by (initClosingHandoff), so the two never fight
-     over the same inline style. */
-  animation: groundGlowDrift 22s ease-in-out infinite alternate;
+  /* A drift on the lit ellipse only — the photo layer's own position
+     (second value, "top center") never moves — so the one bright patch
+     reads as gently alive rather than a flat, static cutout, on
+     request ("라이팅이 된 부분이 자연스럽게 무빙되면서 일렁이는
+     느낌"). Same technique as .vwipe__ground--to's own drift:
+     background-position is animatable directly, and a different
+     property from the opacity this element's fade is already driven
+     by (initClosingHandoff), so the two never fight over the same
+     inline style.
+     Range widened (47/53 -> 38/62, four times the swing) and sped up
+     (22s -> 16s) now that the separate glow layer is gone (see above)
+     — this drift is carrying the whole "일렁이는" effect alone, so it
+     needed to read as clearly more noticeable on its own, not just
+     barely-there (request: "일렁이는 느낌만 더 눈에 띄게"). */
+  animation: groundGlowDrift 16s ease-in-out infinite alternate;
 }
 @keyframes groundGlowDrift {
-  from { background-position: 47% 47%, top center; }
-  to   { background-position: 53% 53%, top center; }
+  from { background-position: 38% 38%, top center; }
+  to   { background-position: 62% 62%, top center; }
 }
 @media (prefers-reduced-motion: reduce) {
   .apps__ground { animation: none; }
 }
-/* A second, much bolder pass at the same lit patch — the drift above
-   moves the dimming gradient's OWN position, but that gradient's
-   background-size matches the container exactly (no intrinsic ratio on
-   a plain gradient, so `cover`/`auto` both collapse to "fill the box"),
-   which leaves no slack for background-position to actually shift
-   anything by. Rather than resize that layer — risking pulling its
-   cutout off the photo's real bright spot, which it has to stay
-   aligned with to avoid a visible seam — this is a SEPARATE, freely
-   movable warm highlight glow layered on top via mix-blend-mode:screen
-   (only ever brightens, never re-darkens what's under it), driven by
-   transform the same way .hwt::before's own light sweep is: guaranteed
-   to actually move, on request ("조금더 육안적으로 확 느낄 수 있게
-   크게 빛이 물결처럼 일렁이는 느낌도 추가"). Oversized (inset -20%) so
-   the drift and scale never uncover an edge. Roughly over the same
-   spot the base gradient's cutout sits at, translated into this
-   layer's own (20% larger each side) coordinate space. */
-.apps__ground::before {
-  content: '';
-  position: absolute;
-  inset: -20%;
-  pointer-events: none;
-  /* Colour sampled from the photo's own lit patch, not invented — the
-     brightest pixels there (bg.png, ~15-23%/31% of the raw image)
-     measured rgb(104,102,101), a barely-warm neutral rather than the
-     gold/cream this started as, on request ("따뜻한 하이라이트 글로우
-     배경의 라이팅 색깔과 비슷하게 표현해야 자연스러울것 같아"). Scaled
-     up in brightness (a glow has to read against mix-blend-mode:screen,
-     which the source's own dim tone barely would) while holding that
-     exact r:g:b ratio, so the hue reads as the same light, only
-     intensified. */
-  background: radial-gradient(ellipse 30% 20% at 29% 71%,
-    rgba(242, 237, 235, .55) 0%,
-    rgba(216, 212, 210, .26) 45%,
-    transparent 72%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  animation: groundGlowWave 9s ease-in-out infinite;
-}
-@keyframes groundGlowWave {
-  0%   { opacity: 0;   transform: translate3d(0, 0, 0) scale(1); }
-  30%  { opacity: .8;  transform: translate3d(1.6%, -1.1%, 0) scale(1.08); }
-  60%  { opacity: .32; transform: translate3d(-1.1%, 1.3%, 0) scale(.96); }
-  100% { opacity: 0;   transform: translate3d(0, 0, 0) scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .apps__ground::before { animation: none; opacity: 0; }
-}
+/* The separate bolder "glow" pass that used to live here (a warm
+   mix-blend-mode:screen highlight, .apps__ground::before) is removed
+   entirely, at every width, on request ("어플리케이션 bg.png에 글로우
+   효과 전구간에서 제거"). The base layer's own background-position
+   drift (groundGlowDrift, above) is the one motion kept — widened
+   there instead so the "일렁이는" wander alone reads as more noticeable
+   now that it's carrying the whole effect on its own. */
 /* Title left, copy right, filling the whole width the section's own
    margins leave — no max-width of its own any more ("현재 컨텐츠 폭
    고정된듯 한데 풀로 풀고"). Its containing block is left as .apps
