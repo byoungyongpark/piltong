@@ -7247,8 +7247,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      before — the same equal-specificity/source-order bug hit
      repeatedly this session.
      clamp(24,4vw,48) read as too wide once added ("심볼 영상 하단
-     여백 너무 넓어졌다 조금 좁히고") — trimmed back. */
-  .brandid__closing-runway { height: clamp(16px, 2.5vw, 32px); }
+     여백 너무 넓어졌다 조금 좁히고") — trimmed back, then widened
+     again to match ".brandid__closing's" own top padding above the
+     title group (clamp(56,10vw,96)) — "살짝만" (just a touch) more
+     than it, not the same — on request ("영상 아래로 여백 우리는
+     로고를 타이틀 그룹 위쪽 여백과 비슷하게... 살짝만 넓게"). */
+  .brandid__closing-runway { height: clamp(64px, 11vw, 104px); }
 }
 
 /* ---- Applications ----
@@ -7694,9 +7698,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-right: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-top: 0;
-    /* Was clamp(28px,5vw,48px) — zeroed, on request ("에플리케이션
-       타이틀 밑... 여백은 없어야 하고"). */
-    margin-bottom: 0;
+    /* Was clamp(28px,5vw,48px), zeroed on request ("타이틀 밑...
+       여백은 없어야 하고"), then asked back — flush read as too tight
+       once actually seen (request: "어플리케션 한글 텍스트 그룹
+       위아래로 여백 적절하게 넣어줘"). Landed on a value between the
+       two rather than the original — "적절하게", not back to where it
+       started. */
+    margin-bottom: clamp(20px, 3.5vw, 36px);
     padding-left: var(--edge);
     padding-right: var(--edge);
     box-sizing: border-box;
@@ -7709,22 +7717,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     text-align: center;
     color: var(--paper);
   }
-  /* Re-measured after zeroing .apps__title's margin-bottom and
-     .apps__showcase's margin-top just below, and after fixing
-     .apps__intro's own 901-1023px row-layout gap (a couple rules up) —
-     both changes shrank the real content height a lot (the previous
-     500-600px fixed value was overshooting into the first photo by a
-     couple hundred px). Content height is purely width-driven (font-
-     sizes are vw-based, not vh), so this is now a vw formula instead
-     of vh: fit through the actual measured needs at three widths
-     (227.7px@375, 296.2px@700, 386.0px@1023) with a consistent ~50-60px
-     margin over each. */
-  .apps::before { height: clamp(260px, calc(155px + 28vw), 460px); }
-  /* Was clamp(80px,6vw,100px) — zeroed, on request ("하단 텍스트
-     그룹 아래로 여백은 없어야 하고"): the intro group now runs
-     straight into the first photo with no gap. Desktop keeps the
-     base rule's own value. */
-  .apps__showcase { margin-top: 0; }
+  /* Re-measured again after .apps__title's margin-bottom and
+     .apps__showcase's margin-top came back from 0 to something
+     "적절한" (a couple rules below) — content height grew back up,
+     and the previous clamp(260,...,460) (fit to the zero-margin
+     numbers) started running short (confirmed: needed 271.7px@375
+     against only 260px available). Re-fit through the new measured
+     needs at three widths (271.7px@375, 348.7px@700, 462.7px@1023)
+     with a consistent ~45-65px margin over each. */
+  .apps::before { height: clamp(300px, calc(203px + 30.25vw), 520px); }
+  /* Was clamp(80px,6vw,100px), zeroed on request ("하단 텍스트 그룹
+     아래로 여백은 없어야 하고"), then asked back — flush read as too
+     tight once actually seen (request: "어플리케션 한글 텍스트 그룹
+     위아래로 여백 적절하게 넣어줘"). Landed between the two, same
+     reasoning as .apps__title's own margin-bottom just above. Desktop
+     keeps the base rule's own value either way. */
+  .apps__showcase { margin-top: clamp(24px, 4vw, 44px); }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
