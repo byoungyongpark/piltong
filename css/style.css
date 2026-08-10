@@ -1914,18 +1914,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     display: block;
     margin: 0 0 clamp(20px, 4vw, 32px);
     padding: 0 var(--edge);
-    /* Unified with .acycle__intro-title and .statement__big at this
-       width, on request ("비전, 아워 어프로치 섹션 타이틀도 30으로
-       통일"). Was clamp(30px, 6vw, 48px), which still plateaued well
-       inside the 1024-420px range — same exact formula .statement's own
-       --big already uses (clamp(30px, 7.2vw, 160px)), copied here
-       directly rather than re-derived, so all three scale with
-       identically the same feel across 1024-420px and land on
-       identically the same 30px floor right around 420px (request:
-       "아워필라서피 섹션의 폰트 사이즈 변화를 비전, 아워 어프로치에도
-       똑같이 적용해서 똑같은 느낌으로... 420이하에서 같은 크기로
-       고정"). */
-    font-size: clamp(30px, 7.2vw, 160px);
+    /* Was unified with .statement__big's own clamp(30px,7.2vw,160px) —
+       but .statement__big's DESKTOP size (--big, also 7.2vw-driven)
+       reaches that same value right at 1024px, so it's continuous there,
+       while .vwipe__word and .acycle__intro-title's own DESKTOP sizes
+       are NOT 7.2vw-driven (Vision is the scroll-zoom system; Our
+       Approach's .acycle__intro-title desktop rule is a flat 40px) — so
+       crossing 1024->1023 jumped this from 40px to 73.7px, reading as
+       "다소 큰" right at that seam (request: "1023구간에서 비전 섹션 및
+       아워 어프로치 섹션의 영문 타이틀이 다소 큰데 1024이상 해상도
+       크기에서부터 1024~420구간까지 자연스럽게 줄어들고 늘어나게").
+       Rebuilt as its own two-point line instead: 40px at 1024px (Our
+       Approach's own desktop ceiling, so entering compact no longer
+       jumps) down to the SAME 30px floor at 420px this already had
+       ("420이하 구간에서 지금처럼 고정하자"). */
+    font-size: clamp(30px, calc(23.05px + 1.6556vw), 40px);
     /* Matched to .acycle__intro-title's own compact tracking/leading —
        font-weight already matches via the base rule (300 on both).
        line-height was 1.05, a stale match from before .acycle__intro
@@ -2644,12 +2647,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      APPROACH)을... 행간을 좁히고 위의 비전 타이틀 스타일을 똑같이
      맞춰달란", "1025이하 기준"). */
   .acycle__intro-title {
-    /* Unified with .vwipe__word and .statement__big at this width, on
-       request ("비전, 아워 어프로치 섹션 타이틀도 30으로 통일") — see
-       .vwipe__word for the reasoning behind the exact formula (matches
-       .statement's own --big directly, so all three scale with the
-       same feel across 1024-420px). */
-    font-size: clamp(30px, 7.2vw, 160px);
+    /* Was unified with .vwipe__word/.statement__big's shared
+       clamp(30px,7.2vw,160px) — rebuilt as its own two-point line
+       matched to THIS element's own flat 40px desktop rule instead, so
+       crossing 1024->1023 no longer jumps from 40px to 73.7px. See
+       .vwipe__word for the full reasoning (same fix, same request,
+       same formula). */
+    font-size: clamp(30px, calc(23.05px + 1.6556vw), 40px);
     /* Was 500 (itself brought down from 600, up from 400, then 300).
        One step lighter again, unified with .statement__big at the same
        value (request: "아워필라서피 영문 굵기 다시 한단계 낮추고...
@@ -3019,6 +3023,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     12px 22px 44px -20px rgba(24, 28, 35, .09),
     30px 70px 130px -34px rgba(24, 28, 35, .11);
 }
+/* min(1490px,92vw) leaves real margin at typical wide desktop widths
+   (e.g. ~215px each side at 1920px) but almost none right at the
+   1024px boundary itself (~41px), which is what "1024포함" in the
+   request was calling out specifically. Same margin-first formula as
+   the compact rule below, for the same reason and the same value, so
+   there's no jump crossing 1023/1024 either (both give var(--edge),
+   ~61px at 1024px). */
+@media (min-width: 1024px) and (max-width: 1280px) {
+  .whyp__media { width: calc(100% - 2 * var(--edge)); }
+}
 .whyp__media-img {
   width: 100%;
   /* auto, not 100% + object-fit: cover — that combination cropped the
@@ -3265,18 +3279,21 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      tight (request: "와이필통 타이틀 흘러가는 아래 여백도 더 넉넉하게
      줘"). Same two-point construction, both ends pushed up ~16px. */
   margin: clamp(36px, calc(11.01px + 5.9504vw), 72px) auto 0;
-  /* Was min(1490px,92vw) (desktop's own unbounded formula) — two-point
-     line instead, ceiling matched to that formula's own value at
-     1025px (943px, so entering compact doesn't jump) down to a flat
-     280px at 420px and fixed there below it (request: "영상도 대략
-     420이하 지점에선 280정도로 고정하자"). Both ends widened ~5% since
-     (943->990, 280->294) — no independent height control exists here
-     (.whyp__media-img is width:100%/height:auto, tracking the video's
-     own aspect ratio on purpose, so the artwork is never cropped —
-     see that rule), so growing the video's height at all means growing
-     this width, which scales height with it proportionally (request:
-     "심볼 영상 위아래 높이도 조금 늘려줘"). */
-  width: clamp(294px, calc(-190px + 115.23vw), 990px);
+  /* Was a two-point line matched almost edge-to-edge to the container
+     (943px ceiling in a 1024px-wide box — ~41px each side — then
+     widened further to 990px, ~17px each side, chasing height via
+     width since there's no independent height control here). Both
+     read as having no real side margin at all, and the second pass
+     made it worse, not better ("1024포함 그 이하 구간에서 와이필통
+     좌우에 여백 좀 넓혀서 심볼 영상 좌우로 여백이 어느정도 존재하길
+     희망하는거야 오히려 지금은 좌우가 더 좁아졌네"). Switched to a
+     margin-first formula instead of a width-first one: subtract the
+     SAME var(--edge) inset every other section's content uses, so the
+     video always keeps a real, familiar margin at any compact width —
+     this does mean it's no longer chasing extra height via width (that
+     was in direct tension with "more margin" anyway, given a fixed
+     aspect ratio and a fixed viewport can't grow both at once). */
+  width: calc(100% - 2 * var(--edge));
   /* Removed — desktop's shadow (below), even scaled down, still read
      as an unwanted mark under the video at compact sizes (request:
      "영상 아래 그림자는 제거 하자"). */
@@ -4446,6 +4463,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        타이틀 아래 한글 그룹은 영문 타이틀 좌측에 맞추면 좋겠어"). */
     align-items: flex-start;
     gap: clamp(24px, 6vw, 40px);
+    /* A natural divider from Shape DNA into Symbol & Wordmark (request:
+       "쉐입 디엔에이 섹션과 심볼&워드마크 섹션 사이 자연스러운
+       구분라인"). Same hairline convention as every other divider in
+       this file (var(--ink-12), see .brandid__blueprint-principle's
+       own compact border-top). Sits inside the existing ~70px gap
+       .brandid__dna-sticky's own bottom spacing already leaves above
+       this row, so padding-top splits that gap rather than adding a
+       new one on top of it. */
+    padding-top: clamp(24px, 4vw, 40px);
+    border-top: 1px solid var(--ink-12);
   }
 }
 /* Same font-family/weight/line-height/letter-spacing/colour as
@@ -5761,6 +5788,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__blueprint-panel + .brandid__blueprint-panel {
     margin-top: clamp(72px, 13vw, 92px);
     margin-bottom: clamp(72px, 10vw, 128px);
+    /* Divider between SYMBOL and WORDMARK, same request/convention as
+       .brandid__construction-row's own new border-top above (request:
+       "심볼과 워드마크 섹션 사이에도 넣어주고"). Sits at the top of the
+       existing margin-top gap, with its own small padding-top so the
+       wordmark graphic doesn't start flush against the line. */
+    padding-top: clamp(24px, 4vw, 40px);
+    border-top: 1px solid var(--ink-12);
   }
   .brandid__color-flash,
   .brandid__color-seal,
