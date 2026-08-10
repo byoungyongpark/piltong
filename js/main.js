@@ -2689,13 +2689,18 @@
         colorHead.style.backgroundColor = cs.backgroundColor;
         colorHead.style.color = cs.color;
       }
-      // .hscroll-dots is injected right after .brandid__color-caption by
-      // initHorizontalScrollDots (main.js, runs later at page load than
-      // this function is first defined) — queried fresh here rather
-      // than cached above, since it doesn't exist yet the very first
-      // time this runs.
-      const dots = colorCaption.nextElementSibling;
-      if (dots && dots.classList.contains('hscroll-dots')) {
+      // .hscroll-dots is injected INSIDE .brandid__color-caption (right
+      // after .brandid__color-cards-row) by initHorizontalScrollDots
+      // (main.js, runs later at page load than this function is first
+      // defined) — so it's a DESCENDANT of the caption, not its next
+      // sibling. Queried fresh here rather than cached above, since it
+      // doesn't exist yet the very first time this runs. (An earlier
+      // version looked at colorCaption.nextElementSibling, from before
+      // the dots were moved inside the scroll container — that stopped
+      // matching anything once they moved, which is why the nav strip
+      // never picked up the active colour.)
+      const dots = colorCaption.querySelector('.hscroll-dots');
+      if (dots) {
         dots.style.backgroundColor = cs.backgroundColor;
         dots.style.color = cs.color;
       }

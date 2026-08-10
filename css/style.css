@@ -5147,10 +5147,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        and never adjusted for compact WIDTH at all (only a separate
        max-height:860px query touches it, and only down to 32-64px on
        short screens). First matched to .brandid__blueprint-row's own
-       28-40px symbol gap, now widened a further step on its own
-       (request: "워드마크 아래여백 조금 더 띄우고") — the two are no
-       longer required to match exactly, just this one specifically. */
-    gap: clamp(40px, 8vw, 56px);
+       28-40px symbol gap, then widened, and now a further step again
+       (request: "워드마크 위 아래 여백 조금씩 더 넓히자") — this is the
+       BELOW-graphic margin; the ABOVE-graphic one (panel margin-top) is
+       bumped in step below, kept a touch larger. */
+    gap: clamp(52px, 10vw, 68px);
   }
 }
 /* Was a full-bleed breakout (calc(100% + 2*edge) with a matching
@@ -5475,6 +5476,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Widened from clamp(32px,5vw,56px), on request ("색은 장식 아니라
      아래 여백 조금더 넓히고"). */
   margin: 0 0 clamp(48px, 7vw, 80px);
+  /* Wrap on word/space boundaries, never mid-syllable — without this
+     the compact-width wrap split "기준입니다" into "기준입니" / "다."
+     (request: "한글 타이틀은 단어별로 줄바꿈 되게 해주고"). Same pairing
+     .brandid__colorstory-lead / .acycle__body already use. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 /* The combined symbol+wordmark logo (previously h_logo.svg's paths
    inlined here) was removed entirely, on request ("로고를 빼고") —
@@ -5586,14 +5593,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     pointer-events: auto !important;
   }
   /* margin-top (the gap between the diagram panel's own content ending
-     and the wordmark panel/graphic starting) — matched down to the
-     symbol's own equivalent (sticky's padding-top) two rounds ago, now
-     widened back out past it on its own, deliberately larger than the
-     wordmark-inner gap above (request: "위쪽 여백은 아래보다 조금더
-     넉넉히 확보해줘"). margin-bottom (wordmark's own trailing space
-     before Color Principle) is a separate, still-untouched concern. */
+     and the wordmark panel/graphic starting) — the ABOVE-graphic
+     margin, widened again in step with the below-graphic gap
+     (.brandid__blueprint-wordmark-inner above), kept a touch larger
+     than it (request: "워드마크 위 아래 여백 조금씩 더 넓히자", earlier
+     "위쪽 여백은 아래보다 조금더 넉넉히"). margin-bottom (wordmark's own
+     trailing space before Color Principle) is a separate, still-
+     untouched concern. */
   .brandid__blueprint-panel + .brandid__blueprint-panel {
-    margin-top: clamp(56px, 10vw, 72px);
+    margin-top: clamp(72px, 13vw, 92px);
     margin-bottom: clamp(72px, 10vw, 128px);
   }
   .brandid__color-flash,
@@ -5672,21 +5680,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     left: 0;
     width: 100%;
     box-sizing: border-box;
-    /* Top cut hard, 48-96px -> 16-32px, then back up to the shared
-       clamp(56px,10vw,96px) every other section's own top padding
-       uses — the "대폭 줄여줘" cut turned out to be too far off that
-       standard (request: "컬러 프린서플 위아래... 섹션 여백 기타 다른
-       섹션 여백과 똑같이 맞춰주고"). Bottom widened from a flat 28-44px
-       into its own clamp, separate from the top, so there's a real,
-       deliberate gap before the colour row starts rather than reading
-       as one shared padding value (request: "영문 타이틀 및 한글
-       타이틀 그룹 아래에 세가지 색상 적당한 여백을 두고 위치"). */
+    /* The space below the title used to be margin-bottom — but margin
+       is TRANSPARENT, so it showed the page's paper through it as a
+       stripe between the (coloured) title and the (coloured) cards,
+       making them read as two separate sections (request: "한섹션이면
+       저사이에 여백이 없어야"). Moved into padding-bottom instead: same
+       breathing room, but now it's part of the title's own coloured
+       box, so the title runs seamlessly into the card row with no paper
+       seam. margin-bottom:0. */
     padding-top: clamp(56px, 10vw, 96px);
     padding-left: var(--edge);
     padding-right: var(--edge);
-    padding-bottom: 0;
+    padding-bottom: clamp(28px, 6vw, 48px);
     margin-top: 0;
-    margin-bottom: clamp(28px, 6vw, 48px);
+    margin-bottom: 0;
     background-color: var(--paper);
     color: var(--ink);
     /* No transition — background-color/color are set inline every
