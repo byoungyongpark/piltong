@@ -4117,20 +4117,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__dna-media { display: none; }
   .brandid__dna-right { flex-basis: 100%; }
 }
-/* Same hide, open-ended from 1600px up (no max-width cap) — a rotated
-   monitor gets TALLER as its own native width grows (it's the long
-   side of the landscape original becoming the portrait height), so the
-   video's vertical elongation only gets WORSE past 1600px, never
-   better, unlike the 1024-1280px band above which needed an upper
-   bound (request: "가로는 1600구간(그 이상 그 이하든... 모니터를
-   세로로 돌린 해상도 구간)부터... 세로길이가 768이상일때만 적용
-   [영상이] 세로로 길어지는 비율이 심해지는 구간 돌입시"). 1280-1600px
-   is deliberately left alone — not asked for, and not a width any
-   common rotated monitor actually lands on. */
-@media (min-width: 1600px) and (min-height: 768px) {
-  .brandid__dna-media { display: none; }
-  .brandid__dna-right { flex-basis: 100%; }
-}
 /* SHAPE/DNA + the title — the "영문 타이틀 그룹" (English title group),
    on request. .brandid__dna-detail-col (the 4 principles) is a
    separate sibling now, independently centered — see below. */
