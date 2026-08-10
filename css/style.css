@@ -6216,14 +6216,31 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     gap: clamp(40px, 5vw, 96px);
   }
   .brandid__colorstory-img { position: absolute; inset: 0; }
+  /* Flex items paint in order-modified document order as if positioned
+     (CSS Flexbox §z-order) — without an explicit z-index here, the
+     absolutely-positioned img (painted at its own DOM-order slot)
+     landed on TOP of the copy (order:-1 puts it first/bottom in that
+     paint order), hiding the whole text group behind the photo
+     ("1600구간에서 아예 화면이 사라졌는데"). position:relative +
+     z-index:1 lifts both above the img's implicit z-index:auto, same
+     fix already used for the same reason in the ≤1023px tier below. */
   .brandid__colorstory-card {
-    position: static;
+    position: relative;
+    z-index: 1;
+    /* Base rule's left:50%/top:48.25% still apply once this is
+       position:relative (only position:static ignored them) — reset
+       both, or the card offsets 50% of the panel's own width to the
+       right of its normal flex position (measured: 733px -> 1433px
+       at 1400px wide, i.e. off-screen). */
+    left: auto;
+    top: auto;
     transform: none;
     margin: 0;
   }
   .brandid__colorstory-copy {
     order: -1;
-    position: static;
+    position: relative;
+    z-index: 1;
     left: auto;
     top: auto;
     bottom: auto;
