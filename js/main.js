@@ -849,8 +849,9 @@
     // 400px), then -19 (request: "BELOW_OVERLAP을 -18→-19로 해보자"),
     // then -20 (request: "20으로"), then -30 (request: "타이틀 및 아래
     // 본문을 위로 조금 더 당겨보자") — that overshot, back to -20
-    // (request: "지금보단 내려야 할것 같아"), now -22 (request: "-22").
-    const BELOW_OVERLAP = -22;
+    // (request: "지금보단 내려야 할것 같아"), then -22 (request: "-22"),
+    // now -21 (request: "-21").
+    const BELOW_OVERLAP = -21;
     const TITLE_GAP = 32;
 
     function resetToBeside() {
