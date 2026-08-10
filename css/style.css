@@ -4166,9 +4166,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__dna-media {
     flex: none;
     width: 100%;
-    /* Was 62vw — a bit taller (request: "쉐입디엔에이 심볼 영상
-       높이는 조금더 높여주고"). */
-    height: 78vw;
+    /* Was 62vw, then 78vw — taller again (request: "쉐입디엔에이 위의
+       위치한 심볼 영상의 높이값은 더 주면 좋겠고"). */
+    height: 95vw;
     padding-top: 0;
     padding-left: 0;
     padding-bottom: 0;
@@ -4202,14 +4202,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__dna-index {
     /* Floor raised 32->28 — a gentler ratio than Visual Identity's
        own title (request: "비쥬얼 아이덴티티 영문 타이틀보단 작은
-       비율로... 420이하에선 28사이즈로 고정"), same 56px ceiling. */
+       비율로... 420이하에선 28사이즈로 고정"), same 56px ceiling. This
+       exact clamp/letter-spacing/line-height triple is now the single
+       shared reference for every English title in this stretch of
+       sections — .brandid__construction-index and .brandid__blueprint-
+       index (SYMBOL/WORDMARK) copy it verbatim below, on request
+       ("쉐입 디엔에이, 심볼&워드마크, 심볼, 워드마크 영문 타이틀은...
+       동일한 크기, 자간, 행간, 사이즈로 작동되길 원하고") — they'd each
+       been tuned to their own independent clamp (56/71.68/50px
+       ceilings) despite comments already claiming they matched. */
     font-size: clamp(28px, calc(8.53px + 4.6358vw), 56px);
     white-space: normal;
-    /* Was the desktop base rule's own -.02em — unified with
-       .brandid__construction-index's own compact letter-spacing
-       (request: "쉐입디엔에이 영문 타이틀 자간은 심볼&워드마크
-       타이틀이랑 똑같이 통일"). */
     letter-spacing: .1em;
+    line-height: 1;
   }
   /* Was flat 50px/36px/24px, no compact scaling at all — two-point
      exact lines through each element's own desktop value (matching
@@ -4314,7 +4319,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__construction-row {
     padding: 0 var(--edge);
     flex-direction: column;
-    align-items: center;
+    /* center -> flex-start: the title itself was reverted to text-
+       align:left below a while after this rule was written (comment on
+       .brandid__construction-index), but this row-level cross-axis
+       centering was never updated to match — each child was still
+       being centred as its own shrink-wrapped block, so the title and
+       the Korean group below it landed on two different centres rather
+       than sharing a left edge. On request ("심볼&워드마크 섹션의 영문
+       타이틀 아래 한글 그룹은 영문 타이틀 좌측에 맞추면 좋겠어"). */
+    align-items: flex-start;
     gap: clamp(24px, 6vw, 40px);
   }
 }
@@ -4349,9 +4362,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      whole way (request: "심볼&워드마크 섹션도 타이틀과 그아래 한글
      그룹 똑같이 적용하자" — same 1024->420 technique as Shape DNA). */
   .brandid__construction-index {
-    /* Floor raised 40->28, same "smaller ratio than Visual Identity"
-       request as the other three titles. */
-    font-size: clamp(28px, calc(-2.37px + 7.2318vw), 71.68px);
+    /* Was its own independent clamp (28-71.68px) — now the exact same
+       triple as .brandid__dna-index, the shared reference (see its own
+       comment), on request ("쉐입 디엔에이, 심볼&워드마크, 심볼, 워드마크
+       영문 타이틀은... 동일한 크기, 자간, 행간, 사이즈로"). */
+    font-size: clamp(28px, calc(8.53px + 4.6358vw), 56px);
     flex: none;
     /* Back to left — was centered on an earlier request ("심볼과
        워드마크 영문 타이틀만 센터 정렬"), reversed now ("심볼&워드마크
@@ -4722,6 +4737,24 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   stroke: var(--ink-70);
   stroke-width: .09;
 }
+@media (max-width: 1025px) {
+  /* Matches .brandid__blueprint-wordmark-svg path's own stroke exactly
+     (colour + weight), on request ("심볼과 워드마크 섹션의 스트로크로
+     그려진 심볼 및 워드마크는 워드마크 스타일의 스트로크 색상 및
+     굵기로 심볼도 똑같이 적용해서") — full ink instead of the lighter
+     ink-70, and vector-effect:non-scaling-stroke so .7 renders as .7
+     real pixels regardless of this diagram's own viewBox scale, same as
+     the wordmark's already does, rather than the symbol's own user-unit
+     .09 (which scales WITH the viewBox and reads as a different weight
+     at a different size). Left untouched above 1025px — desktop's
+     thinner construction-drawing line was never part of this request. */
+  .bp-outline path {
+    stroke: var(--ink);
+    stroke-width: .7;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+  }
+}
 /* Guide grid. Lighter and thinner than the outline it precedes — it has
    to read as the paper the mark is set on, not as part of the mark.
    Scrubbed like everything else here, so no transition. */
@@ -4796,7 +4829,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    Wordmark above it). */
 @media (max-width: 1025px) {
   .brandid__blueprint-index {
-    font-size: clamp(28px, calc(12.7px + 3.6424vw), 50px);
+    /* Was its own independent clamp (28-50px) — now the exact same
+       triple .brandid__dna-index/.brandid__construction-index share
+       (see .brandid__dna-index's own comment), on request ("쉐입
+       디엔에이, 심볼&워드마크, 심볼, 워드마크 영문 타이틀은... 동일한
+       크기, 자간, 행간, 사이즈로"). Covers both "SYMBOL" and "WORDMARK"
+       — same class, both panels. */
+    font-size: clamp(28px, calc(8.53px + 4.6358vw), 56px);
     /* Was centered on request ("심볼과 워드마크 영문 타이틀만 센터
        정렬 나머지는 왼쪽 정렬로") — reversed back to left now
        ("심볼&워드마크 영문타이틀, 심볼, 워드마크 타이틀은 왼쪽
@@ -5492,7 +5531,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: static;
     height: auto;
     overflow: visible;
-    padding: clamp(48px, 9vw, 88px) 0;
+    /* Top cut drastically — this is the space before the drawn symbol
+       even appears, at the very start of the merged blueprint/colour
+       stage (request: "그려진 심볼 위로 여백은 대폭 줄여줘"). Bottom
+       stays put (0 here, then overridden back up for .brandid__color-
+       sticky specifically below, same as before this edit). */
+    padding: clamp(12px, 2vw, 20px) 0 0;
   }
   /* Bottom split off from the shared rule above — was riding
      .brandid__blueprint-sticky's own 48-88px, not the clamp(64px,
@@ -5568,20 +5612,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__color-name span {
     font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
   }
-  /* Real flex column now (was display:contents, transparent to
-     desktop's own layout) — head, caption and (once JS inserts it)
-     the dots row all stack as one visual/structural block here. */
+  /* .brandid__color-block IS the touch-scroll row now, not just a
+     structural wrapper around one — the title/lead slide swipes away
+     with the same gesture as the 3 colour cards instead of sitting
+     above them as a persistent header, so the whole section reads and
+     behaves as one continuous strip (request: "컬러 프린서플 섹션은
+     하나의 구조로 합쳐서 섹션 자체를 터치 스크롤 하면 좌우로 넘어가게
+     해줘"). .brandid__color-caption dissolves to display:contents so
+     its 3 .brandid__color-name children land as direct flex items
+     here, siblings of .brandid__color-head rather than nested one
+     level down in their own separate scroller. */
   .brandid__color-block {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
   }
   .brandid__color-head {
     opacity: 1;
     transform: none;
     filter: none;
-    width: 100%;
+    flex: 0 0 100%;
+    min-width: 0;
     box-sizing: border-box;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     /* Top cut hard, 48-96px -> 16-32px, then back up to the shared
        clamp(56px,10vw,96px) every other section's own top padding
        uses — the "대폭 줄여줘" cut turned out to be too far off that
@@ -5589,30 +5649,23 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        섹션 여백과 똑같이 맞춰주고"). */
     padding: clamp(56px, 10vw, 96px) var(--edge) clamp(28px, 5vw, 44px);
     margin-top: 0;
-    background-color: transparent;
-    transition: background-color 260ms var(--ease), color 260ms var(--ease);
+    /* No longer synced to "whichever card is active" (updateColorHeadSync,
+       main.js, removed) — this is its own swipeable slide now, not a
+       persistent header hovering above the cards, so there's no longer
+       a single "currently showing" colour for it to agree with. Plain
+       paper instead. */
+    background-color: var(--paper);
+    color: var(--ink);
   }
   .brandid__color-caption {
-    position: relative;
-    height: auto;
-    width: 100%;
-    max-width: none;
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    margin-top: 0;
+    display: contents;
   }
   /* .brandid__color-sticky (this row's own parent) is display:flex
      with align-items:center — .hscroll-dots, unlike its siblings above
      (which all carry their own explicit width:100%), has no width of
      its own, so it defaulted to shrink-to-fit and centered as a ~34px
-     island instead of spanning full width. Its own JS-set background
-     colour (updateColorHeadSync, main.js) was correctly filling that
-     island completely, just not reading as "the whole area" the way a
-     full-width strip would (request: "하단 네비게이션포함한 영역도
-     풀로 100%로 색이 가득차야하고"). */
-  .brandid__color-caption + .hscroll-dots {
+     island instead of spanning full width. */
+  .brandid__color-block + .hscroll-dots {
     width: 100%;
   }
   .brandid__color-name {
