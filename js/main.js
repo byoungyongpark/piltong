@@ -4373,6 +4373,42 @@
       e.preventDefault();
     }, { passive: false });
   }
+
+  /* Loop the carousels: resting on the LAST card, a forward swipe wraps
+     back to the FIRST (and resting on the first, a backward swipe wraps
+     to the last) — request: "터치 스크롤 되는 전부 마지막에서 터치 스크롤
+     하면 처음으로 돌아가는 구조". Touch only — a wheel/trackpad at the
+     boundary still lets the PAGE scroll past the section (see
+     enableWheelHorizontalScroll above), so the wheel never traps you in
+     an endless loop on desktop. Keyed on where the swipe STARTED, not
+     where it ended, so a normal forward swipe that merely REACHES the
+     last card doesn't bounce straight back — you have to already be on
+     the last card and swipe forward AGAIN. The smooth scrollTo lets each
+     row wrap in its own idiom (the sliding rows slide back, Color
+     Principle fades back). */
+  function enableLoopWrap(el) {
+    if (!el) return;
+    const THRESH = 40; // px of horizontal travel to count as a swipe
+    let sx = 0, sy = 0, sLeft = 0, single = false;
+    el.addEventListener('touchstart', (e) => {
+      single = e.touches.length === 1;
+      if (!single) return;
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+      sLeft = el.scrollLeft;
+    }, { passive: true });
+    el.addEventListener('touchend', (e) => {
+      if (!single) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) < THRESH || Math.abs(dx) <= Math.abs(dy)) return;
+      const maxLeft = el.scrollWidth - el.clientWidth;
+      if (maxLeft <= 0) return;
+      if (sLeft >= maxLeft - 2 && dx < 0) el.scrollTo({ left: 0, behavior: 'smooth' });
+      else if (sLeft <= 2 && dx > 0) el.scrollTo({ left: maxLeft, behavior: 'smooth' });
+    }, { passive: true });
+  }
+
   if (isCompact()) {
     [
       '.acycle__steps',
@@ -4380,7 +4416,11 @@
       '.whyp__copy-sticky',
       '.brandid__dna-items',
       '.brandid__color-caption',
-    ].forEach(sel => enableWheelHorizontalScroll(document.querySelector(sel)));
+    ].forEach(sel => {
+      const el = document.querySelector(sel);
+      enableWheelHorizontalScroll(el);
+      enableLoopWrap(el);
+    });
   }
 
   // Color Principle's title and nav dots used to need a hand-rolled
