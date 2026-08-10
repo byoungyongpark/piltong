@@ -4929,8 +4929,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding: clamp(96px, 15vw, 150px) calc(var(--edge) + 16px);
     gap: clamp(24px, 4vw, 40px);
     /* Narrowed — the gap from the Korean group above down to the first
-       logo (request: "한글 그룹 아래 여백은 지금보단 조금 좁혀주고"). */
-    margin-top: clamp(32px, 5vw, 64px);
+       logo (request: "한글 그룹 아래 여백은 지금보단 조금 좁혀주고"),
+       then again — this is the actual gap down to the torn-paper edge
+       itself (background-position:top on this element's own box, right
+       after this margin), not just "down to the first logo" as the
+       comment above says — same thing, since the torn strip sits well
+       inside this element's own top padding either way (request:
+       "심볼&워드마크 한글 그룹 텍스트 하단과 종이찢어진 부분 사이
+       여백... 조금 줄이자"). */
+    margin-top: clamp(20px, 3.5vw, 44px);
   }
 }
 /* Same self-generated feTurbulence grain as before (no image asset, so
@@ -6108,13 +6115,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        both sides. margin-bottom (wordmark's own trailing space before
        Color Principle) is a separate, untouched concern. */
     margin-top: clamp(56px, 10vw, 76px);
-    /* Was clamp(72px,10vw,128px) — narrowed on request ("1024이하 기준
-       심볼&워드마크 섹션 컨텐츠 그룹 아래 여백 조금 줄이자"): this is
-       the WORDMARK panel's own trailing space (the "+" combinator
-       selects it specifically, the second/last panel), i.e. the gap
-       after the whole section's content before Color Principle
-       begins. */
-    margin-bottom: clamp(48px, 8vw, 96px);
+    margin-bottom: clamp(72px, 10vw, 128px);
     /* Divider between SYMBOL and WORDMARK, same request/convention as
        .brandid__construction-row's own new border-top above (request:
        "심볼과 워드마크 섹션 사이에도 넣어주고"). Sits at the top of the
