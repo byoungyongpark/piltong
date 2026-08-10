@@ -847,8 +847,9 @@
     // 되어야 원하는 바가 될것 같은데 (542구간 부터)" — copy.style.top
     // was landing at 404px at 542px width, -22 turned that into exactly
     // 400px), then -19 (request: "BELOW_OVERLAP을 -18→-19로 해보자"),
-    // now -20 (request: "20으로").
-    const BELOW_OVERLAP = -20;
+    // then -20 (request: "20으로"), now -30 — pulled up further still
+    // (request: "타이틀 및 아래 본문을 위로 조금 더 당겨보자").
+    const BELOW_OVERLAP = -30;
     const TITLE_GAP = 32;
 
     function resetToBeside() {
