@@ -3053,17 +3053,28 @@
     // playback advances on its own) at every width, composing a small
     // translateX with updateDna's own scroll-driven scale so the two
     // don't fight over the same inline transform.
+    //
+    // Shape corrected a second time: a symmetric sine (pull left, then
+    // swing right past centre, then back) was wrong — the lean only
+    // ever happens once per loop, right as it starts, not twice
+    // (request: "영상 시작과 함께 왼쪽으로 먼저 이동되고 그다음에 다시
+    // 제자리로 돌아와야"). Now a one-sided pulse: starting from the
+    // loop point (t=0, shifted by --dna-wobble-phase same as before),
+    // pull ramps to -amp and back to 0 across the first
+    // --dna-wobble-turn-fraction of the loop only, then stays at 0
+    // (original position) for the remainder until it loops again.
     if (dnaVideo && !prefersReduced) {
       // Exposed as CSS custom properties (read live off the element,
       // not hardcoded) specifically so they can be tuned in DevTools
       // without a rebuild — I can't see the actual footage to know
-      // exactly when in the loop the rightward lean peaks or how far
-      // it drifts, so these starting values (a modest 14px pull, peak
-      // assumed at the very start of the loop) are a first guess, not
-      // a measured fit. --dna-wobble-amp is the peak pull in px;
-      // --dna-wobble-phase shifts WHEN in the loop (0-1, one full turn)
-      // that peak lands — nudge it until the correction and the actual
-      // turn line up.
+      // exactly when the turn happens or how long it lasts, so these
+      // starting values (a modest 14px pull, pulsing across the first
+      // 40% of the loop from t=0) are a first guess, not a measured
+      // fit. --dna-wobble-amp is the peak pull in px; --dna-wobble-
+      // phase shifts WHERE in the loop (0-1) the pulse starts;
+      // --dna-wobble-turn-fraction is how much of the loop (0-1) the
+      // pulse spans before settling back to centre — nudge all three
+      // until the correction and the actual turn line up.
       //
       // The video is object-fit:cover inside an overflow:hidden box, so
       // translateX alone would slide its own edge into view on one side
@@ -3084,8 +3095,12 @@
         const cs = getComputedStyle(dnaVideo);
         const amp = parseFloat(cs.getPropertyValue('--dna-wobble-amp')) || 0;
         const phase = parseFloat(cs.getPropertyValue('--dna-wobble-phase')) || 0;
+        const turnFraction = Math.min(1, Math.max(0.01,
+          parseFloat(cs.getPropertyValue('--dna-wobble-turn-fraction')) || 0.4));
         const t = (dnaVideo.currentTime / dnaVideo.duration + phase) % 1;
-        const pull = -amp * Math.sin(t * Math.PI * 2);
+        const pull = t < turnFraction
+          ? -amp * Math.sin((t / turnFraction) * Math.PI)
+          : 0;
         const scale = dnaVideoScale * WOBBLE_SAFETY_SCALE;
         dnaVideo.style.transform = `translateX(${pull.toFixed(2)}px) scale(${scale.toFixed(3)})`;
       }

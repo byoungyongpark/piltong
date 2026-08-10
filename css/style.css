@@ -4073,16 +4073,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      (main.js) — reads the video's own currentTime and drives a small
      periodic translateX synced to the loop, composed with this
      element's existing scroll-driven scale rather than fighting it.
-     --dna-wobble-amp/-phase are its tuning knobs, read live off this
-     element every frame so they're adjustable directly in DevTools —
-     I can't see the actual footage to know exactly when the rightward
-     lean peaks or how far it drifts, so these are a first guess:
-     14px, peak assumed at the very start of the loop (phase 0). Nudge
-     phase in 0.05-ish steps (a fraction of the loop, 0-1) until the
-     pull lines up with the actual turn, and amp until the distance
-     feels right. */
+     --dna-wobble-amp/-phase/-turn-fraction are its tuning knobs, read
+     live off this element every frame so they're adjustable directly
+     in DevTools — I can't see the actual footage to know exactly when
+     the turn happens or how long it lasts, so these are a first
+     guess: a one-sided 14px pull that starts right at the loop point
+     (phase 0) and settles back to centre over the first 40% of the
+     loop (turn-fraction .4), then holds centre the rest of the way —
+     not a symmetric swing (request: "영상 시작과 함께 왼쪽으로 먼저
+     이동되고 그다음에 다시 제자리로 돌아와야"). Nudge phase in
+     0.05-ish steps (a fraction of the loop, 0-1) until the pulse
+     starts exactly when the turn does, turn-fraction until it settles
+     back to centre exactly when the turn ends, and amp until the
+     distance feels right. */
   --dna-wobble-amp: 14px;
   --dna-wobble-phase: 0;
+  --dna-wobble-turn-fraction: .4;
   /* transform set inline every frame (updateDna's scale, composed with
      the wobble loop's own translateX) — will-change hints the browser
      this element animates, same reasoning as .brandwall__bg's own
@@ -7045,10 +7051,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      source-order trap this file has hit repeatedly. */
   .brandid__closing-loop-wrap {
     --loop-band-top: clamp(32px, 5vw, 72px);
-    --loop-band-bottom: clamp(28px, 4.5vw, 64px);
+    /* Widened back out from clamp(28px,4.5vw,64px) — that shrink assumed
+       nothing would ever sit in this band again once the ticker's
+       "APPLICATIONS" text moved out (see the comment above), but the
+       wordmark itself (.brandid__closing-mark, unhidden below) still
+       needs to land here. Top is untouched — only the bottom band grows
+       (request: "심볼 영상 하단부만 확장해서 기존 워드마크 배치해줘").
+       ~72-140px gives .brandid__closing-mark (viewBox ratio ~7.44:1, so
+       ~13.4% of its own rendered width tall) comfortable room at its
+       40% fallback width across this range without crowding the footage
+       above it. */
+    --loop-band-bottom: clamp(72px, 10vw, 140px);
     /* The actual un-pin — see the long note on the earlier, ineffective
-       attempt at this further up. */
-    position: static;
+       attempt at this further up. relative, not static: .brandid__
+       closing-slot (the wordmark's positioning parent) is position:
+       absolute and needs SOME positioned ancestor to anchor to — static
+       stops being one, which would send the now-visible mark off to
+       whatever positioned ancestor is next up the tree instead of
+       flush against this wrap's own bottom band. relative un-pins from
+       scroll exactly the same as static does (only sticky/fixed
+       actually track scroll), so the original fix still holds. */
+    position: relative;
     top: auto;
   }
 }
@@ -7648,14 +7671,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      BLOCK itself at the section's own left inset rather than centred
      — only the text's own alignment inside that block needed fixing. */
   .apps__lead { text-align: left; }
-  /* .apps__intro's own align-items:flex-start (base rule) shrink-wraps
-     its children to their own content width rather than stretching
-     them — .apps__lead/-body were sizing to their own widest line
-     instead of using the section's full available width (request:
-     "하나의 아이덴티티 여기 텍스트 그룹 100%로 풀어줘"). */
-  .apps__lead,
+  /* Side-by-side again (title left, body right), not forced-stacked —
+     but with room to drop the body below the title on its own once
+     there genuinely isn't space for both, rather than letting body
+     keep shrinking indefinitely and reading squeezed/distorted
+     (request: "하나의 아이덴티티 타이틀 좌우 배치로 다시 잡되 우측
+     본문이 일그러지지 않게... 브라우저 리사이즈시 자연스럽게 아래로
+     타이틀 아래로 떨어지게"). flex-wrap:wrap on the row plus a real
+     min-width on body (below) is what does this natively — no JS
+     measuring needed (unlike .statement__body's own beside/below
+     switch, which needs it because that layout's width depends on a
+     video's own rendered size, not just text). When body wraps to its
+     own line it also has the FULL row width to itself there, so it
+     reads full-width in the stacked state for free via its own
+     flex-grow, without needing an unconditional width:100% (which
+     would have also forced the TITLE to full width even side-by-side,
+     breaking that layout — the previous width:100% rule is gone). */
+  .apps__intro {
+    flex-direction: row;
+    flex-wrap: wrap;
+    row-gap: clamp(16px, 3vw, 28px);
+  }
   .apps__body {
-    width: 100%;
+    flex: 1 1 280px;
+    min-width: min(280px, 100%);
   }
   /* Was the base rule's 2.75rem — technically already responsive (the
      global html{font-size} pilot scales EVERY rem down to 320px), but
@@ -7724,8 +7763,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      numbers) started running short (confirmed: needed 271.7px@375
      against only 260px available). Re-fit through the new measured
      needs at three widths (271.7px@375, 348.7px@700, 462.7px@1023)
-     with a consistent ~45-65px margin over each. */
-  .apps::before { height: clamp(300px, calc(203px + 30.25vw), 520px); }
+     with a consistent ~45-65px margin over each.
+     Re-fit AGAIN once .apps__intro went back to side-by-side (below):
+     unlike the old always-stacked layout, content height is no longer
+     monotonic in width — .apps__lead/.apps__body sit side-by-side and
+     stay short from ~550px up to 1023px, but a narrow stacked range
+     below that (own wrap breakpoint, measured ~548px in this content)
+     is comparatively tall. A single clamp can't track a rise-dip-rise
+     shape, so this row-mode formula (measured needed: 238.8px@550,
+     255.7px@700, 347.1px@1023, ~50px margin over each) only has to
+     cover the >=550px side; the stacked side gets its own tighter
+     override just below. */
+  .apps::before { height: clamp(280px, calc(163px + 22.9vw), 400px); }
   /* Was clamp(80px,6vw,100px), zeroed on request ("하단 텍스트 그룹
      아래로 여백은 없어야 하고"), then asked back — flush read as too
      tight once actually seen (request: "어플리케션 한글 텍스트 그룹
@@ -7733,6 +7782,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      reasoning as .apps__title's own margin-bottom just above. Desktop
      keeps the base rule's own value either way. */
   .apps__showcase { margin-top: clamp(24px, 4vw, 44px); }
+}
+/* Stacked-column override for the narrow slice below .apps__intro's own
+   flex-wrap breakpoint (measured ~548px in this content): needed height
+   there runs 271.7-296px (fairly flat — .apps__lead/-body stack full-width
+   instead of scaling with vw the way the row layout's font sizes do), which
+   the >=550px row-mode formula above would undershoot near the top of this
+   range. Same-specificity selector placed after the 1023px block on
+   purpose, so it wins by source order for the widths where both match. */
+@media (max-width: 549px) {
+  .apps::before { height: clamp(310px, calc(264px + 14.05vw), 345px); }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
@@ -7867,12 +7926,43 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   pointer-events: none;
 }
 @media (max-width: 1023px) {
-  /* Hidden — see the compact block near .brandid__closing-next's own
-     base rule for why (the ticker's JS is disabled here, so this
-     settles on APPLICATIONS as the resting state instead of the mark).
-     Placed after this base rule, not before — the same equal-
-     specificity/source-order bug hit repeatedly this session. */
-  .brandid__closing-mark { display: none; }
+  /* Shown again — was hidden on the assumption nothing would replace
+     APPLICATIONS in this slot at compact, but the request turned out to
+     want the wordmark itself here, not a stand-in caption: "우리는
+     로고를 만든 것이 아니라 아래 심볼 영상 하단부만 확장해서 기존
+     워드마크 배치해줘". The ticker's JS (initClosingFit/-Handoff) still
+     bails at compact, so .is-ticked never gets added here and this
+     never animates — it just renders once and stays put, which is
+     exactly the static placement asked for.
+     Positioned directly against the wrap rather than through its own
+     .brandid__closing-slot parent: that slot gets its own compact
+     override (above, from the earlier APPLICATIONS-relocation work)
+     dropping it to position:static/width:auto/height:auto so the slot
+     itself is no longer a positioning context — the base rule's
+     left:50%+transform:translateX(-50%) centring lives on the SLOT, so
+     with the slot inert the mark's own position:absolute would instead
+     climb straight past it to the wrap and render flush to the wrap's
+     left edge (base rule's left:0), not centred. Centring reasserted
+     here instead. Needs .brandid__closing-loop-wrap's own
+     position:relative (compact override above) as its containing
+     block — see that rule's own note. Width is a fresh compact value.
+     not the 40%-of-slot fallback (that fraction was sized against the
+     slot's own narrower ticker-window box, not the full wrap) — tuned
+     small enough to sit comfortably inside the ~72-140px bottom band
+     without crowding it; needs visual confirmation like the DNA
+     wobble's own tuning knobs, since the actual rendered footage isn't
+     visible here. Placed after both the slot's and this rule's own
+     base rules, so it actually wins the equal-specificity/source-order
+     tie hit repeatedly this session. */
+  .brandid__closing-mark {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: clamp(10px, 1.6vw, 20px);
+    width: clamp(120px, 18vw, 220px);
+    height: auto;
+    transform: translateX(-50%);
+  }
 }
 .brandid__closing-slot.is-ticked .brandid__closing-mark {
   transform: translateY(calc(-1 * var(--loop-mark-window-h, 100%)));
