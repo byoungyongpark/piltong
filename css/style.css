@@ -928,6 +928,38 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   transition: fill 250ms var(--ease);
 }
 .hero-logo.is-on-light .hero-logo__mark { fill: var(--ink); }
+@media (min-width: 1024px) {
+  /* Desktop's persistent nav mark (once .is-nav-fixed — scrolled past
+     the hero, sliding back in on scroll-up) stops reading its colour
+     off whatever section happens to be behind it and just stays paper,
+     backed by its own dark blurred chip instead — request: "위로 하면
+     상단 로고 나타날때 어두운 블러 배경색 적용해서 로고는 섹션마다
+     변경되는 구조가 아닌 페이퍼색으로 고정하자". initContrastSwitchers
+     (main.js) keeps running and still toggles .is-on-light underneath —
+     left alone rather than special-cased there, since this override
+     simply always wins here regardless of that class. Compact keeps
+     the original per-section switch untouched (this block only applies
+     >=1024px), matching "1023구간부터 위로".
+     ::before rather than the button's own background/padding: the
+     button's box is exactly the mark's own aspect-ratio'd size with
+     zero padding, and changing that would also resize its actual
+     click/tap target and shift the mark's own pixel-snapped position
+     (top/left, above). Inset negative instead, so the chip grows
+     around the existing box without moving or resizing it. */
+  .hero-logo.is-nav-fixed::before {
+    content: '';
+    position: absolute;
+    inset: -10px -14px;
+    background: var(--ink-70);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 999px;
+    z-index: -1;
+  }
+  .hero-logo.is-nav-fixed .hero-logo__mark {
+    fill: var(--paper);
+  }
+}
 
 /* The block is centred on the frame and set low, with its lines
    stepped inside it — so the mass reads as centred while the left
@@ -7742,8 +7774,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        once actually seen (request: "어플리케션 한글 텍스트 그룹
        위아래로 여백 적절하게 넣어줘"). Landed on a value between the
        two rather than the original — "적절하게", not back to where it
-       started. */
-    margin-bottom: clamp(20px, 3.5vw, 36px);
+       started. Widened again on request ("어플리케이션 타이틀 한글
+       텍스트 그룹 위아래 여백 더 넓혀줘" — .apps__intro, below, is the
+       Korean text group this and .apps__showcase's own margin-top
+       sandwich). */
+    margin-bottom: clamp(32px, 5.5vw, 56px);
     padding-left: var(--edge);
     padding-right: var(--edge);
     box-sizing: border-box;
@@ -7770,28 +7805,36 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      stay short from ~550px up to 1023px, but a narrow stacked range
      below that (own wrap breakpoint, measured ~548px in this content)
      is comparatively tall. A single clamp can't track a rise-dip-rise
-     shape, so this row-mode formula (measured needed: 238.8px@550,
-     255.7px@700, 347.1px@1023, ~50px margin over each) only has to
-     cover the >=550px side; the stacked side gets its own tighter
-     override just below. */
-  .apps::before { height: clamp(280px, calc(163px + 22.9vw), 400px); }
+     shape, so this row-mode formula only has to cover the >=550px
+     side; the stacked side gets its own tighter override just below.
+     Re-fit a THIRD time once .apps__title's margin-bottom and
+     .apps__showcase's margin-top (both below) widened again (request:
+     "위아래 여백 더 넓혀줘") — content height grew by the same amount
+     at every width (measured needed: 264.8px@550, 287.2px@700,
+     392.9px@1023, ~50-68px margin over each, consistent with the
+     margin this formula has carried since the very first fit). */
+  .apps::before { height: clamp(300px, calc(166px + 27.1vw), 450px); }
   /* Was clamp(80px,6vw,100px), zeroed on request ("하단 텍스트 그룹
      아래로 여백은 없어야 하고"), then asked back — flush read as too
      tight once actually seen (request: "어플리케션 한글 텍스트 그룹
      위아래로 여백 적절하게 넣어줘"). Landed between the two, same
-     reasoning as .apps__title's own margin-bottom just above. Desktop
+     reasoning as .apps__title's own margin-bottom just above. Widened
+     again alongside it (request: "위아래 여백 더 넓혀줘"). Desktop
      keeps the base rule's own value either way. */
-  .apps__showcase { margin-top: clamp(24px, 4vw, 44px); }
+  .apps__showcase { margin-top: clamp(38px, 6.5vw, 68px); }
 }
 /* Stacked-column override for the narrow slice below .apps__intro's own
    flex-wrap breakpoint (measured ~548px in this content): needed height
-   there runs 271.7-296px (fairly flat — .apps__lead/-body stack full-width
-   instead of scaling with vw the way the row layout's font sizes do), which
-   the >=550px row-mode formula above would undershoot near the top of this
+   there runs fairly flat (.apps__lead/-body stack full-width instead of
+   scaling with vw the way the row layout's font sizes do), which the
+   >=550px row-mode formula above would undershoot near the top of this
    range. Same-specificity selector placed after the 1023px block on
-   purpose, so it wins by source order for the widths where both match. */
+   purpose, so it wins by source order for the widths where both match.
+   Re-fit alongside the row-mode formula above when .apps__title/
+   .apps__showcase's margins widened again (measured needed: 297.7px@375,
+   320.3px@545, ~45-50px margin over each). */
 @media (max-width: 549px) {
-  .apps::before { height: clamp(310px, calc(264px + 14.05vw), 345px); }
+  .apps::before { height: clamp(330px, calc(293px + 13.29vw), 370px); }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
@@ -8031,13 +8074,37 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     -webkit-mask-image: none;
     mask-image: none;
   }
-  /* The two backdrop layers this same request also asked to remove —
-     ::before is the dark gradient plate BEHIND the video (the padding
-     bands' own colour), ::after is the radial dimming layer sitting IN
-     FRONT of it. Both gone, same reasoning. */
-  .brandid__closing-loop-wrap::before,
+  /* ::after is the radial dimming layer sitting IN FRONT of the video —
+     stays gone, same reasoning as the mask above (request: "순수 영상만
+     남겨줘"). */
   .brandid__closing-loop-wrap::after {
     display: none;
+  }
+  /* ::before is the dark gradient plate BEHIND the video (the padding
+     bands' own colour) — was ALSO removed here, but that left the
+     wordmark (unhidden further down, .brandid__closing-mark) sitting on
+     nothing: this wrap has no background-color of its own, so the
+     bottom band it lives in showed straight through to the page's own
+     paper, and a paper-fill wordmark on a paper background is
+     invisible (request: "아래 심볼 영상 아래 배경 하단부 영상 색깔
+     깔아서 워드마크가 보이게 해줘"). Brought back, but heavily
+     simplified rather than restoring the full desktop version: the
+     base rule's ceiling-to-floor split gradient with its scroll-driven
+     spread/offset custom properties all assume initClosingHandoff is
+     running, which still bails at compact, so instead this is just a
+     flat rect sized to the bottom band alone (top stays untouched, on
+     request — only "하단부"), in --loop-floor, the tone already sampled
+     from the footage's own lower edge (see the base rule's own note on
+     where that colour comes from) — literally "영상 색깔" rather than a
+     picked one. Placed after the base rule so it wins the equal-
+     specificity/source-order tie this file keeps hitting. */
+  .brandid__closing-loop-wrap::before {
+    display: block;
+    inset: auto 0 0 0;
+    height: var(--loop-band-bottom);
+    background: var(--loop-floor);
+    opacity: 1;
+    transform: none;
   }
 }
 /* Dims the footage's own content toward the plate's ACTUAL background
