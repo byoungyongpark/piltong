@@ -2635,6 +2635,29 @@
     const colorFlash = colorStage ? colorStage.querySelector('.brandid__color-flash') : null;
     const colorNames = colorStage ? Array.from(colorStage.querySelectorAll('.brandid__color-name')) : [];
 
+    // Touch/wheel gestures starting ON the title or the nav dots used to
+    // need manual forwarding to .brandid__color-caption's own scrollLeft
+    // (enableTouchScrollForward), because neither actually lived inside
+    // the element that scrolls. Moving both INSIDE it instead — the
+    // title first, then a new wrapper around just the 3 cards, with
+    // .hscroll-dots landing after that wrapper once initHorizontalScroll
+    // Dots injects it further down — means every part of the group is a
+    // real descendant of the one overflow-x:auto box, so native touch/
+    // wheel scroll just works on all of it directly; position:sticky
+    // (style.css) keeps the title and dots visually pinned to the left
+    // edge while only the cards move underneath, the same mechanism a
+    // sticky first table column uses (request: "컬러프린서플 섹션 현재
+    // 3가지 터치 스크롤 되는 부분... 구조 안에 하단 네비게이션이
+    // 작동하게 바꾸고 이 구조 위쪽에 컬러프린서플 영문 타이틀 및
+    // 그아래 한글도 포함시켜줘").
+    if (isCompact() && colorCaption && colorHead && colorNames.length) {
+      const cardsRow = document.createElement('div');
+      cardsRow.className = 'brandid__color-cards-row';
+      colorCaption.insertBefore(cardsRow, colorNames[0]);
+      colorNames.forEach(el => cardsRow.appendChild(el));
+      colorCaption.insertBefore(colorHead, cardsRow);
+    }
+
     // Title (.brandid__color-head), the 3-card row (.brandid__color-
     // caption) and .hscroll-dots (injected after the row, further down)
     // read as ONE bound group that all agree on a single colour at a
@@ -4297,52 +4320,13 @@
     ].forEach(sel => enableWheelHorizontalScroll(document.querySelector(sel)));
   }
 
-  /* Color Principle's title (.brandid__color-head) sits above its own
-     touch-scroll row (.brandid__color-caption) rather than inside it —
-     .brandid__color-head already mirrors the active card's own colour
-     (updateColorHeadSync above), reading as one continuous block, but a
-     touch/swipe starting ON the title (or on .hscroll-dots, injected
-     below the row further down) did nothing on its own, since native
-     horizontal scroll only ever responds to gestures that start inside
-     the actual overflow:auto element itself. Forwards head/dots touches
-     to the caption's own scrollLeft so the whole group — title down
-     through the nav dots — swipes as one unit (request: "영문타이틀+
-     한글타이틀 그룹 + 3가지 색상 컨텐츠 그룹 + 하단 네비게이션 이 전체
-     그룹을 하나로 묶어서... 아래 네비게이션 점까지 포함해서 한 섹션으로
-     구성하자"). */
-  function enableTouchScrollForward(triggerEl, targetEl) {
-    if (!triggerEl || !targetEl) return;
-    let startX = 0, startY = 0, startScrollLeft = 0, dragging = null;
-    triggerEl.addEventListener('touchstart', (e) => {
-      if (e.touches.length !== 1) return;
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-      startScrollLeft = targetEl.scrollLeft;
-      dragging = null;
-    }, { passive: true });
-    triggerEl.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 1) return;
-      const dx = e.touches[0].clientX - startX;
-      const dy = e.touches[0].clientY - startY;
-      // Same directional-dominance gate as enableWheelHorizontalScroll
-      // above — decide once per gesture (not every move) which axis
-      // this swipe belongs to, so a mostly-vertical page scroll that
-      // starts over the title never gets hijacked mid-gesture.
-      if (dragging === null) {
-        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-        dragging = Math.abs(dx) > Math.abs(dy);
-      }
-      if (!dragging) return;
-      targetEl.scrollLeft = startScrollLeft - dx;
-      e.preventDefault();
-    }, { passive: false });
-  }
-  if (isCompact()) {
-    enableTouchScrollForward(document.querySelector('.brandid__color-head'), document.querySelector('.brandid__color-caption'));
-  }
-  // Dots don't exist yet at this point (initHorizontalScrollDots, which
-  // injects them, runs later) — wired up right after that call instead,
-  // further down.
+  // Color Principle's title and nav dots used to need a hand-rolled
+  // touch-forwarding shim here (enableTouchScrollForward) to make a
+  // swipe starting on either of them scroll the actual card row — no
+  // longer needed now that both are real descendants of
+  // .brandid__color-caption itself (see the DOM move in
+  // initBrandIdentity, main.js), so native touch/scroll already
+  // responds correctly no matter where the gesture starts.
 
   /* ---------- Color Story: three photos cross-fade with a curtain wipe, one pinned stage ---------- */
 
@@ -5995,7 +5979,7 @@
       { wrap: '.vwipe__vision', item: '.vwipe__vstep' },
       { wrap: '.whyp__copy-sticky', item: '.whyp__step' },
       { wrap: '.brandid__dna-items', item: '.brandid__dna-item' },
-      { wrap: '.brandid__color-caption', item: '.brandid__color-name' },
+      { wrap: '.brandid__color-cards-row', item: '.brandid__color-name' },
     ];
     ROWS.forEach(({ wrap, item }) => {
       const el = document.querySelector(wrap);
@@ -6032,24 +6016,17 @@
 
   initHorizontalScrollDots();
 
-  // .hscroll-dots for Color Principle didn't exist yet at
-  // enableTouchScrollForward's own isCompact() block above (it's
-  // inserted right here, by the call just made) — wired up now that
-  // it's actually in the DOM, so a touch/swipe starting on the dots
-  // themselves also drives the caption's scroll (same request as the
-  // title: "아래 네비게이션 점까지 포함해서 한 섹션으로 구성하자").
+  // .hscroll-dots for Color Principle didn't exist yet when
+  // updateColorHeadSync (initBrandIdentity, above) first ran at page
+  // load, so the dots never got their initial colour sync — it's scoped
+  // to that function's own closure and can't be called directly from
+  // here, so re-firing its existing 'scroll' listener does the same job.
+  // Dots are a real descendant of .brandid__color-caption now (moved
+  // into .brandid__color-cards-row's own position, immediately after
+  // it), so no separate touch-forwarding wiring is needed here either —
+  // native scroll already covers them.
   if (isCompact()) {
     const colorCaptionEl = document.querySelector('.brandid__color-caption');
-    const colorDotsEl = colorCaptionEl ? colorCaptionEl.nextElementSibling : null;
-    if (colorDotsEl && colorDotsEl.classList.contains('hscroll-dots')) {
-      enableTouchScrollForward(colorDotsEl, colorCaptionEl);
-    }
-    // updateColorHeadSync (initBrandIdentity, above) is scoped to that
-    // function and can't be called directly from here — its own first
-    // call, at page load, ran before .hscroll-dots existed, so the
-    // dots never got their initial colour sync. Re-firing its existing
-    // 'scroll' listener does the same job without needing to reach
-    // across the closure.
     if (colorCaptionEl) colorCaptionEl.dispatchEvent(new Event('scroll'));
   }
 
