@@ -9167,23 +9167,48 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    넣어놓으면 정리할께") — kept visually consistent with the rest of
    the block so it reads as finished structure, not a stub, even though
    the actual values will change. */
-/* Was frame--auto's own clamp(72px,11vw,140px) — zeroed, on request
-   ("영문 타이틀 위의 여백은 0"). */
-.outro { padding-top: 0; }
+/* Was frame--auto's own clamp(72px,11vw,140px), zeroed on request
+   ("영문 타이틀 위의 여백은 0"), then asked back once it read as too
+   flush against Applications above it (that section's own bottom
+   padding was ALSO removed the same pass, so the two sections had
+   landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘").
+   Same shared clamp(56px,10vw,96px) top-padding convention every
+   other section in this file already uses, not the original
+   frame--auto value.
+   Side padding widened past frame--auto's own plain var(--edge), on
+   request ("참조 사진처럼 좌우 여백 넉넉히 준뒤") — same two-point
+   shape as .apps's own generous side margin, just a shorter reach
+   since this section's content is narrower. */
+.outro {
+  padding-top: clamp(56px, 10vw, 96px);
+  padding-left: clamp(var(--edge), 10vw, 180px);
+  padding-right: clamp(var(--edge), 10vw, 180px);
+}
+/* justify-content was space-between, stretching .outro__info out to
+   the row's own far right edge — a 50/50 split with the row's own
+   (now much narrower) gap reads as the two columns sitting closer
+   together instead, on request ("50% 화면 나뉘고 좌측 정렬로 왼쪽과
+   오른쪽 정보가 지금보단 조금 붙어 보이게"). */
 .outro__row {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: clamp(40px, 6vw, 120px);
+  justify-content: flex-start;
+  gap: clamp(24px, 3.5vw, 56px);
 }
 .outro__lead {
-  flex: 1 1 55%;
-  max-width: 640px;
+  flex: 0 1 50%;
+  max-width: none;
 }
 /* Uppercase now, weight lightened 700->500, on request ("맨 하단 왼쪽
    영문은 대문자로 굵기는 조금더 얇게") — was sentence-case reasoning
    below is stale but left as history. */
 .outro__title {
+  /* h2's own UA-stylesheet margin was what threw off the top-line
+     match with .outro__info's first block below (request: "영문
+     타이틀이랑 오른쪽 탑라인은 맞추고") — .outro__row's own
+     align-items:flex-start only aligns the two COLUMN boxes, not
+     whatever margin an element inside the left one carries. */
+  margin: 0;
   font-family: var(--font-en);
   font-size: clamp(28px, 3.4vw, 48px);
   font-weight: 500;
@@ -9204,7 +9229,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
 }
 .outro__info {
-  flex: 0 1 380px;
+  flex: 0 1 50%;
   display: flex;
   flex-direction: column;
   gap: clamp(28px, 3.6vw, 48px);
@@ -9253,7 +9278,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   font-family: var(--font-en);
   font-weight: 300;
   font-size: 12px;
-  letter-spacing: .02em;
+  /* Was .02em, widened on request ("하단 카피라이터 자간은 조금 넓히고"). */
+  letter-spacing: .05em;
   color: var(--ink-45);
 }
 @media (max-width: 1023px) {
