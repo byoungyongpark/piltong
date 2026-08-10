@@ -1489,8 +1489,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        positioned element's final position. */
     margin-top: 0;
     /* Tracks roughly where the title's own bottom lands (its height +
-       negative top offset both scale with --big) plus a small gap. */
-    top: clamp(85px, 18vw, 185px);
+       negative top offset both scale with --big) plus a small gap.
+       +20px flat on top of that gap (request: "1023포함 이하 구간에서
+       아워 필라서피... 영문 타이틀 아래 우리는 기술보다 위쪽으로 여백
+       조금"). This is the property that actually governs the space —
+       .statement__body's own margin-top is explicitly zeroed just
+       above (it's a position:absolute element in this layout, and the
+       older max-width:900px margin-top rule further down would
+       otherwise still apply if not cancelled here). */
+    top: clamp(105px, calc(20px + 18vw), 205px);
     left: calc(38% - var(--edge) + 16px);
     right: clamp(16px, 3vw, 24px);
     text-align: left;
