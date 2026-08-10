@@ -794,11 +794,42 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    unaffected either way — it reads --st-gap/--st-overlap live via
    getComputedStyle each time the column pins, so it automatically
    picks up these same frozen values too; there's no separate press-
-   state number to chase. */
+   state number to chase.
+
+   --st-overlap UPDATE: freezing it flat at 25.2px (the 1400px value)
+   kept the title's OWN crossing distance matching 1400 exactly, but
+   broke a DIFFERENT relationship — PHILO/SOPHY's own left edge is
+   supposed to land on the Korean lead's second line ("문제를 먼저
+   봅니다.") starting edge, and that coupling depends on --big (still
+   live, still shrinking with the viewport) while the title's base
+   position was now flat, so the two drifted apart below ~1137px
+   (request, with a screenshot at 1024x768: "PHILO랑 SOPHY의 앞 철자
+   라인이 문제를의 문자 라인과 맞도록... Our포함 현재 보여지는 모양
+   그대로 오른쪽으로 옮겨서 맞춰줘"). Measured (not derived — shifting
+   margin-left and re-measuring directly, since the analytical version
+   of this didn't reproduce the measured numbers) the exact shift
+   needed to zero that gap at three points: +12.37px at 1024px, -6.9px
+   at 1200px, -23.34px at 1350px — an almost perfectly straight line,
+   as expected once --st-gap is the only other frozen term and --big is
+   linear in this range too. Rebuilt --st-overlap as that line instead
+   of a flat value, solved so .statement__big's existing margin-left
+   formula (-1 * (--st-gap + --st-overlap), untouched) reproduces the
+   measured target automatically — verified back to delta=0px at both
+   1024px and 1200px after the rebuild. The O-clip-path (reads --st-
+   overlap directly) picks this up for free too, same as the flat
+   version did, and stays in its valid 0-100% range across the band
+   (82% at 1024px, 30% at 1400px).
+   Trade-off accepted knowingly: this no longer lands on 25.2px right
+   at 1400px (it's 54px there instead), so crossing 1400px now has a
+   visible seam in the title's crossing distance where none existed
+   before — alignment with the Korean line was the explicit ask here,
+   and the two goals aren't simultaneously satisfiable without also
+   freezing --big (which nobody asked for and would stop the title
+   shrinking with the viewport at all in this band). */
 @media (min-width: 1024px) and (max-width: 1400px) {
   .statement__stage {
     --st-gap: 36.4px;
-    --st-overlap: 25.2px;
+    --st-overlap: calc(10.9489vw - 99.287px);
   }
   .statement__body {
     left: calc(71.38px - var(--st-gap));
