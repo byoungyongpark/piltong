@@ -1155,6 +1155,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    keeps this consistent with what's already running elsewhere. */
 .reveal { opacity: 0; transform: translateY(46px); transition: opacity 1100ms var(--ease), transform 1100ms var(--ease); }
 .reveal.is-in { opacity: 1; transform: translateY(0); }
+@media (max-width: 1023px) {
+  /* .statement__figure (Our Philosophy's left video) carries .reveal
+     too — the generic fade+rise-in-on-scroll entrance every .reveal
+     element gets, site-wide. Neutralized here so it's just visible
+     immediately instead, on request ("1023구간부터 아워필라서피
+     좌측 영상에 아래로 스크롤시 애니매이션 효과 있던 부분 제거"). Scoped
+     to this one element, not .reveal generally — every other .reveal
+     block on the page keeps its own entrance untouched. */
+  .statement__figure.reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
 
 /* Hero's own timed entrance (see runHeroEntrance in main.js) — separate
    from the generic scroll-reveal above, and choreographed against the
@@ -6733,6 +6747,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 .brandid__closing-copy .brandid__closing-line { flex: 0 0 auto; }
 .brandid__closing-copy .brandid__closing-body { flex: 1 1 auto; min-width: 0; }
+@media (max-width: 1023px) {
+  /* Widened a step off the base rule's own clamp(28,3.6vw,56) — the
+     gap down to the video read a little tight in compact specifically
+     (request: "우리는 로고를 만든것이 아니라 타이틀 우측 문장까지
+     포함해서 아래 여백 조금만 더 넓히고"). Desktop keeps the base
+     value untouched. */
+  .brandid__closing-copy { margin-bottom: clamp(36px, 4.5vw, 68px); }
+}
 @media (max-width: 900px) {
   /* Side by side needs room the title alone nearly fills at this width. */
   .brandid__closing-copy {
@@ -7457,6 +7479,40 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      pseudo-element (::before) rides the same box, no separate rule
      needed. */
   .apps__ground { position: absolute; }
+  /* Desktop already does exactly this split — initApplicationsGroundFade
+     crossfades .apps's own background from --apps-fill to paper (and
+     the title from paper to ink text) once the intro's hold ends, so
+     the photo gallery below sits on Paper while the held title stays
+     on the dark ground. That function bails on isCompact() (no pin to
+     crossfade out of), so compact never got either half of the split —
+     the whole section stayed flat --apps-fill throughout, gallery
+     included (request: "어플리케이션 타이틀과 텍스트 그룹쪽은
+     어두운색으로 가되 목업이 뜨는 이미지 구간은 페이퍼색으로"). Rebuilt
+     as two static zones instead of a scroll-crossfade, matching how
+     every other pinned/scroll-driven effect on the page already
+     collapses to something simpler in compact: the section's own
+     background switches to paper, and a fixed-height dark ::before
+     covers just the intro's own area (measured 322-376px across
+     375-1023px width; 380-460px clamp leaves margin above the max). */
+  .apps { background-color: var(--paper); z-index: 0; }
+  .apps::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: clamp(380px, 50vh, 460px);
+    background-color: var(--apps-fill);
+    z-index: -1;
+    pointer-events: none;
+  }
+  /* Was right-aligned (desktop-only reasoning — see the base rule) —
+     switched to left for compact, on request ("하나의 아이덴티티 여기
+     텍스트 그룹은 텍스트 좌측 정렬로"). .apps__intro's own
+     align-items:flex-start (base rule, untouched) already keeps the
+     BLOCK itself at the section's own left inset rather than centred
+     — only the text's own alignment inside that block needed fixing. */
+  .apps__lead { text-align: left; }
 }
 /* ---- Ink backdrop, disabled with the footage swap to
    symbol_seamless_loop.mp4 ("뒤에 깔려있던 배경은 제거"). It existed
