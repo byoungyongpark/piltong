@@ -4100,6 +4100,23 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (min-width: 1024px) and (max-width: 1280px) {
   .brandid__dna-right { flex-basis: 54%; }
 }
+/* Hide the left symbol video specifically for a rotated-monitor desktop
+   window — narrow width (~1080px, roughly; not width-critical) paired
+   with a viewport TALL enough that this is clearly a portrait-rotated
+   PC monitor rather than a normal short/wide desktop window, not the
+   height a landscape browser at this width would ever actually reach
+   (request: "가로 1080구간(그 이상 그 이하든 모니터를 세로로 돌린
+   해상도 구간)... 세로길이가 768이상일때만 적용"). The 100svh sticky
+   pin plus a 40-46%-wide video reads badly tall/cropped at that
+   combination, so it's simplest to just not show it there rather than
+   retune the video's own sizing for one rare monitor orientation.
+   .brandid__dna-right expands to fill the freed column — both are
+   flex:0 0 (no shrink), so simply hiding the video would otherwise
+   leave its 46-54% of the row empty rather than reflowing into it. */
+@media (min-width: 1024px) and (max-width: 1280px) and (min-height: 768px) {
+  .brandid__dna-media { display: none; }
+  .brandid__dna-right { flex-basis: 100%; }
+}
 /* SHAPE/DNA + the title — the "영문 타이틀 그룹" (English title group),
    on request. .brandid__dna-detail-col (the 4 principles) is a
    separate sibling now, independently centered — see below. */
