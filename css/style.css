@@ -4764,6 +4764,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   stroke: var(--ink-12);
   stroke-width: .06;
 }
+@media (max-width: 1025px) {
+  /* More visible at this width, on request ("심볼쪽에 그려진 그리드는
+     조금더 표나게 해주고") — ink-12 read as barely-there next to the
+     symbol's own outline, which is now full ink at .7px non-scaling
+     (see .bp-outline path's own compact rule). Bumped to ink-45 (same
+     level .bp-handles already uses) and doubled the stroke width.
+     Desktop's original, more subtle ink-12/.06 is untouched. */
+  .bp-grid line,
+  .bp-grid circle {
+    stroke: var(--ink-45);
+    stroke-width: .12;
+  }
+}
 .bp-handles line { stroke: var(--ink-45); stroke-width: .06; }
 .bp-anchors rect { fill: var(--ink); }
 .bp-controls circle { fill: var(--signal-100); }
@@ -5130,6 +5143,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      so the two children can differ. */
   .brandid__blueprint-wordmark-inner {
     padding: 0;
+    /* Was the desktop base rule's own clamp(72px,15vh,168px) — vh-based
+       and never adjusted for compact WIDTH at all (only a separate
+       max-height:860px query touches it, and only down to 32-64px on
+       short screens). At a typical phone viewport that resolved to
+       ~127px versus .brandid__blueprint-row's own 28-40px gap below the
+       SYMBOL, a visibly mismatched pair (request: "워드마크 섹션의
+       그려진 스트로크 워드마크 아래쪽 여백을 위쪽 그려진 심볼 아래
+       여백이랑 똑같이 통일"). Same clamp as that row's gap now. */
+    gap: clamp(28px, 6vw, 40px);
   }
 }
 /* Was a full-bleed breakout (calc(100% + 2*edge) with a matching
@@ -5256,7 +5278,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    mark-to-text gap, and --bp-gap's two uses inside the text block)
    claws back ~100px, which is enough without touching the full-bleed
    width the mark was explicitly asked to keep. */
-@media (max-height: 860px) {
+/* min-width:1026px added — this query exists to claw space back inside
+   the PINNED 100svh sticky on a short desktop window; at compact widths
+   the stage is unpinned entirely (position:static, no height cap), so
+   there's nothing to overflow and this no longer applies. Without the
+   min-width, it was firing on any short-but-narrow viewport too (most
+   phones in portrait are well under 860px tall) and clobbering the
+   compact-width gap fix above whenever both conditions were true —
+   found by measurement: .brandid__blueprint-wordmark-inner's gap
+   computed to ~50.64px (6vh at an 844px-tall phone) instead of the
+   intended clamp(28px,6vw,40px), since this rule came later in source
+   and won the tie at equal specificity. */
+@media (max-height: 860px) and (min-width: 1026px) {
   /* Widened a step too (24-48px -> 32-64px), same request as the base
      rule's own widening above ("워드마크 스크로크로 그려진 부분 아래
      여백 넉넉히 확보해줘") — kept well short of the base rule's own
@@ -5553,14 +5586,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     transform: none !important;
     pointer-events: auto !important;
   }
-  /* Widened, 48-96px -> 72-128px — the wordmark panel's own top
-     margin, and its own bottom margin added (there wasn't one; the
-     panel just ran straight into the shared sticky's own bottom
-     padding) so both read as similarly generous (request: "워드마크
-     위아래 여백 넉넉히 확보"). Top widened once more on its own
-     (request: "워드마크 위쪽 여백은 조금더 넓히고"). */
+  /* margin-top (the gap between the diagram panel's own content ending
+     and the wordmark panel/graphic starting) was clamp(96px,13vw,160px)
+     — wordmark's own "space before it starts," which towered over the
+     symbol's equivalent (.brandid__blueprint-sticky's own padding-top,
+     cut to clamp(12px,2vw,20px) on request last round). Matched to that
+     same value now (request: "위쪽 여백도 통일시켜줘"). margin-bottom
+     (wordmark's own trailing space before Color Principle) is a
+     separate, still-untouched concern — not part of this request. */
   .brandid__blueprint-panel + .brandid__blueprint-panel {
-    margin-top: clamp(96px, 13vw, 160px);
+    margin-top: clamp(12px, 2vw, 20px);
     margin-bottom: clamp(72px, 10vw, 128px);
   }
   .brandid__color-flash,
@@ -5612,60 +5647,69 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__color-name span {
     font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
   }
-  /* .brandid__color-block IS the touch-scroll row now, not just a
-     structural wrapper around one — the title/lead slide swipes away
-     with the same gesture as the 3 colour cards instead of sitting
-     above them as a persistent header, so the whole section reads and
-     behaves as one continuous strip (request: "컬러 프린서플 섹션은
-     하나의 구조로 합쳐서 섹션 자체를 터치 스크롤 하면 좌우로 넘어가게
-     해줘"). .brandid__color-caption dissolves to display:contents so
-     its 3 .brandid__color-name children land as direct flex items
-     here, siblings of .brandid__color-head rather than nested one
-     level down in their own separate scroller. */
+  /* Reverted from last round's "title is its own swipe slide" structure
+     — on request: "영문타이틀+한글타이틀 그룹 + 3가지 색상 컨텐츠 그룹 +
+     하단 네비게이션 이 전체 그룹을 하나로 묶어서 이 통째로 색상이
+     바뀌는 구조를 말한거야". The title stays fixed above; only the 3
+     colour cards swipe, in their own row (.brandid__color-caption,
+     restored as the real scroll container) below it. "하나로 묶어서"
+     means title+row+dots all agree on ONE colour at a time (updateColor
+     -HeadSync, main.js) — not that the title itself has to be part of
+     the swipe gesture. */
   .brandid__color-block {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
   }
   .brandid__color-head {
     opacity: 1;
     transform: none;
     filter: none;
-    flex: 0 0 100%;
-    min-width: 0;
+    width: 100%;
     box-sizing: border-box;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     /* Top cut hard, 48-96px -> 16-32px, then back up to the shared
        clamp(56px,10vw,96px) every other section's own top padding
        uses — the "대폭 줄여줘" cut turned out to be too far off that
        standard (request: "컬러 프린서플 위아래... 섹션 여백 기타 다른
-       섹션 여백과 똑같이 맞춰주고"). */
-    padding: clamp(56px, 10vw, 96px) var(--edge) clamp(28px, 5vw, 44px);
+       섹션 여백과 똑같이 맞춰주고"). Bottom widened from a flat 28-44px
+       into its own clamp, separate from the top, so there's a real,
+       deliberate gap before the colour row starts rather than reading
+       as one shared padding value (request: "영문 타이틀 및 한글
+       타이틀 그룹 아래에 세가지 색상 적당한 여백을 두고 위치"). */
+    padding-top: clamp(56px, 10vw, 96px);
+    padding-left: var(--edge);
+    padding-right: var(--edge);
+    padding-bottom: 0;
     margin-top: 0;
-    /* No longer synced to "whichever card is active" (updateColorHeadSync,
-       main.js, removed) — this is its own swipeable slide now, not a
-       persistent header hovering above the cards, so there's no longer
-       a single "currently showing" colour for it to agree with. Plain
-       paper instead. */
+    margin-bottom: clamp(28px, 6vw, 48px);
     background-color: var(--paper);
     color: var(--ink);
+    /* No transition — background-color/color are set inline every
+       scroll tick (updateColorHeadSync, main.js), and an eased
+       transition on top of per-tick updates is exactly what read as
+       the colour changing a beat AFTER the actual swipe rather than
+       with it (request: "터치스크롤 하면 뒤늦게 색상이 같이 바뀌는
+       것처럼 되는데... 통째로 색상이 바뀌는 구조를 말한거야"). Plain,
+       instant, tracks scroll position exactly. */
+    transition: none;
   }
   .brandid__color-caption {
-    display: contents;
+    position: relative;
+    height: auto;
+    width: 100%;
+    max-width: none;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 0;
   }
   /* .brandid__color-sticky (this row's own parent) is display:flex
      with align-items:center — .hscroll-dots, unlike its siblings above
      (which all carry their own explicit width:100%), has no width of
      its own, so it defaulted to shrink-to-fit and centered as a ~34px
      island instead of spanning full width. */
-  .brandid__color-block + .hscroll-dots {
+  .brandid__color-caption + .hscroll-dots {
     width: 100%;
   }
   .brandid__color-name {

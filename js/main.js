@@ -2632,52 +2632,55 @@
     const colorSymbol = colorStage ? colorStage.querySelector('.brandid__color-symbol') : null;
     const colorHead = colorStage ? colorStage.querySelector('.brandid__color-head') : null;
     const colorCaption = colorStage ? colorStage.querySelector('.brandid__color-caption') : null;
-    const colorBlock = colorStage ? colorStage.querySelector('.brandid__color-block') : null;
     const colorFlash = colorStage ? colorStage.querySelector('.brandid__color-flash') : null;
     const colorNames = colorStage ? Array.from(colorStage.querySelectorAll('.brandid__color-name')) : [];
 
-    // .brandid__color-block is the touch-scroll row itself now, not
-    // just a wrapper around one (style.css) — the title slide and the
-    // 3 colour cards are direct siblings in the same scroll-snap row,
-    // on request ("컬러 프린서플 섹션은 하나의 구조로 합쳐서 섹션
-    // 자체를 터치 스크롤 하면 좌우로 넘어가게 해줘"). The title no
-    // longer needs to COPY whichever card is active (there's no longer
-    // a "currently showing" card to agree with once it's just one more
-    // slide you swipe past) — only .hscroll-dots, sitting outside the
-    // row as a fixed strip below it, still benefits from matching
-    // whichever slide is centred, so it reads as part of that slide
-    // rather than sitting on the page's neutral background (request:
-    // "아래 네비게이션 점도 색상 범위 안에 집어넣어서 한섹션 처럼
-    // 보이게"). Copies the ACTIVE SLIDE's own computed colours directly
-    // rather than duplicating a colour table here.
-    function updateColorDotsSync() {
-      if (!isCompact() || !colorBlock) return;
-      const slides = [colorHead, ...colorNames].filter(Boolean);
-      if (!slides.length) return;
-      const wrapRect = colorBlock.getBoundingClientRect();
+    // Title (.brandid__color-head), the 3-card row (.brandid__color-
+    // caption) and .hscroll-dots (injected after the row, further down)
+    // read as ONE bound group that all agree on a single colour at a
+    // time, rather than the title being just one more swipeable slide —
+    // on request ("영문타이틀+한글타이틀 그룹 + 3가지 색상 컨텐츠 그룹 +
+    // 하단 네비게이션 이 전체 그룹을 하나로 묶어서 이 통째로 색상이
+    // 바뀌는 구조를 말한거야"), reverting the previous round's "title
+    // is its own slide" structure. Copies the ACTIVE CARD's own computed
+    // colours directly onto both head and dots, rather than duplicating
+    // a colour table here — .brandid__color-name[data-color] in
+    // style.css is the one place these colours are defined. No CSS
+    // transition on either target (style.css) — this runs every scroll
+    // tick already, so an eased transition on top of that is exactly
+    // what read as the colour changing a beat AFTER the actual swipe
+    // rather than with it ("터치스크롤 하면 뒤늦게 색상이 같이 바뀌는
+    // 것처럼 되는데").
+    function updateColorHeadSync() {
+      if (!isCompact() || !colorCaption || !colorNames.length) return;
+      const wrapRect = colorCaption.getBoundingClientRect();
       const center = wrapRect.left + wrapRect.width / 2;
-      let active = slides[0], best = Infinity;
-      slides.forEach(el => {
+      let active = colorNames[0], best = Infinity;
+      colorNames.forEach(el => {
         const r = el.getBoundingClientRect();
         const dist = Math.abs((r.left + r.width / 2) - center);
         if (dist < best) { best = dist; active = el; }
       });
       const cs = getComputedStyle(active);
-      // .hscroll-dots is injected right after .brandid__color-block by
+      if (colorHead) {
+        colorHead.style.backgroundColor = cs.backgroundColor;
+        colorHead.style.color = cs.color;
+      }
+      // .hscroll-dots is injected right after .brandid__color-caption by
       // initHorizontalScrollDots (main.js, runs later at page load than
       // this function is first defined) — queried fresh here rather
       // than cached above, since it doesn't exist yet the very first
       // time this runs.
-      const dots = colorBlock.nextElementSibling;
+      const dots = colorCaption.nextElementSibling;
       if (dots && dots.classList.contains('hscroll-dots')) {
         dots.style.backgroundColor = cs.backgroundColor;
         dots.style.color = cs.color;
       }
     }
     if (isCompact()) {
-      updateColorDotsSync();
-      if (colorBlock) colorBlock.addEventListener('scroll', updateColorDotsSync, { passive: true });
-      window.addEventListener('resize', updateColorDotsSync, { passive: true });
+      updateColorHeadSync();
+      if (colorCaption) colorCaption.addEventListener('scroll', updateColorHeadSync, { passive: true });
+      window.addEventListener('resize', updateColorHeadSync, { passive: true });
     }
 
     // The flat opacity flash (first pass) was still just a uniform
@@ -4290,24 +4293,23 @@
       '.vwipe__vision',
       '.whyp__copy-sticky',
       '.brandid__dna-items',
-      '.brandid__color-block',
+      '.brandid__color-caption',
     ].forEach(sel => enableWheelHorizontalScroll(document.querySelector(sel)));
   }
 
-  /* .hscroll-dots (Color Principle's own progress dots) sits OUTSIDE
-     .brandid__color-block, its actual touch-scroll row, as a fixed
-     strip below it — a touch/swipe starting ON the dots does nothing on
-     its own, since native horizontal scroll only ever responds to
-     gestures that start inside the actual overflow:auto element itself.
-     Forwards dots touches to the row's own scrollLeft so the whole
-     section — title slide through the 3 colour cards down through the
-     nav dots — swipes as one unit regardless of where the gesture
-     starts (request: "컬러 프린서플 섹션은 하나의 구조로 합쳐서 섹션
-     자체를 터치 스크롤 하면 좌우로 넘어가게 해줘... 아래 네비게이션
-     점까지 포함해서 한 섹션으로 구성하자"). .brandid__color-head no
-     longer needs this wiring itself — it's a direct flex item INSIDE
-     .brandid__color-block now, so native scroll already responds to a
-     swipe starting on the title. */
+  /* Color Principle's title (.brandid__color-head) sits above its own
+     touch-scroll row (.brandid__color-caption) rather than inside it —
+     .brandid__color-head already mirrors the active card's own colour
+     (updateColorHeadSync above), reading as one continuous block, but a
+     touch/swipe starting ON the title (or on .hscroll-dots, injected
+     below the row further down) did nothing on its own, since native
+     horizontal scroll only ever responds to gestures that start inside
+     the actual overflow:auto element itself. Forwards head/dots touches
+     to the caption's own scrollLeft so the whole group — title down
+     through the nav dots — swipes as one unit (request: "영문타이틀+
+     한글타이틀 그룹 + 3가지 색상 컨텐츠 그룹 + 하단 네비게이션 이 전체
+     그룹을 하나로 묶어서... 아래 네비게이션 점까지 포함해서 한 섹션으로
+     구성하자"). */
   function enableTouchScrollForward(triggerEl, targetEl) {
     if (!triggerEl || !targetEl) return;
     let startX = 0, startY = 0, startScrollLeft = 0, dragging = null;
@@ -4334,6 +4336,9 @@
       targetEl.scrollLeft = startScrollLeft - dx;
       e.preventDefault();
     }, { passive: false });
+  }
+  if (isCompact()) {
+    enableTouchScrollForward(document.querySelector('.brandid__color-head'), document.querySelector('.brandid__color-caption'));
   }
   // Dots don't exist yet at this point (initHorizontalScrollDots, which
   // injects them, runs later) — wired up right after that call instead,
@@ -5981,7 +5986,7 @@
      .is-active by the same "closest to the row's own centre" test
      already used everywhere else in this project that needs to know
      which card is active (initApproachActive's updateHorizontal,
-     updateColorDotsSync, etc). Colour/spacing are a plain, deliberately
+     updateColorHeadSync, etc). Colour/spacing are a plain, deliberately
      minimal default (style.css) — left for further design pass. */
   function initHorizontalScrollDots() {
     if (!isCompact()) return;
@@ -5990,7 +5995,7 @@
       { wrap: '.vwipe__vision', item: '.vwipe__vstep' },
       { wrap: '.whyp__copy-sticky', item: '.whyp__step' },
       { wrap: '.brandid__dna-items', item: '.brandid__dna-item' },
-      { wrap: '.brandid__color-block', item: '.brandid__color-head, .brandid__color-name' },
+      { wrap: '.brandid__color-caption', item: '.brandid__color-name' },
     ];
     ROWS.forEach(({ wrap, item }) => {
       const el = document.querySelector(wrap);
@@ -6027,24 +6032,25 @@
 
   initHorizontalScrollDots();
 
-  // .hscroll-dots for Color Principle didn't exist yet when the wiring
-  // above ran (it's inserted right here, by the call just made) — wired
-  // up now that it's actually in the DOM, so a touch/swipe starting on
-  // the dots themselves also drives .brandid__color-block's own scroll
-  // (request: "아래 네비게이션 점까지 포함해서 한 섹션으로 구성하자").
+  // .hscroll-dots for Color Principle didn't exist yet at
+  // enableTouchScrollForward's own isCompact() block above (it's
+  // inserted right here, by the call just made) — wired up now that
+  // it's actually in the DOM, so a touch/swipe starting on the dots
+  // themselves also drives the caption's scroll (same request as the
+  // title: "아래 네비게이션 점까지 포함해서 한 섹션으로 구성하자").
   if (isCompact()) {
-    const colorBlockEl = document.querySelector('.brandid__color-block');
-    const colorDotsEl = colorBlockEl ? colorBlockEl.nextElementSibling : null;
+    const colorCaptionEl = document.querySelector('.brandid__color-caption');
+    const colorDotsEl = colorCaptionEl ? colorCaptionEl.nextElementSibling : null;
     if (colorDotsEl && colorDotsEl.classList.contains('hscroll-dots')) {
-      enableTouchScrollForward(colorDotsEl, colorBlockEl);
+      enableTouchScrollForward(colorDotsEl, colorCaptionEl);
     }
-    // updateColorDotsSync (initBrandIdentity, above) is scoped to that
+    // updateColorHeadSync (initBrandIdentity, above) is scoped to that
     // function and can't be called directly from here — its own first
-    // call, at page load, ran before .hscroll-dots existed, so the dots
-    // never got their initial colour sync. Re-firing its existing
+    // call, at page load, ran before .hscroll-dots existed, so the
+    // dots never got their initial colour sync. Re-firing its existing
     // 'scroll' listener does the same job without needing to reach
     // across the closure.
-    if (colorBlockEl) colorBlockEl.dispatchEvent(new Event('scroll'));
+    if (colorCaptionEl) colorCaptionEl.dispatchEvent(new Event('scroll'));
   }
 
   // The ground used to pan through its own length here — the image is
