@@ -755,32 +755,51 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      directly rather than this being expressed as a CSS rule — see the
      comment on .statement__figure further up for why. */
 }
-/* 1024-1400px: hold the REST-state photo-to-copy gap at the same size
-   it reads at 1400px, rather than letting it keep narrowing on down to
-   1024px (request: "1400 구간부터 1024에 이르기까지... 좌측 영상과
-   우측 컨텐츠 그룹 사이 여백 1400구간에서 보이는 여백정도로 최대한
-   유지"). The base rule's `left` cancels --st-gap exactly (see its own
-   comment) down to gap = --big * --line3-ink-l - --st-overlap - 60px —
-   both --big and --st-overlap keep scaling down with the viewport, so
-   that gap drifts from ~71px at 1400px to ~36px at 1024px (measured).
-   Overriding `left` directly to (target - --st-gap) reproduces
-   whatever --st-gap resolves to at each width and cancels it the same
-   way, landing on the same fixed ~71.38px gap at every width in this
-   band instead — solved from the base formula at w=1400 (--big=100.8,
-   --st-overlap=25.2): 100.8*1.5534 - 25.2 - 60 = 71.38, so this is
-   exactly continuous with the un-touched formula right above 1400px,
-   not a new number invented separately.
-   Deliberately NOT touching --st-overlap itself (which would have been
-   the more obvious lever) — the O-clip-path and .statement__big's own
-   title-crossing distance both read --st-overlap too, and solving for
-   a constant gap all the way to 1024px would drive it negative, which
-   breaks that unrelated corner-crossing composition. This only touches
-   .statement__body's own rest position, leaving the title's crossing
-   and the PRESSED-state target (initStatementStickyPress reads --st-
-   gap/--st-overlap independently, for the deliberate on-photo overlap
-   while the column is actually pinned, not a "gap" at all) exactly as
-   designed. */
+/* 1024-1400px: hold the REST-state photo-to-content relationship at
+   the same reading it has at 1400px, rather than letting it keep
+   shrinking on down to 1024px (request: "1400 구간부터 1024에
+   이르기까지... 좌측 영상과 우측 컨텐츠 그룹 사이 여백 1400구간에서
+   보이는 여백정도로 최대한 유지", then clarified: "한글 컨텐츠
+   그룹뿐만 아닌 영문 타이틀까지 포함"). Two different mechanisms for
+   the title and the Korean copy, because they relate to the photo two
+   different ways — the title deliberately CROSSES onto it (a designed
+   overlap, not a gap), the copy sits after it with a real gap — but
+   both derive from the same --st-gap/--st-overlap pair, frozen here to
+   their own exact 1400px values (2.6vw and 1.8vw resolve to 36.4px and
+   25.2px there).
+   .statement__big's margin-left (-1 * (--st-gap + --st-overlap)) and
+   the O-clip-path (which reads --st-overlap directly, deriving exactly
+   how much of the O's ink sits over the photo) both pick this up for
+   free just by --st-gap/--st-overlap being frozen below — the title's
+   crossing distance stops shrinking with the viewport, and the clip
+   stays self-consistent with it automatically since both read the same
+   frozen number, rather than needing a separately re-derived formula.
+   The Korean copy's own gap needs its own fix on top of that, though:
+   its formula is --big * --line3-ink-l - --st-overlap - 60px once
+   --st-gap cancels out (see .statement__body's own comment) — --big
+   keeps scaling down with the viewport independently of --st-gap/
+   --st-overlap, so even with those two frozen the gap would still
+   drift purely from --big shrinking. Overriding `left` directly to
+   (target - --st-gap) compensates for exactly that remaining drift,
+   landing on the same fixed ~71.38px gap at every width in the band —
+   solved from the base formula at w=1400 (--big=100.8, --st-overlap=
+   25.2): 100.8*1.5534 - 25.2 - 60 = 71.38, continuous with the
+   untouched formula right above 1400px, not a new number invented
+   separately. (Now that --st-gap is frozen too, this override's own
+   -var(--st-gap) term is also just a flat number in this band, but the
+   formula still needs to be `target - --st-gap` rather than a literal
+   constant to stay correct exactly at the 1400px seam, where --st-gap
+   hands off from its live clamp() to this frozen value.)
+   The PRESSED-state target (initStatementStickyPress, main.js) is
+   unaffected either way — it reads --st-gap/--st-overlap live via
+   getComputedStyle each time the column pins, so it automatically
+   picks up these same frozen values too; there's no separate press-
+   state number to chase. */
 @media (min-width: 1024px) and (max-width: 1400px) {
+  .statement__stage {
+    --st-gap: 36.4px;
+    --st-overlap: 25.2px;
+  }
   .statement__body {
     left: calc(71.38px - var(--st-gap));
   }
