@@ -5033,32 +5033,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     font-size: clamp(15px, calc(11.52px + .8278vw), 20px);
   }
 }
-/* Desktop: the SYMBOL (diagram) panel's type was flat px, so it never
-   responded to resizing above the 1024px breakpoint. Now each size scales
-   gently off the 2560px reference — its current value held as the ceiling
-   at 2560px (the "1x" point, capped above that) down to ~88% at 1024px
-   (request: "2560 1x지점에서 해상도 리사이징 하다가 반응해서... 영문
-   타이틀 아래 및 그섹션에 속한 한글 텍스트 그룹들도 미세하게 자연스럽게
-   줄어들거나 늘어나게"). Scoped to this panel so the WORDMARK panel and
-   the Symbol & Wordmark row (shared classes) are untouched; desktop-only
-   because compact has its own scaling and reloads at the boundary. */
-@media (min-width: 1024px) {
-  .brandid__blueprint-panel--diagram .brandid__blueprint-index {
-    font-size: clamp(44px, calc(40px + 0.3906vw), 50px);
-  }
-  .brandid__blueprint-panel--diagram .brandid__lead {
-    font-size: clamp(32px, calc(29.33px + 0.2604vw), 36px);
-  }
-  .brandid__blueprint-panel--diagram .brandid__body {
-    font-size: clamp(21px, calc(19px + 0.1953vw), 24px);
-  }
-  .brandid__blueprint-panel--diagram .brandid__blueprint-principle-key {
-    font-size: clamp(16px, calc(14.67px + 0.1302vw), 18px);
-  }
-  .brandid__blueprint-panel--diagram .brandid__blueprint-principle-desc {
-    font-size: clamp(17.5px, calc(15.83px + 0.1628vw), 20px);
-  }
-}
+/* (The desktop type-scaling that used to sit here was scoped to the
+   SYMBOL diagram panel alone, which left every other section's Korean
+   text flat — see the consolidated block at the end of this file, which
+   covers them all via the shared classes.) */
 @media (max-width: 900px) {
   /* Own rules superseded — see the @media(max-width:1025px) block near
      .brandid__blueprint-row's base rule, which now covers the
@@ -7929,5 +7907,67 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .hscroll-dot.is-active {
   opacity: 1;
   transform: scale(1.3);
+}
+
+/* ---- Desktop type scale: 2560 = 1x, easing down to ~88% at 1024 ----
+   The big English titles across the Brand Identity run already respond
+   to resizing (they're 7-7.2vw based), but the Korean text groups under
+   them — and most of the supporting labels in those same sections —
+   were authored as flat px, so they never moved at all above the 1024px
+   breakpoint. Request: "2560 1x지점~이하에서 해상도 리사이징 하다가
+   반응해서 글자가 적절하게 조절되는 영문 타이틀 아래 및 그섹션에 속한
+   한글 텍스트 그룹들도 미세하게 자연스럽게 줄어들거나 늘어나게".
+
+   One shared formula so every size moves in step rather than each
+   drifting on its own curve: each element keeps its CURRENT value as the
+   ceiling at 2560px (the 1x reference, capped above that) and eases to
+   ~88% of it at 1024px. For a value V that's
+       clamp(0.88V, calc(0.8V + (V/128)vw), V)
+   — deliberately subtle ("미세하게"), roughly a 12% span end to end.
+
+   Targets the SHARED classes (.brandid__lead/.brandid__body/etc), so one
+   rule covers Visual Identity, Shape DNA, Symbol & Wordmark, both
+   blueprint panels, Color Principle and Color Story at once — an earlier
+   pass scoped this to the SYMBOL panel alone, which is why nothing else
+   appeared to change. Anything already vw-driven (the English titles,
+   .brandid__dna-title, .brandid__intro-title, .brandid__colorstory-body)
+   is left alone.
+
+   min-width:1024 = desktop only: compact has its own 1023->420 clamps,
+   and the breakpoint reloads, so the two never fight or jump. Placed at
+   the end of the file so it wins the equal-specificity tie against the
+   base rules it overrides (the source-order trap this file has hit
+   repeatedly). */
+@media (min-width: 1024px) {
+  /* 36px group — the Korean lead lines */
+  .brandid__lead,
+  .brandid__dna-kr,
+  .brandid__color-lead,
+  .brandid__colorstory-lead {
+    font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px);
+  }
+  /* 24px group — the Korean body copy + card labels */
+  .brandid__body,
+  .brandid__dna-copy,
+  .brandid__color-name span,
+  .brandid__colorstory-hex,
+  .brandid__colorstory-swatchname {
+    font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px);
+  }
+  /* 50px group — the section sub-titles */
+  .brandid__blueprint-index,
+  .brandid__dna-name {
+    font-size: clamp(44px, calc(40px + 0.3906vw), 50px);
+  }
+  /* 22px / 20px / 18px — the smaller supporting labels */
+  .brandid__color-name {
+    font-size: clamp(19.4px, calc(17.6px + 0.1719vw), 22px);
+  }
+  .brandid__blueprint-principle-desc {
+    font-size: clamp(17.6px, calc(16px + 0.1563vw), 20px);
+  }
+  .brandid__blueprint-principle-key {
+    font-size: clamp(15.8px, calc(14.4px + 0.1406vw), 18px);
+  }
 }
 
