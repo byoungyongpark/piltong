@@ -6285,7 +6285,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     justify-content: center;
     gap: clamp(40px, 5vw, 96px);
   }
-  .brandid__colorstory-img { position: absolute; inset: 0; }
+  .brandid__colorstory-img { position: absolute; inset: 0;
+    /* Base rule's transform-origin (88% 75%) shifted right for this
+       band specifically (request: "1024구간에서 컬러스토리 배경 위치
+       오른쪽으로... 오른쪽 오브젝트 있는 구간이 오른쪽으로 밀려보이게
+       이동"). scale(1.1)-about-origin is mathematically a fixed-anchor
+       zoom plus a uniform translation — for a FIXED scale, moving the
+       anchor to a LOWER x pushes every point in the image further
+       right on screen by (88 - newX) * (scale-1)%, since the anchor
+       itself is what stays visually still while the rest scales
+       outward from it (the further the anchor sits from the content,
+       the more that content is carried outward past it). 88% -> 20%
+       reads as a solid, clearly visible rightward push (~6.8% of the
+       frame) without maxing out the available range (0% is the most
+       this scale can buy without also changing it). */
+    transform-origin: 20% 75%;
+  }
   /* Flex items paint in order-modified document order as if positioned
      (CSS Flexbox §z-order) — without an explicit z-index here, the
      absolutely-positioned img (painted at its own DOM-order slot)
