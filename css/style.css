@@ -829,7 +829,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (min-width: 1024px) and (max-width: 1400px) {
   .statement__stage {
     --st-gap: 36.4px;
-    --st-overlap: calc(10.9489vw - 99.287px);
+    /* Intercept nudged -99.287 -> -132.287 (same 10.9489vw slope) —
+       tuned directly in DevTools against the real rendered composition
+       rather than my own measured-delta derivation, which apparently
+       didn't quite land right ("개발자 도구에서 이래 조정하니까 얼추
+       내가 원하는대로 맞아 들어가던데"). Goes negative below ~1207px
+       now (-20.18px at 1024px), which would push .o-photo-clip's own
+       clip-path formula (a few lines up) past its valid 0-100% range —
+       harmless here since that class doesn't exist anywhere in the
+       current markup (dead CSS, unused), but worth knowing if that
+       element is ever reintroduced. */
+    --st-overlap: calc(10.9489vw - 132.287px);
   }
   .statement__body {
     left: calc(71.38px - var(--st-gap));
