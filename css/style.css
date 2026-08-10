@@ -7559,8 +7559,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin-top: var(--apps-pull, 0px);
   /* Side margins of about 300, and the content fills everything between
      them ("좌우 여백이 300정도 남겨두고 꽉 채워서") — clamped so it
-     collapses to the page's own --edge on anything narrow. */
-  padding: clamp(90px, 13vh, 200px) clamp(var(--edge), 24vw, 300px) clamp(120px, 18vh, 240px);
+     collapses to the page's own --edge on anything narrow. Bottom was
+     clamp(120px,18vh,240px) — that trailing space made sense while this
+     was the page's own last section, but the new Outro section right
+     after it (its own top padding) now supplies that gap instead, on
+     request ("목업 섹션 아래에 있던 기존 여백은 없애자"). */
+  padding: clamp(90px, 13vh, 200px) clamp(var(--edge), 24vw, 300px) 0;
   background-color: var(--apps-fill);
   color: var(--paper);
   display: flex;
