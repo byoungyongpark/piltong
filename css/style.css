@@ -6108,7 +6108,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        both sides. margin-bottom (wordmark's own trailing space before
        Color Principle) is a separate, untouched concern. */
     margin-top: clamp(56px, 10vw, 76px);
-    margin-bottom: clamp(72px, 10vw, 128px);
+    /* Was clamp(72px,10vw,128px) — narrowed on request ("1024이하 기준
+       심볼&워드마크 섹션 컨텐츠 그룹 아래 여백 조금 줄이자"): this is
+       the WORDMARK panel's own trailing space (the "+" combinator
+       selects it specifically, the second/last panel), i.e. the gap
+       after the whole section's content before Color Principle
+       begins. */
+    margin-bottom: clamp(48px, 8vw, 96px);
     /* Divider between SYMBOL and WORDMARK, same request/convention as
        .brandid__construction-row's own new border-top above (request:
        "심볼과 워드마크 섹션 사이에도 넣어주고"). Sits at the top of the
