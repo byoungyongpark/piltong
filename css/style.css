@@ -5649,7 +5649,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      trim to bring the two tight together. */
   .brandid__color-lead {
     font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
-    margin-bottom: clamp(12px, 2.5vw, 20px);
+    /* A bit more space above the cards than last round's near-zero
+       (request: "위쪽 영역 지금보단 조금 여백 더주고") — still coloured
+       (part of the block), just a touch of breathing room under the
+       title. */
+    margin-bottom: clamp(24px, 5vw, 40px);
   }
   /* Was a flat 22px. */
   .brandid__color-name {
@@ -5700,15 +5704,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-bottom: 0;
     margin-top: 0;
     margin-bottom: 0;
-    background-color: var(--paper);
+    /* Transparent — the single interpolated fill is painted on
+       .brandid__color-caption itself now (updateColorHeadSync), and this
+       sticky title just sits on top of it, so it must NOT carry its own
+       background or it'd cover that fade. color is the pre-JS fallback;
+       JS drives it to the interpolated foreground. No transition — the
+       interpolation IS the fade (see the caption note below). */
+    background-color: transparent;
     color: var(--ink);
-    /* No transition — background-color/color are set inline every
-       scroll tick (updateColorHeadSync, main.js), and an eased
-       transition on top of per-tick updates is exactly what read as
-       the colour changing a beat AFTER the actual swipe rather than
-       with it (request: "터치스크롤 하면 뒤늦게 색상이 같이 바뀌는
-       것처럼 되는데... 통째로 색상이 바뀌는 구조를 말한거야"). Plain,
-       instant, tracks scroll position exactly. */
     transition: none;
   }
   /* .brandid__color-head, .brandid__color-cards-row (the new wrapper
@@ -5736,58 +5739,69 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     -webkit-overflow-scrolling: touch;
     margin-top: 0;
   }
+  /* The 3 cards STACK in one grid cell so they cross-fade in place
+     instead of sliding (request: "여기 전환 효과도 페이드로 통일...
+     색상이 채워진 영역 통째로 터치스와이퍼"). Sticky left:0 pins the
+     stack at the scrollport's left edge while the invisible swipe sizer
+     (below) scrolls under it — so a swipe never MOVES the cards, it just
+     drives updateColorHeadSync's cross-fade. */
   .brandid__color-cards-row {
-    display: flex;
+    position: sticky;
+    left: 0;
     width: 100%;
+    display: grid;
   }
-  /* .brandid__color-sticky (this whole group's own parent) is
-     display:flex with align-items:center — .hscroll-dots, unlike its
-     siblings above (which all carry their own explicit width:100%), has
-     no width of its own, so it defaulted to shrink-to-fit and centered
-     as a ~34px island instead of spanning full width. position:sticky
-     holds it at the scrollport's left edge, same as the title above. */
+  /* Nav dots: same sticky-pin as the head/cards above. Generous COLOURED
+     bottom padding — a bit more than the section's top space above the
+     title (.brandid__color-head's padding-top, clamp(56,10vw,96)), on
+     request ("하단 네비게이션 하단쪽으로 패딩 프린서플 섹션 위쪽 여백보다
+     조금 더 넉넉히"). It sits on the caption's interpolated fill, so it's
+     part of the coloured block. */
   .brandid__color-cards-row + .hscroll-dots {
     position: sticky;
     left: 0;
     width: 100%;
-    /* Generous COLOURED padding below the dots — a bit more than the
-       section's own top space above the title (.brandid__color-head's
-       padding-top, clamp(56,10vw,96)), on request ("하단 네비게이션
-       하단쪽으로 패딩 프린서플 섹션 위쪽 여백보다 조금 더 넉넉히
-       확보해줘"). Because it's the dots' own padding it takes the synced
-       colour, so the whole nav strip reads as part of the coloured
-       block rather than floating dots. Top kept modest — just clears
-       the card content above. */
     padding: clamp(20px, 4vw, 32px) 0 clamp(64px, 12vw, 108px);
   }
   .brandid__color-name {
+    /* Stacked in the single grid cell — opacity is driven per scroll
+       tick by updateColorHeadSync (only the current state's label is
+       opaque, the neighbour cross-fades). No own background: the
+       interpolated fill lives on the caption; these are transparent
+       text-only layers. No scroll-snap (that's on the sizer's cells). */
     position: static;
-    opacity: 1 !important;
-    filter: none;
-    flex: 0 0 100%;
+    grid-area: 1 / 1;
     min-width: 0;
     box-sizing: border-box;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
-    /* Top padding 0 — the "위쪽 영역 여백은 0" for the card row itself,
-       so the first card's content sits right under the (now tight)
-       title instead of floating in a tall centred box. Bottom cut down
-       from the old symmetric clamp(56,12vw,96) too ("하단 여백도 조금
-       줄이고"). */
+    /* Top 0 (title sits right above), bottom cut down from the old
+       symmetric clamp(56,12vw,96) ("하단 여백도 조금 줄이고"). */
     padding: 0 var(--edge) clamp(36px, 7vw, 56px);
+    background: transparent;
+    color: var(--ink);
+    opacity: 0;
+    filter: none;
     transition: none;
-    /* This is a <p> — nothing in this ruleset ever zeroed its default
-       UA margin (1em top/bottom), which the flex row's own auto height
-       still counts even though it doesn't show up in the element's own
-       rect. That 1em (16px at this element's own font-size) is exactly
-       what was leaving a sliver of the page's own paper background
-       visible above and below every card (request: "참조 사진 보면
-       중간에 안붙어진 여백 그거 제거해주고"). */
     margin: 0;
   }
-  .brandid__color-name[data-color="0"] { background: var(--paper); color: var(--ink); }
-  .brandid__color-name[data-color="1"] { background: var(--ink); color: var(--paper); }
-  .brandid__color-name[data-color="2"] { background: var(--signal-surface); color: var(--paper); }
+  /* Pre-JS fallback — state 0 is the one showing until
+     updateColorHeadSync takes over the opacities. */
+  .brandid__color-name[data-color="0"] { opacity: 1; }
+  /* The hidden swipe sizer: three viewport-wide snap cells in a row, the
+     only thing wider than the scrollport, so it's what gives the caption
+     its horizontal scroll distance + snap points. 1px tall, pointer-
+     transparent — a pure scroll-length provider behind the pinned
+     content above it. */
+  .brandid__color-swipe-sizer {
+    width: 300%;
+    height: 1px;
+    display: flex;
+    pointer-events: none;
+  }
+  .brandid__color-swipe-sizer > div {
+    flex: 1;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
 }
 
 /* ---- Color Story ---- */
