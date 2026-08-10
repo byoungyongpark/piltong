@@ -3092,6 +3092,14 @@
       function wobbleFrame() {
         wobbleRafId = requestAnimationFrame(wobbleFrame);
         if (!dnaVideo.duration) return;
+        // PC reverted to the plain original footage — no pull, no
+        // pre-zoom (request: "피시구간에서 쉐입디엔에이 좌측 심볼영상
+        // 그냥 움직임 없는 기존 영상대로 원래대로 돌리자"). The
+        // correction stays on at compact, which is unaffected by this.
+        if (!isCompact()) {
+          dnaVideo.style.transform = `scale(${dnaVideoScale.toFixed(3)})`;
+          return;
+        }
         const cs = getComputedStyle(dnaVideo);
         const amp = parseFloat(cs.getPropertyValue('--dna-wobble-amp')) || 0;
         const phase = parseFloat(cs.getPropertyValue('--dna-wobble-phase')) || 0;
