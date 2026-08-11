@@ -674,13 +674,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 /* Matched to .vwipe__vtitle's own clamp — sticky-pin composition is already out below 1025px (see .statement__stage's gate), so this is free to shrink like normal compact text. */
 @media (max-width: 1023px) {
-  /* Two-point line (offset + vw), not vw alone — a plain vw term plateaus at both ends instead of transitioning across the full range. Lands exactly on 36px at 1025px and 24px at 420px. */
+  /* Was its own two-point line (24px at 420 to 36px at 1025), independent
+     of --big's pure 8.5vw line above it — the two grow at different
+     rates (--big ~0.085px/px of width, this only ~0.0198px/px), so their
+     relative sizes visibly drifted across the compact range: the English
+     title and Korean line read close in size at narrow widths but the
+     title pulled far ahead by 1023px. Deriving this directly from --big
+     locks it to the exact same curve, so the whole title+lead+body group
+     scales as one piece instead of drifting apart. Ratio (.496) is this
+     line's own current value at 700px (29.53px) divided by --big's there
+     (59.5px) — picked as a representative mid-compact width, not derived.
+     max() floor matches the old clamp's own 24px floor, for the same
+     readability reason, since --big alone floors lower (30px) than this
+     ratio would otherwise allow past ~350px width. */
   .statement__body .statement__lead {
-    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+    font-size: max(24px, calc(var(--big) * .496));
   }
-  /* Same two-point construction: 19px at 1025px to 15px at 420px. */
+  /* Same reasoning as -lead above — ratio (.283) is this line's own
+     value at 700px (16.84px) divided by --big's there (59.5px). Floor
+     matches the old clamp's 15px. */
   .statement__body p {
-    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
+    font-size: max(15px, calc(var(--big) * .283));
   }
 }
 /* inline-block — transform has no effect on a plain inline element (same reason .scatter-letter needs it). */

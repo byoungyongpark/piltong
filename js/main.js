@@ -747,9 +747,17 @@
     const philo = lines[1];
     const fig = document.querySelector('.statement__figure');
     if (!stage || !copy || !big || !philo || !fig || lines.length < 2) return;
-    const GAP = 44;
-    const BELOW_OVERLAP = -14;
-    const TITLE_GAP = 32;
+    // Were flat px constants — steady regardless of how big/small --big
+    // (and, now, the Korean lines it drives — see style.css) was running,
+    // so the gap between English and Korean read proportionally huge at
+    // narrow widths and proportionally tiny at wide ones: the two blocks
+    // held their own sizes together but not the space between them.
+    // Ratios are each constant's own current value at 700px width (44 /
+    // -14 / 32) divided by --big's rendered size there (59.5px) — same
+    // reference point style.css's own --big-derived ratios use.
+    const GAP_RATIO = .74;
+    const BELOW_OVERLAP_RATIO = -.235;
+    const TITLE_GAP_RATIO = .54;
 
     function resetToBeside() {
       stage.classList.remove('is-copy-below');
@@ -777,6 +785,10 @@
       // call started in, so the fit check just below can bias toward
       // staying there (see HYST).
       const wasBelow = stage.classList.contains('is-copy-below');
+      const bigPx = parseFloat(getComputedStyle(big).fontSize);
+      const GAP = bigPx * GAP_RATIO;
+      const TITLE_GAP = bigPx * TITLE_GAP_RATIO;
+      const BELOW_OVERLAP = bigPx * BELOW_OVERLAP_RATIO;
       // Reset to "beside" layout before measuring, or a call that landed in
       // "below" mode last time would measure its own below-mode state.
       resetToBeside();
