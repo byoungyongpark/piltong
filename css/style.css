@@ -9223,33 +9223,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    padding was ALSO removed the same pass, so the two sections had
    landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘"),
    then widened a further notch (request: "상단 여백 조금만 더주고").
-   Side padding history: matched .apps__intro's COMPACT margin only at
-   first (plain var(--edge)) — but .apps__intro has no padding of its
-   own, so at desktop it inherits .apps's much wider
-   clamp(var(--edge),24vw,300px), leaving the two 216px apart at
-   1400px (request: "좌우 여백은... 텍스트 그룹과 똑같이
-   맞춰달라니깐"). Matched that exact clamp next, which held them in
-   sync everywhere, then narrowed to only minimizing past 1600px (kept
-   wide below it, matching .apps__intro) — briefly flipped the other
-   way round on a request that read as the opposite direction, then
-   flipped back to this shape once more, on request ("1600구간
-   진입하면 좌우 여백을 줄여줘"): wide (.apps__intro's own clamp) below
-   1600px, easing down smoothly to the minimized 112px floor (matching
-   padding-top's own ceiling) by 1600px, flat past that on the clamp's
-   own floor. Below the base rule's own 1250px plateau (24vw=300 is
-   reached there) this is still rising toward that same 300px meeting
-   point, so the whole curve reads as one smooth rise-then-fall-then-
-   flat shape with no seam at either 1250 or 1600. */
+   Side padding went back and forth on direction a few times (matching
+   .apps__intro's own wide clamp everywhere, then only below 1600px,
+   then only above it, then below it again) before landing on its final
+   shape, confirmed explicitly: >=1600px keeps the wide value
+   (.apps__intro's own clamp(var(--edge),24vw,300px) — plenty of screen
+   real estate there anyway), and BELOW 1600px it's reduced well past
+   that, freeing up real content width on the narrower desktop range
+   where it actually matters (request: "1600이상 구간에서는 좌우
+   여백이 이전 수치가 맞고 1600진입하고 그 이하부터는 좌우 여백을
+   이전 수치보다 확 줄여서 공간을 확보하자"). One continuous two-point
+   line covers the whole 1024px+ range: 112px (padding-top's own
+   ceiling) at 1024px, rising to 300px by 1600px — clamp()'s own
+   ceiling then holds it flat past that point on its own, so nothing
+   separate is needed for >=1600px. 32.6389/vw slope, -222.22
+   intercept. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
-  padding-left: clamp(var(--edge), 24vw, 300px);
-  padding-right: clamp(var(--edge), 24vw, 300px);
-}
-@media (min-width: 1250px) {
-  .outro {
-    padding-left: clamp(112px, calc(971.43px - 53.7143vw), 300px);
-    padding-right: clamp(112px, calc(971.43px - 53.7143vw), 300px);
-  }
+  padding-left: clamp(112px, calc(-222.22px + 32.6389vw), 300px);
+  padding-right: clamp(112px, calc(-222.22px + 32.6389vw), 300px);
 }
 /* justify-content was space-between, stretching .outro__info out to
    the row's own far right edge — a 50/50 split with the row's own
