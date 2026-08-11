@@ -3502,15 +3502,20 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
     mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
   }
-  /* position:relative reactivates the base rule's left:50% (inert under position:static above) — that alone pushed the card 50% of the panel's width right of centre; left:auto here cancels it. margin is a full shorthand (not just margin-top) so the 1024-1600px tier's own margin:0 can't leave this un-centred. */
+  /* position:relative reactivates the base rule's left:50%/top:48.25% (inert under position:static above) — that alone pushed the card 50% of the panel's width right of centre, PLUS the translate(-50%,-50%) below still shifting it another half its own size. left/top/transform explicit here (not just left, as the old comment said) since above 1600px width neither the <=1600px nor the 1024-1600px tier is around to have already reset them — this block can't rely on either one coincidentally also matching. margin is a full shorthand so the 1024-1600px tier's own margin:0 can't leave this un-centred either. */
   .brandid__colorstory-card {
     position: relative;
     left: auto;
+    top: auto;
+    transform: none;
     z-index: 1;
     margin: clamp(64px, 11vw, 108px) auto 0;
   }
   .brandid__colorstory-copy {
     position: relative;
+    left: auto;
+    top: auto;
+    bottom: auto;
     z-index: 1;
     /* Explicit — the 1024-1600px tier sets order:-1 and its own narrower width for a row layout; both need resetting here or they leak into this stacked one. */
     order: 0;
