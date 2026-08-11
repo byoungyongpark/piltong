@@ -9268,9 +9268,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Adds on top of .outro__block's own gap:3px (margins and flex gap
      stack), giving the label→value space more room than the
      value→value space below it, on request ("타이틀 아래로 여백이
-     좀더 있고"), then narrowed back down a step, on request ("우측
-     타이틀 아래 정보 간격더 좁히자"). */
-  margin-bottom: 4px;
+     좀더 있고"). Briefly narrowed to 4px on a misread of "간격더
+     좁히자" as this gap — that request was actually about
+     .outro__value's own line-height, not this label→value space,
+     which the user then asked to widen instead (request: "타이틀과
+     정보사이는 넓히고"). */
+  margin-bottom: 16px;
 }
 .outro__value {
   /* <p>'s own UA-stylesheet margin (1em top+bottom) was stacking on
@@ -9283,8 +9286,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   font-family: var(--font-en);
   font-size: 17px;
   font-weight: 500;
-  /* Was 1.4 — tightened, on request ("우측 이름간 행간 줄여주고"). */
-  line-height: 1.25;
+  /* Was 1.4, then 1.25 — tightened again, on request ("정보 진한
+     글씨색으로 되어있는 부분 행간을 좁히자는 의미"), clarifying that
+     the earlier "간격더 좁히자" meant THIS property (the value text's
+     own line-height, for whenever a long slash-separated line wraps),
+     not the label→value spacing above. */
+  line-height: 1.1;
   color: var(--ink);
 }
 .outro__value--muted { color: var(--ink-70); }
