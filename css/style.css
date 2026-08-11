@@ -390,6 +390,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (max-width: 1023px) {
   .hero-logo { height: 14px; }
 }
+/* iPad Air/mini/Pro landscape band — full 18px desktop size read a bit
+   large against everything else at these widths. */
+@media (min-width: 1024px) and (max-width: 1200px) {
+  .hero-logo { height: 15px; }
+}
 .hero-logo.is-nav-fixed {
   position: fixed;
   /* Above every other fixed overlay (equalizer: 999, custom cursor: 9999/10000). isolation:isolate pins its own stacking context; only needed once fixed. */
@@ -464,8 +469,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   position: absolute;
   z-index: 1;
   left: var(--hero-gutter);
-  /* Tracks the same --hero-gutter as left so the block sits the same distance off every edge, but capped by 6vh so a wide-but-short viewport (gutter grows with width, not height) doesn't push it implausibly far up. Floored at 20px, matching --hero-gutter's own floor. */
-  bottom: max(20px, min(var(--hero-gutter), 6vh, 96px));
+  /* Tracks the same --hero-gutter as left so the block sits the same distance off every edge, but capped by 6vh so a wide-but-short viewport (gutter grows with width, not height) doesn't push it implausibly far up. Floored at 20px, matching --hero-gutter's own floor. +24px on top — sat too close to the bottom edge. */
+  bottom: calc(max(20px, min(var(--hero-gutter), 6vh, 96px)) + 24px);
   width: max-content;
   max-width: var(--hero-measure);
 }
@@ -694,8 +699,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (max-width: 1023px) {
   /* Float was tried and reverted — once lines sit within the float's height, its exclusion zone overrides each line's own margin-left, killing the indent. Absolute positioning keeps the indent under this rule's control. */
   .statement {
-    /* Reuses the base rule's own clamp with just the floor lowered (48px->30px), keeping the curve continuous with the >=1025px range instead of a separate, plateauing shape. */
-    --big: clamp(30px, 7.2vw, 160px);
+    /* Reuses the base rule's own clamp with just the floor lowered (48px->30px), keeping the curve continuous with the >=1025px range instead of a separate, plateauing shape. Coefficient bumped 7.2->8.5vw to match .brandid__intro-index/.apps__title's own compact clamp. */
+    --big: clamp(30px, 8.5vw, 160px);
     /* Padding is bumped above .vwipe's own matching value — .statement__big's negative top offset (crossing onto the video) eats into it, so a raw match left the visible gap 28-32px short. */
     padding-top: clamp(84px, 13vw, 128px);
     padding-bottom: clamp(64px, 11vw, 96px);
@@ -748,8 +753,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: absolute;
     /* Neutralizes the older max-width:900px margin-top rule below, which still matches here and would otherwise stack with the `top` offset below (margin still shifts an absolute element). */
     margin-top: 0;
-    /* Governs the actual gap below the title — height and negative top offset both scale with --big, so this tracks it plus a flat +20px. */
-    top: clamp(105px, calc(20px + 18vw), 205px);
+    /* Governs the actual gap below the title — height and negative top offset both scale with --big, so this tracks it plus a flat +20px (theoretically; measured a -6.9px overlap at 768px width in practice, not a gap, so bumped +30px across the board). */
+    top: clamp(135px, calc(50px + 18vw), 235px);
     left: calc(38% - var(--edge) + 16px);
     right: clamp(16px, 3vw, 24px);
     text-align: left;
@@ -2088,8 +2093,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 @media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
   .brandid__intro {
-    padding-left: clamp(96px, 13vw, 160px);
-    padding-right: clamp(96px, 13vw, 160px);
+    padding-left: clamp(96px, 13vw, 220px);
+    padding-right: clamp(96px, 13vw, 220px);
   }
 }
 /* Desktop's padding had no compact override, sitting flat at its own floor (160px/100px) — matched to the shared compact pair every other section uses. */
@@ -2117,7 +2122,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__intro-index {
   display: block;
   font-family: 'Outfit', var(--font-en);
-  font-size: clamp(48px, 7.2vw, 160px);
+  /* 8.5vw, not 7.2 — VISUAL IDENTITY is the parent section for Shape
+     DNA/Symbol & Wordmark/Color Principle below it and read as barely
+     bigger than them (73.7px vs .brandid__dna-index's 71.68px at
+     1024px, a ~3% difference). This puts it clearly a size class above. */
+  font-size: clamp(48px, 8.5vw, 160px);
   font-weight: 400;
   line-height: .86;
   letter-spacing: -.02em;
@@ -2126,8 +2135,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 /* 30px floor, matching the other section titles' shared formula — the old 48px floor plateaued at 667px instead of shrinking all the way to 420px like the others. */
 @media (max-width: 1023px) {
+  /* 8.5vw, matching this turn's bump to .statement's --big and
+     .apps__title, which shared this same 7.2vw formula — kept the
+     three unified rather than drifting apart. */
   .brandid__intro-index {
-    font-size: clamp(30px, 7.2vw, 160px);
+    font-size: clamp(30px, 8.5vw, 160px);
     /* Unified with the other compact titles, which all share .1em tracking and line-height:1. */
     letter-spacing: .1em;
     line-height: 1;
@@ -2184,7 +2196,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__intro-title {
   flex: 0 0 auto;
   margin: 0;
-  font-size: clamp(28px, 3vw, 44px);
+  /* Floor raised 28->39 — at a plain 28px floor this dipped below
+     .brandid__colorstory-lead's own ~31.7-32px eased value across
+     roughly 1024-1059px width (a narrow but real "closing-line/dna-title/
+     intro-title read smaller than Color Story" zone spanning into
+     iPad territory). 39 clears colorstory-lead's ceiling (36px) with
+     room at every width from 1024 up through iPad Pro/Air. */
+  font-size: clamp(39px, 3vw, 44px);
   font-weight: 700;
   line-height: 1.22;
   letter-spacing: -.04em;
@@ -2192,9 +2210,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
 }
 @media (max-width: 1023px) {
-  /* Matched to .statement__body .statement__lead's own two-point formula, not an independent clamp. */
+  /* Matched to .brandid__dna-title/.brandid__closing-line's own bumped
+     clamp (not .statement__body .statement__lead's formula anymore) —
+     "기준이 형태가 되는 순간" should read the same size as the Korean
+     line under Shape DNA's English title at this width. Re-tuned so
+     its ceiling (39, at 1024px) matches the base rule's own new 39px
+     floor exactly — same two-point-line convention every other title
+     in this stretch uses, avoiding a jump crossing 1023->1024. */
   .brandid__intro-title {
-    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+    font-size: clamp(25px, calc(15.26px + 2.318vw), 39px);
   }
 }
 /* flex:0 1 auto, not 1 — flex:1 would grow to fill the row and cancel out justify-content:flex-end's rightward shift. */
@@ -2297,15 +2321,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
   white-space: nowrap;
   word-break: keep-all;
-  font-size: clamp(28px, 3vw, 44px);
+  /* Floor raised 28->39 — same fix as .brandid__intro-title above. */
+  font-size: clamp(39px, 3vw, 44px);
   font-weight: 700;
   line-height: 1.22;
   letter-spacing: -.04em;
   color: var(--ink);
 }
-@media (max-width: 1023px), (max-height: 780px) {
+@media (max-width: 1023px) {
+  /* Bumped ~15% off its old value (which matched .brandid__colorstory-lead
+     exactly) — this and .brandid__closing-line should read a bit
+     bigger than Color Story's Korean title at this width, not the
+     same size. Width-only now, not (max-height:780px) too — that
+     combined condition made this hit its ceiling already at 1024px
+     width (regardless of height) while the unconditional base only
+     reached the same ceiling around 1367px width, so 1024x768 read
+     bigger than iPad Air's 1180x820 despite being the narrower width —
+     non-monotonic. Letting width>=1024 fall through to the base rule
+     for any height keeps it purely width-driven and consistent with
+     Air/Pro. Re-tuned again so the ceiling here (39, at 1024px) exactly
+     matches the base rule's own new 39px floor — no jump crossing
+     1023->1024, and 39 clears .brandid__colorstory-lead's own 36px
+     ceiling at every width from 1024 up through Air/Pro. */
   .brandid__dna-title {
-    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+    font-size: clamp(25px, calc(15.26px + 2.318vw), 39px);
   }
 }
 /* position:absolute against .brandid__dna-right (its own position:relative above) — independent of .brandid__dna-group's height. text-align:center cascades to the children below. opacity/transform (translate + scale) set inline every frame by updateDna, starting zoomed in and settling out. */
@@ -2785,8 +2824,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 /* Two-point line, matching .brandid__dna-name's 50->32 pattern through this element's own 50/28 endpoints. */
 @media (max-width: 1023px), (max-height: 920px) {
   .brandid__blueprint-index {
-    /* Same shared triple as .brandid__dna-index/.brandid__construction-index. Covers both SYMBOL and WORDMARK — same class, both panels. */
-    font-size: clamp(28px, calc(8.53px + 4.6358vw), 56px);
+    /* Scaled to ~87% of .brandid__dna-index/.brandid__construction-index's
+       shared triple (not the same formula anymore) — SYMBOL/WORDMARK's
+       panel titles should read a size class below "SYMBOL & WORDMARK"'s
+       own intro title at this width, not identical to it. */
+    font-size: clamp(24px, calc(7.42px + 4.033vw), 49px);
     text-align: left;
     /* Unified with .brandid__intro-index (line-height wasn't set here before, inheriting the page default). */
     line-height: 1;
@@ -3060,6 +3102,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 /* color is the one property not matched to .brandid__construction-index — a flat ink measured at 1.00 contrast (invisible) against this stage's Charcoal step, so it inherits the JS-driven fg colour instead. The descendant selector is required — .index (equal specificity, declared later) was winning the source-order tie and blocking every property here, not just color. */
 .brandid__color-sticky .brandid__color-index {
+  /* Overrides the generic .index utility class's own var(--mono) —
+     this carries "index" for its 12px eyebrow-label defaults (color,
+     margin) but is sized as a section title here, same family as
+     .brandid__dna-index/.brandid__construction-index. */
+  font-family: 'Outfit', var(--font-en);
+  font-weight: 400;
   font-size: clamp(60px, 7vw, 128px);
   line-height: .86;
   letter-spacing: -.02em;
@@ -3351,24 +3399,40 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__colorstory-lead {
   max-width: 46rem;
   margin: 0 0 clamp(14px, 1.8vw, 20px);
-  /* Matches .brandid__lead/.brandid__color-lead/.brandid__closing-line, all flat 36px. */
-  font-size: 36px;
+  /* Matched to .brandid__color-lead (the Korean line under Color
+     Principle's English title) at width>=1024, not Vision's own
+     vtitle formula — same eased desktop-type-scale shape used
+     throughout the brand-identity sections. */
+  font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px);
   line-height: 1.22;
   font-weight: 700;
   letter-spacing: -.02em;
   color: var(--paper);
   word-break: keep-all;
 }
-@media (max-width: 1023px), (max-height: 620px) {
+@media (max-width: 1023px) {
   .brandid__colorstory-lead {
     font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
   }
 }
-/* Matched exactly to .acycle__body, same reasoning as -lead above. */
+@media (min-width: 1024px) and (max-height: 620px) {
+  /* Same drift this whole file keeps hitting: the (max-height:620px)
+     half of the old combined condition above won the tie at width>=1024
+     (e.g. 1024x600, Nest Hub's real size) with a formula that was never
+     matched to anything, reading bigger (36px, at its ceiling) than
+     .brandid__color-lead (31.7px) right when this element is supposed
+     to equal it. Reusing the base rule's own matched formula here. */
+  .brandid__colorstory-lead {
+    font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px);
+  }
+}
+/* Matched to .brandid__blueprint-text .brandid__body (Wordmark's own
+   body copy) at width>=1024, not Vision's vbody — same eased
+   desktop-type-scale shape as -lead above. */
 .brandid__colorstory-body {
   max-width: 46rem;
   margin: 0;
-  font-size: clamp(16px, 1.6vw, 24px);
+  font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px);
   line-height: 1.4;
   font-weight: 500;
   letter-spacing: -.015em;
@@ -3376,10 +3440,18 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-@media (max-width: 1023px), (max-height: 620px) {
+@media (max-width: 1023px) {
   /* Plateaued at 16-16.4px across the compact range (1.6vw hits the floor by 1000px). Two-point line to the 24px ceiling, matching .brandid__body's pattern. */
   .brandid__colorstory-body {
     font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+  }
+}
+@media (min-width: 1024px) and (max-height: 620px) {
+  /* Same fix as -lead above — matched to .brandid__color-name span
+     (Color Principle's per-card description text), not the old
+     unmatched compact clamp. */
+  .brandid__colorstory-body {
+    font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px);
   }
 }
 .brandid__colorstory-copy--ink .brandid__colorstory-lead { color: var(--ink); }
@@ -3438,7 +3510,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     /* Base rule's left:50%/top:48.25% still apply once position:relative (only position:static ignored them) — reset both or the card offsets 50% of the panel's width to the right (measured 733px->1433px at 1400px wide). */
     left: auto;
     top: auto;
-    transform: none;
+    /* Same optical-centring nudge as the base rule's own top:48.25%
+       (not 50%) — flex align-items:center here lands the pair dead
+       mathematically centre in the sticky, which reads slightly low,
+       same as that other tier's comment already notes. */
+    transform: translateY(-1.75vh);
     margin: 0;
   }
   .brandid__colorstory-copy {
@@ -3450,6 +3526,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     bottom: auto;
     width: min(360px, 30vw);
     margin: 0;
+    transform: translateY(-1.75vh);
   }
 }
 
@@ -3535,8 +3612,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 
 /* ---- Closing ---- */
 .brandid__closing-line {
-  /* Font-size matches .brandid__intro-title's clamp (not a flat value) so it doesn't drift from it below 1467px. This element's rendered height feeds initClosingFit's video-width/plate-height cascade — a font-size that silently shrinks below 2560px breaks plateH/stickyTopInk/--apps-pull downstream (confirmed cause of a past regression from a site-wide rem-scale rollout). */
-  font-size: clamp(28px, 3vw, 44px);
+  /* Font-size matches .brandid__intro-title's clamp (not a flat value) so it doesn't drift from it below 1467px. This element's rendered height feeds initClosingFit's video-width/plate-height cascade — a font-size that silently shrinks below 2560px breaks plateH/stickyTopInk/--apps-pull downstream (confirmed cause of a past regression from a site-wide rem-scale rollout). Floor raised 28->39 — same fix as .brandid__intro-title/.brandid__dna-title. */
+  font-size: clamp(39px, 3vw, 44px);
   font-weight: 700;
   line-height: 1.22;
   letter-spacing: -.04em;
@@ -3544,9 +3621,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
 }
 @media (max-width: 1023px) {
-  /* Mirrors .brandid__intro-title's compact clamp. Safe to resize — initClosingFit (main.js) has no isCompact() guard and measures this element's live rendered size every call. */
+  /* Matched to .brandid__dna-title's own compact clamp (re-tuned so
+     its ceiling — 39 at 1024px — clears .brandid__colorstory-lead's
+     36px ceiling with room, and matches the base rule's own new 39px
+     floor so there's no jump crossing 1023->1024) rather than its own
+     separate value — the two should move together. Safe to resize —
+     initClosingFit (main.js) has no isCompact() guard and measures
+     this element's live rendered size every call. */
   .brandid__closing-line {
-    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
+    font-size: clamp(25px, calc(15.26px + 2.318vw), 39px);
   }
 }
 /* Inherits .brandid__body except max-width — the 480px cap exists to force wrapping in a column layout; here the copy carries its own line breaks. */
@@ -3703,9 +3786,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Matches .statement's own --big clamp/leading exactly — shrinking to fit the slot's width would change the one thing being matched. The slot clips vertically only, so extra width is fine. */
+  /* Own value, not var(--big) (.statement__big's shared clamp/leading
+     token, still 7.2vw) — matched instead to .brandid__intro-index
+     (VISUAL IDENTITY)'s 8.5vw so Applications' title reads the same
+     size class as that section title, at the cost of no longer
+     matching Our Philosophy's big word. Shrinking to fit the slot's
+     width would still change the one thing being matched, so this
+     stays wider than the slot on purpose (the slot only clips
+     vertically). */
   font-family: var(--font-sq);
-  font-size: clamp(48px, 7.2vw, 160px);
+  font-size: clamp(48px, 8.5vw, 160px);
   font-weight: 400;
   line-height: .86;
   letter-spacing: 0;
@@ -3951,7 +4041,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* rem alone follows its own curve, not .brandid__closing-line's (this section's visual reference) — the two only agreed at 2560px. Matched to closing-line/-body's exact clamp formulas instead so they read as the same size through the whole compact range. */
   .apps__lead { font-size: clamp(24px, calc(15.67px + 1.98vw), 36px); }
   .apps__body { font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px); }
-  /* Relocated from the closing ticker (see index.html) — kept the same display formula .brandid__closing-next's compact rule used, so relocating it doesn't also change how it reads. */
+  /* Relocated from the closing ticker (see index.html) — kept the same display formula .brandid__closing-next's compact rule used, so relocating it doesn't also change how it reads. Coefficient bumped 7.2->8.5vw alongside .brandid__intro-index/.statement's --big, which shared this exact formula. */
   .apps__title {
     display: block;
     /* Full-bleed breakout (like .apps__photo) — at this size+tracking the text needs more room than .apps's own padded box has at narrower widths (measured 407.5px text vs 364px box), so it overflowed instead of centering. Repadded with var(--edge), matching the Closing video's own margin above it. */
@@ -3965,7 +4055,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-right: var(--edge);
     box-sizing: border-box;
     font-family: var(--font-sq);
-    font-size: clamp(30px, 7.2vw, 160px);
+    font-size: clamp(30px, 8.5vw, 160px);
     font-weight: 400;
     line-height: 1;
     letter-spacing: .1em;
@@ -4020,6 +4110,32 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* No slice — relies on the handover's spread (initClosingHandoff) having already grown the plate past the mark by the time it's visible. -1.5px, not 0, since an exact seam at ordinary rendering precision showed a 1px sliver of the plate's colour under the letters; the slot's own clip-path above is opened by the same amount. */
   bottom: -1.5px;
   pointer-events: none;
+}
+/* Measured against .brandid__closing-next (APPLICATIONS, via canvas
+   actualBoundingBox metrics) at several widths, re-measured after
+   .brandid__closing-next's own font-size moved to 8.5vw (matched to
+   .brandid__intro-index) — the ticker's cap-height is now almost
+   exactly the mark's own natural height across 1024-1600px (needed
+   correction ~1.04x). Above 1600px this used to need no correction
+   (mark and ticker crossed near 1:1 around 1800px on the OLD 7.2vw
+   ticker) — re-measured after the 8.5vw change and that's no longer
+   true: --loop-mark-w plateaus at 1600px (the video block hits its own
+   max-width) while the ticker keeps growing on vw all the way to its
+   160px ceiling at ~1882px, so by 2560px the mark reads ~22% smaller
+   than the ticker's cap-height (needed correction 1.219x). Scaled to
+   1.1, not the full 1.219 — matching exactly still read a touch big
+   next to the ticker; backed off ~10% from the measured correction. */
+@media (max-width: 1600px) {
+  .brandid__closing-mark {
+    transform: scale(1.037);
+    transform-origin: center bottom;
+  }
+}
+@media (min-width: 1601px) {
+  .brandid__closing-mark {
+    transform: scale(1.1);
+    transform-origin: center bottom;
+  }
 }
 @media (max-width: 1023px) {
   /* Centring reasserted here — .brandid__closing-slot's compact override strips its own position/transform, so it's no longer a containing block; this mark centres against the wrap instead. absolute, not in-flow, so it doesn't add its height to the wrap and throw off ::before's fade/floor sizing. */
@@ -4499,6 +4615,103 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__dna-copy { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
   .brandid__dna-name { font-size: clamp(44px, calc(40px + 0.3906vw), 50px); }
 }
+/* Wide-but-short complement (video hidden, single-column compact
+   layout per isDnaCompact()'s own height<=780 branch) — without this,
+   .brandid__dna-name/-kr/-copy fall through to the general compact
+   clamp above, which is calibrated to hit ITS ceiling (the old flat
+   50/36/24 desktop values) exactly at 1024px width so 1023->1024 never
+   jumps for narrow/tall viewports. That's the right target for phones,
+   but at 1024x768 it reads as maxed-out and oversized against the
+   eased desktop-type scale everything else already follows. Reuses
+   that same eased formula verbatim, purely by width, matched to the
+   height>=781 block above so it's one continuous curve on either side
+   of the layout flip instead of a second, disconnected one. */
+@media (min-width: 1024px) and (max-height: 780px) {
+  /* Explicit, not left to the separate (min-width:1024px) and
+     (max-aspect-ratio:5/3) rule elsewhere — that rule only hides the
+     video when width/height <= 5/3 (~1.667). A very short window
+     inside this same range (e.g. 1024x600, ratio ~1.71) falls outside
+     that ratio, so the video was left visible while the compact
+     block's own .brandid__dna-media{width:100%;aspect-ratio:1/1} still
+     applied, rendering it full-width instead of hidden — the reported
+     "video overflows, text pushed off-screen" bug. Repeating it here
+     guarantees it's hidden throughout this whole pin-restoration
+     range regardless of aspect ratio. */
+  .brandid__dna-media { display: none; }
+  .brandid__dna-right { flex-basis: 100%; }
+  .brandid__dna-kr { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .brandid__dna-copy { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  .brandid__dna-name { font-size: clamp(44px, calc(40px + 0.3906vw), 50px); }
+  /* dna-index's own base rule is already a continuous vw clamp (not a
+     flat value + separate easing), so restoring it verbatim — rather
+     than reusing a "desktop type scale" formula that doesn't apply to
+     this element — is what keeps it matched to .brandid__construction-index
+     (SYMBOL & WORDMARK), which never gets a compact override at this
+     width to begin with. */
+  /* letter-spacing -.02em, not the compact block's .1em (2467) — matches
+     .brandid__construction-index (SYMBOL & WORDMARK)'s own base spacing,
+     same as this element's own base rule already uses. */
+  .brandid__dna-index { font-size: clamp(60px, 7vw, 128px); letter-spacing: -.02em; }
+  /* A bit more breathing room than the compact clamp's 40px cap — 60px
+     matches what .brandid__dna-right already uses natively at this exact
+     width band on desktop (see the (min-width:1024px) and
+     (max-width:1281px) rule above), just not currently winning the tie
+     against the compact block's own padding-top here. */
+  .brandid__dna-right { padding-top: 60px; }
+  /* Restores the pinned-scroll/cross-fade engine (updateDna, main.js
+     early-returns on isDnaCompact() otherwise) for this same wide-but-
+     short window. .brandid__dna-media stays hidden and .brandid__dna-right
+     stays full-width via the existing (min-width:1024px) and
+     (max-aspect-ratio:5/3) rule above (untouched) — only the pin itself
+     and the item cross-fade (vs. the compact swipe row) are restored,
+     so the visual stays the single-column look already established,
+     just animated instead of a static block. */
+  /* padding left as compact's own clamp(32px,6vw,48px) var(--edge) 0 —
+     .brandid__dna-right stays at compact's padding-left:0 (untouched),
+     which relies on this outer edge padding for the left inset instead
+     of its own desktop padding-left:100px. Zeroing this out here was
+     the bug: nothing was left providing that inset. */
+  .brandid__dna { min-height: 220vh; }
+  .brandid__dna-sticky { position: sticky; top: 0; height: 100svh; flex-direction: row; gap: 0; }
+  .brandid__dna-detail-col {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(90%, 480px);
+    margin-top: 0;
+  }
+  .brandid__dna-items {
+    display: grid;
+    max-width: 100%;
+    width: auto;
+    overflow-x: visible;
+    gap: 0;
+    margin-inline: 0;
+  }
+  .brandid__dna-item {
+    position: relative;
+    grid-area: 1 / 1;
+    flex: none;
+    min-width: 0;
+    max-width: 560px;
+    padding-left: 0;
+    padding-right: 0;
+    scroll-snap-align: none;
+    scroll-snap-stop: normal;
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .brandid__dna-item.is-active { opacity: 1; transform: translateY(0); }
+  .brandid__dna-name, .brandid__dna-copy { opacity: 0; }
+  /* right:0, not the base rule's 50px — .brandid__dna-right already
+     sits flush with the section's own right edge here (padding-right:0,
+     width:100%, per the compact block above), so the base 50px was
+     landing 50px further in than .brandid__dna-index's left inset,
+     which comes entirely from the section's own padding-left. Matching
+     right:0 lines the two up symmetrically. */
+  .brandid__dna-num { display: flex; right: 0; }
+}
 @media (min-width: 1024px) and (min-height: 921px) {
   .brandid__color-lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
   .brandid__color-name span { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
@@ -4507,8 +4720,55 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__blueprint-principle-desc { font-size: clamp(17.6px, calc(16px + 0.1563vw), 20px); }
   .brandid__blueprint-principle-key { font-size: clamp(15.8px, calc(14.4px + 0.1406vw), 18px); }
 }
+/* Wide-but-short complement for the block above — same reasoning as
+   Shape DNA's own pair further up: at width>=1024 the SYMBOL/WORDMARK
+   panel titles and Color Principle's texts should follow the eased
+   desktop-type scale purely by width, not the compact clamp that's
+   calibrated to plateau at 1024 for narrow/tall viewports. */
+@media (min-width: 1024px) and (max-height: 920px) {
+  .brandid__color-lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .brandid__color-name span { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  .brandid__color-name { font-size: clamp(19.4px, calc(17.6px + 0.1719vw), 22px); }
+  .brandid__blueprint-index { font-size: clamp(44px, calc(40px + 0.3906vw), 50px); }
+  .brandid__blueprint-principle-desc { font-size: clamp(17.6px, calc(16px + 0.1563vw), 20px); }
+  /* Matched to .brandid__colorstory-eng exactly, not its own eased
+     desktop-type scale — REDUCE/ORGANIZE/REMAIN's red-signal labels
+     should read as the same "eng" style Color Story already uses. */
+  .brandid__blueprint-principle-key { font-size: clamp(15px, 1vw, 16px); }
+  /* Same eased scale .brandid__construction-text's own lead/body already
+     get at this width (they're never compact-overridden past 1023px
+     wide) — .brandid__blueprint-text's descendant selector otherwise
+     outranks the shared .brandid__lead/.brandid__body rule below on
+     specificity alone, even though that rule has no height gate. */
+  .brandid__blueprint-text .brandid__lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .brandid__blueprint-text .brandid__body { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  /* color-index ("COLOR PRINCIPLE") was missed when this block was
+     first added — its own compact override (line ~3156) still wins at
+     this width otherwise, both shrinking it off .brandid__dna-index's/
+     .brandid__construction-index's shared clamp(60px,7vw,128px) and
+     flipping letter-spacing to .1em instead of their -.02em. */
+  .brandid__color-sticky .brandid__color-index { font-size: clamp(60px, 7vw, 128px); letter-spacing: -.02em; }
+}
+/* Our Philosophy / Vision / Our Approach's Korean title + body, matched
+   to Wordmark's own lead/body (.brandid__blueprint-text .brandid__lead/
+   -body above) at this same width>=1024, short-height window — none of
+   these three have a height-gated compact fallback of their own
+   (.statement__body .statement__lead is flat 40px unconditionally at
+   this width; .vwipe__vtitle/.acycle__title plateau nearer 1379px),
+   so left alone they read a size class off from Wordmark's. */
+@media (min-width: 1024px) and (max-height: 920px) {
+  .statement__body .statement__lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .statement__body .statement__detail { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  .vwipe__vtitle { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .vwipe__vbody { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  .acycle__title { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .acycle__body { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+}
 @media (min-width: 1024px) and (min-height: 621px) {
-  .brandid__colorstory-lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  /* .brandid__colorstory-lead no longer listed here — it's vw-driven
+     now (matches .vwipe__vtitle), so per this block's own exemption
+     rule ("anything already vw-driven is left alone") it doesn't
+     belong in the eased desktop-type scale anymore. */
   .brandid__colorstory-hex,
   .brandid__colorstory-swatchname { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
 }

@@ -8,12 +8,12 @@
   // Function, not a cached const, since viewport width can change mid-session.
   const isCompact = () => window.innerWidth <= 1023;
 
-  // Shape DNA's title sits at a fixed padding-top while its 4-principle
-  // block centres on the sticky's full height (style.css) — below this
-  // height the two collide. Matches the CSS's own
-  // `(max-height: 780px)` addition to the same compact block.
-  const DNA_SHORT_H = 780;
-  const isDnaCompact = () => isCompact() || window.innerHeight <= DNA_SHORT_H;
+  // Used to gate DNA's pin/cross-fade (updateDna) vs. its compact swipe
+  // row — width alone now, matching style.css's own
+  // (min-width:1024px) and (max-height:780px) exception, which restores
+  // the pinned/animated single-column layout for wide-but-short windows
+  // (e.g. iPad landscape) instead of the touch-swipe compact fallback.
+  const isDnaCompact = isCompact;
   // The symbol diagram's copy column is the tallest content the merged
   // blueprint/color-principle sticky ever centres (~880px at its widest
   // wrap); below this height it clips against the sticky's overflow:hidden.
@@ -45,6 +45,23 @@
   // clamp (much smaller ceiling) reads better.
   const ACYCLE_SHORT_H = 500;
   const isAcycleCompact = () => isCompact() || window.innerHeight <= ACYCLE_SHORT_H;
+
+  // Shared debounce helper. `resize` fires on every intermediate frame
+  // while a window edge is being dragged — several handlers below do
+  // real layout measurement (getBoundingClientRect, getComputedStyle)
+  // and DOM writes synchronously on that event, so unthrottled they
+  // thrash layout dozens of times a second and read as stutter during a
+  // drag-resize. Same 120ms settle delay already used by the
+  // introVector/alignIntroWord/photoScale resize timers further down —
+  // this just gives that existing pattern one shared implementation
+  // instead of each call site rolling its own clearTimeout/setTimeout.
+  function debounce(fn, delay = 120) {
+    let timer = null;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn(...args), delay);
+    };
+  }
 
   // isCompact() branches (and CSS's max-width:1025px rules) evaluate once at
   // setup, not live on every scroll tick — checking live caused scroll jank.
@@ -577,7 +594,7 @@
     alignCopies();
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', () => { alignCopies(); onScroll(); }, { passive: true });
+    window.addEventListener('resize', debounce(() => { alignCopies(); onScroll(); }), { passive: true });
   }
 
   initApproachReveals();
@@ -791,7 +808,7 @@
     }
 
     align();
-    window.addEventListener('resize', align, { passive: true });
+    window.addEventListener('resize', debounce(align), { passive: true });
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(align);
     }
@@ -1127,7 +1144,7 @@
     render(current);
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', debounce(onResize), { passive: true });
   }
 
   initStatementStickyPress();
@@ -2162,7 +2179,7 @@
     if (isBlueprintCompact()) {
       updateColorHeadSync();
       if (colorCaption) colorCaption.addEventListener('scroll', updateColorHeadSync, { passive: true });
-      window.addEventListener('resize', updateColorHeadSync, { passive: true });
+      window.addEventListener('resize', debounce(updateColorHeadSync), { passive: true });
     }
 
     // Ripple: .brandid__color-flash sits behind the head/symbol/caption
@@ -2763,7 +2780,7 @@
     reset();
     checkVisibility();
     window.addEventListener('scroll', checkVisibility, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', debounce(onResize), { passive: true });
     // measure() reads the text groups' current getBoundingClientRect() as
     // obstacles — if a webfont is still loading when reset() first runs,
     // that reflects the fallback font's metrics and goes stale once the
@@ -3396,7 +3413,7 @@
 
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', debounce(onResize), { passive: true });
   }
 
   initBlueprintTransition();
@@ -3668,7 +3685,7 @@
 
     alignEngLabels();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignEngLabels);
-    window.addEventListener('resize', alignEngLabels, { passive: true });
+    window.addEventListener('resize', debounce(alignEngLabels), { passive: true });
 
     if (prefersReduced) {
       // First panel stays put (CSS default), nothing else to drive.
@@ -4204,7 +4221,7 @@
     // The width depends on the footage's own ratio, which isn't known
     // until its metadata lands — the first fit() uses a fallback.
     if (video.readyState < 1) video.addEventListener('loadedmetadata', fit, { once: true });
-    window.addEventListener('resize', fit, { passive: true });
+    window.addEventListener('resize', debounce(fit), { passive: true });
   }
 
   initClosingFit();
@@ -4362,7 +4379,7 @@
       entranceVideo.addEventListener('loadedmetadata', remeasure, { once: true });
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', remeasure, { passive: true });
+    window.addEventListener('resize', debounce(remeasure), { passive: true });
     // Same gap as initClosingHandoff (see its own notes): positions here
     // depend on the layout of everything above this section, and `p`
     // (entrance progress) can land short of 1 on a refresh if any of that
@@ -4666,7 +4683,7 @@
     window.addEventListener('load', remeasure);
     if (video && video.readyState < 1) video.addEventListener('loadedmetadata', remeasure, { once: true });
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', remeasure, { passive: true });
+    window.addEventListener('resize', debounce(remeasure), { passive: true });
     // Covers back/forward-cache restores, which don't re-run this
     // script at all — 'pageshow' fires again on both a fresh load and
     // a bfcache restore, unlike 'load' (bfcache) or DOMContentLoaded.
@@ -4723,7 +4740,7 @@
     }
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
+    window.addEventListener('resize', debounce(update), { passive: true });
   }
 
   initApplicationsEntrance();
@@ -4843,7 +4860,7 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(remeasure);
     window.addEventListener('load', remeasure);
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', remeasure, { passive: true });
+    window.addEventListener('resize', debounce(remeasure), { passive: true });
   }
 
   initApplicationsGroundFade();
@@ -4900,7 +4917,12 @@
       { wrap: '.acycle__steps', item: '.acycle__step', when: isAcycleCompact },
       { wrap: '.vwipe__vision', item: '.vwipe__vstep', when: isVwipeCompact },
       { wrap: '.whyp__copy-sticky', item: '.whyp__step', when: isWhypCompact },
-      { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isDnaCompact },
+      // isCompact() only, not isDnaCompact() — at width>=1024 with a short
+      // height (e.g. iPad landscape) the row is still a horizontal
+      // scroll-snap swipe underneath, but the dots read as an unwanted
+      // mobile-carousel tell against the otherwise desktop-like 1024x768
+      // reference; narrower/portrait widths keep them.
+      { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isCompact },
       // Color Principle's dots are created + driven in initBrandIdentity
       // (updateColorHeadSync) instead — its cards are stacked cross-fade
       // layers, not sliding items, so this generic "active = card nearest
@@ -4937,7 +4959,7 @@
       }
       update();
       el.addEventListener('scroll', update, { passive: true });
-      window.addEventListener('resize', update, { passive: true });
+      window.addEventListener('resize', debounce(update), { passive: true });
     });
   }
 
@@ -5420,7 +5442,7 @@
     // scrolls at all.
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', debounce(onResize), { passive: true });
   }
 
   initHeroLogoNav();
@@ -5450,7 +5472,7 @@
 
     align();
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(align);
-    window.addEventListener('resize', align, { passive: true });
+    window.addEventListener('resize', debounce(align), { passive: true });
   }
 
   initScrollCueAlign();
