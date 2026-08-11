@@ -4269,20 +4269,28 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    git history / prior note). Originally scoped to just iPad Pro in
    portrait (12.9": 1024x1366, capped at max-width:1280px), on request
    ("아이패드 프로 세로모드에서 쉐입 디엔에이 왼쪽 심볼영상 숨기자").
-   Widened to any portrait-oriented desktop-width monitor, not just
-   that one specific tablet's own resolution band, on request ("모니터를
-   세로로 돌렸을 해상도 비율... 쉐입 디엔에이 좌측 심볼영상은 숨기자") —
-   dropped the max-width:1280px ceiling so a rotated desktop monitor at
-   any width (1440x2560, etc.) hides the video too, not just the
-   narrower tablet range. orientation:portrait is the media feature
-   actually built for this — height alone can't tell a rotated/tall
-   window from a normal short/wide one, but the browser's own
-   portrait/landscape classification can, directly. min-width:1024px
-   keeps this from ever overlapping compact's own width-driven layout
-   (isCompact() bails at 1023px regardless of orientation).
-   .brandid__dna-right expands to fill the freed column, same as the
-   reverted min-height version. */
-@media (min-width: 1024px) and (orientation: portrait) {
+   Widened to any portrait-oriented desktop-width monitor, on request
+   ("모니터를 세로로 돌렸을 해상도 비율... 쉐입 디엔에이 좌측 심볼영상은
+   숨기자") — used orientation:portrait for that pass.
+   orientation:portrait alone turned out too narrow a net, though: the
+   column is a fixed 46%-of-viewport-width next to a near-full-viewport
+   -height sticky, so it reads just as awkwardly tall/cramped (empty
+   headroom above and below the subject) well BEFORE the window
+   actually crosses into portrait — confirmed at 1564x998 (ratio 1.57,
+   still technically landscape, orientation:portrait never matches)
+   which the reference screenshot showed reading exactly as bad as a
+   true portrait window (request: "참조 사진처럼 이런 어정쩡한 비율로
+   좌측 영상이 보일경우 그냥 다 숨기고 싶은데"). Switched to
+   max-aspect-ratio instead of orientation — this is a direct viewport
+   width:height comparison rather than the browser's binary port/land
+   classification, so it catches this "nearly-there" landscape case
+   too; portrait windows (ratio < 1) are already well under this
+   threshold, so nothing from the old rule is lost. 5/3 (1.667) is a
+   first-guess cutoff — comfortably past the confirmed-bad 1.57 case,
+   but I can't see the actual rendered footage here, so the exact line
+   between "reads fine" and "reads cramped" may want nudging once
+   actually seen at a few in-between ratios. */
+@media (min-width: 1024px) and (max-aspect-ratio: 5/3) {
   .brandid__dna-media { display: none; }
   .brandid__dna-right { flex-basis: 100%; }
 }
