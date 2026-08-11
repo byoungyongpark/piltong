@@ -4263,37 +4263,65 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-right: 60px;
   }
 }
-/* Hide the left symbol video for a tall desktop-width window — was
-   done via min-height:768px, which turned out to catch ordinary
-   landscape laptops (1366x768 etc.) too and got reverted outright (see
-   git history / prior note). Originally scoped to just iPad Pro in
-   portrait (12.9": 1024x1366, capped at max-width:1280px), on request
-   ("아이패드 프로 세로모드에서 쉐입 디엔에이 왼쪽 심볼영상 숨기자").
-   Widened to any portrait-oriented desktop-width monitor, on request
-   ("모니터를 세로로 돌렸을 해상도 비율... 쉐입 디엔에이 좌측 심볼영상은
-   숨기자") — used orientation:portrait for that pass.
-   orientation:portrait alone turned out too narrow a net, though: the
-   column is a fixed 46%-of-viewport-width next to a near-full-viewport
-   -height sticky, so it reads just as awkwardly tall/cramped (empty
-   headroom above and below the subject) well BEFORE the window
-   actually crosses into portrait — confirmed at 1564x998 (ratio 1.57,
-   still technically landscape, orientation:portrait never matches)
-   which the reference screenshot showed reading exactly as bad as a
-   true portrait window (request: "참조 사진처럼 이런 어정쩡한 비율로
-   좌측 영상이 보일경우 그냥 다 숨기고 싶은데"). Switched to
-   max-aspect-ratio instead of orientation — this is a direct viewport
-   width:height comparison rather than the browser's binary port/land
-   classification, so it catches this "nearly-there" landscape case
-   too; portrait windows (ratio < 1) are already well under this
-   threshold, so nothing from the old rule is lost. 5/3 (1.667) is a
-   first-guess cutoff — comfortably past the confirmed-bad 1.57 case,
-   but I can't see the actual rendered footage here, so the exact line
-   between "reads fine" and "reads cramped" may want nudging once
-   actually seen at a few in-between ratios. */
+/* For a tall desktop-width window (iPad Pro portrait etc.) — history:
+   tried min-height:768px (caught ordinary landscape laptops too,
+   reverted), then orientation:portrait scoped to just iPad Pro's own
+   1024x1366 band, then widened to any portrait monitor, then switched
+   to max-aspect-ratio:5/3 after a reference screenshot showed a
+   technically-landscape-but-still-cramped 1564x998 window (ratio 1.57)
+   reading exactly as bad as true portrait — see git history for each
+   of those requests. That last version just hid the video outright.
+   Replaced with an actual layout instead, on request ("아이패드
+   프로처럼 세로가 긴 해상도일 경우 심볼 섹션은 그려진 심볼을 좌측에
+   배치 말고 중앙에 배치하고 그아래에 내용을 떨어뜨려 배치해보자") —
+   stacks the video above the text column, centered and bounded in
+   width rather than filling the whole row, same general shape compact
+   already uses for this exact video (square aspect-ratio, full-bleed)
+   just centered/bounded here instead of edge-to-edge, since this is
+   still a desktop-width reader, not a phone.
+   The whole scroll-driven pin/cross-fade (updateDna, main.js) is
+   un-pinned the same way isCompact() already does — .brandid__dna's
+   own tall scroll runway (min-height:220vh, base rule) collapses,
+   .brandid__dna-sticky drops its sticky pin, .brandid__dna-detail-col
+   comes out of its centred-overlay absolute positioning to flow
+   normally below the video instead, and the four principles show all
+   at once (no more cross-fade — there's no scroll runway left to drive
+   it) instead of only the active one. isDnaTall() (main.js) mirrors
+   isCompact()'s own bail-and-clear-inline-styles branch inside
+   updateDna, gated on this exact same media condition, so nothing
+   left over from the scroll-driven system fights this static layout. */
 @media (min-width: 1024px) and (max-aspect-ratio: 5/3) {
-  .brandid__dna-media { display: none; }
-  .brandid__dna-right { flex-basis: 100%; }
+  .brandid__dna { min-height: auto; }
+  .brandid__dna-sticky {
+    position: static;
+    flex-direction: column;
+    height: auto;
+    min-height: 100svh;
+    justify-content: center;
+    gap: clamp(24px, 4vw, 48px);
+  }
+  .brandid__dna-media {
+    flex: none;
+    align-self: center;
+    width: min(70%, 520px);
+    aspect-ratio: 1 / 1;
+    padding: 0;
+  }
+  .brandid__dna-right {
+    flex: none;
+    width: 100%;
+    padding-top: 0;
+    align-items: center;
+    text-align: center;
+  }
+  .brandid__dna-num { display: none; }
 }
+/* .brandid__dna-detail-col/-items/-item's own base rules (further down
+   this file) come AFTER this point in source order, so the equal-
+   specificity overrides for them can't live in the block just above —
+   same source-order trap this file keeps hitting. Placed in their own
+   media block right after .brandid__dna-item.is-active, further down,
+   instead. */
 /* SHAPE/DNA + the title — the "영문 타이틀 그룹" (English title group),
    on request. .brandid__dna-detail-col (the 4 principles) is a
    separate sibling now, independently centered — see below. */
@@ -4508,6 +4536,40 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 .brandid__dna-item.is-active .brandid__dna-name { opacity: 1; transition-delay: 40ms; }
 .brandid__dna-item.is-active .brandid__dna-copy { opacity: 1; transition-delay: 90ms; }
+/* The rest of the tall-desktop-ratio layout (see .brandid__dna-media's
+   own comment, above) — split into its own block here rather than
+   folded into that one, since .brandid__dna-detail-col/-items/-item/
+   -num's own base rules all sit BETWEEN here and there, and an
+   equal-specificity override placed before its own base rule loses the
+   source-order tie (the same trap this file keeps hitting). */
+@media (min-width: 1024px) and (max-aspect-ratio: 5/3) {
+  .brandid__dna-detail-col {
+    position: static;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 100%;
+    max-width: 480px;
+    margin-top: clamp(24px, 4vw, 40px);
+  }
+  /* All four cross-fade in the scroll-driven version — nothing left to
+     scroll through here, so just show all four stacked instead of only
+     the active one, same fallback shape the reduced-motion override
+     elsewhere already uses for the identical problem. */
+  .brandid__dna-items {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 3vw, 32px);
+  }
+  .brandid__dna-item {
+    position: static;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    max-width: none;
+  }
+  .brandid__dna-num { display: none; }
+}
 /* weight/letter-spacing matched to .acycle__intro-title (Our
    Approach's own "OUR APPROACH" title) — font-size bumped past its
    40px to 50px, on request. */
@@ -9198,28 +9260,34 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    하나의 아이덴티티, 모든 경험으로. 텍스트 그룹과 똑같이 맞춰달라니깐").
    That held the two in sync at every desktop width — but the actual
    ask was narrower than that: keep matching .apps__intro's own margin
-   normally, and only minimize it specifically once past 1600px, not
-   from 1024px on (request: "하단부 좌우 여백 이전으로 돌리고 1600구간
-   진입시 좌우 여백을 최소화 하자는 의미야 즉 1600 이상인 해상도에서는
-   기존 좌우 여백을 유지해야 하는거야 처음부터 최소화 되는게 아니라" —
-   note the wording inverts what "기존"/"유지" refer to: the margin
-   that gets minimized AT 1600px+ is the NEW behaviour; "기존" is the
-   .apps__intro-matching clamp this reverts to below it). Back to
-   clamp(var(--edge),24vw,300px) here; the >=1600px override sits in
-   its own media query further down, right after the >=1024px block
-   this section shares with everything else here. */
+   normally, and only minimize it once past 1600px, not from 1024px on
+   (request: "하단부 좌우 여백 이전으로 돌리고 1600구간 진입시 좌우
+   여백을 최소화 하자는 의미야 즉 1600 이상인 해상도에서는 기존 좌우
+   여백을 유지해야 하는거야 처음부터 최소화 되는게 아니라"). First cut
+   at that was a hard @media(min-width:1600px) jump straight from 300px
+   to 112px — technically matched the request, but landed as a visible
+   snap rather than a transition, on request ("하단부 상하좌우 여백은
+   1600구간 진입 기점 이하 구간에서는 자연스럽게 축소화 되고 늘어나는
+   구성으로 해줘"). Rebuilt as one continuous two-point line instead,
+   picking up exactly where .apps__intro's own clamp plateaus (300px,
+   reached at 24vw=300 i.e. width=1250px) and easing down to the
+   112px floor by 1600px — clamp()'s own floor then holds it flat past
+   that point on its own, so this single rule replaces both the old
+   >=1600px override AND the flat plateau 1250-1600px used to sit at:
+   300px@1250px -> 112px@1600px, slope -53.7143/vw. Below 1250px the
+   base rule's own clamp(var(--edge),24vw,300px) is still what's
+   rising toward that same 300px meeting point, so the whole curve
+   reads as one smooth rise-then-fall-then-flat shape with no seam at
+   either 1250 or 1600. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
   padding-left: clamp(var(--edge), 24vw, 300px);
   padding-right: clamp(var(--edge), 24vw, 300px);
 }
-/* The >=1600px-only minimize, matching top/bottom's own scale instead
-   of continuing to widen with .apps's — see the base rule's own note
-   above for the exact request this narrows down to just this range. */
-@media (min-width: 1600px) {
+@media (min-width: 1250px) {
   .outro {
-    padding-left: clamp(64px, 11vw, 112px);
-    padding-right: clamp(64px, 11vw, 112px);
+    padding-left: clamp(112px, calc(971.43px - 53.7143vw), 300px);
+    padding-right: clamp(112px, calc(971.43px - 53.7143vw), 300px);
   }
 }
 /* justify-content was space-between, stretching .outro__info out to

@@ -16,6 +16,16 @@
   // scroll/resize tick, not just once at setup.
   const isCompact = () => window.innerWidth <= 1023;
 
+  // Shape DNA's own second "stack instead of pin/cross-fade" condition —
+  // desktop-width but tall enough that the video's fixed 40%-column/
+  // full-height crop reads cramped (style.css: @media(min-width:1024px)
+  // and (max-aspect-ratio:5/3), same threshold, see .brandid__dna-media's
+  // own comment there for the full history). Not folded into isCompact()
+  // itself since every OTHER section on the page still wants its normal
+  // desktop layout here — only Shape DNA's own pin/cross-fade breaks at
+  // this ratio.
+  const isDnaTall = () => window.innerWidth >= 1024 && (window.innerWidth / window.innerHeight) <= 5 / 3;
+
   // Every isCompact() branch across this file (and every max-width:
   // 1025px rule in style.css) only evaluates once — at setup, not
   // continuously as the window resizes. That's a deliberate tradeoff:
@@ -33,11 +43,16 @@
   // Debounced so a window mid-drag across the boundary only reloads once
   // it settles, not on every intermediate frame.
   let lastIsCompact = isCompact();
+  // isDnaTall tracked the same way, same reload-on-cross-over reasoning —
+  // resizing/rotating a window across ITS boundary needs Shape DNA's own
+  // scroll-driven pin logic (updateDna) to re-evaluate fresh too, not
+  // just isCompact()'s.
+  let lastIsDnaTall = isDnaTall();
   let resizeReloadTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeReloadTimer);
     resizeReloadTimer = setTimeout(() => {
-      if (isCompact() !== lastIsCompact) location.reload();
+      if (isCompact() !== lastIsCompact || isDnaTall() !== lastIsDnaTall) location.reload();
     }, 200);
   }, { passive: true });
 
@@ -2564,7 +2579,14 @@
       // crossed 1024px would otherwise keep overriding the new CSS
       // indefinitely — same reasoning as the >900px branch this
       // replaces, just checked once up front instead of every frame.
-      if (isCompact()) {
+      // isDnaTall() added alongside isCompact() here — same bail, same
+      // reasoning, just for the OTHER condition that also drops the
+      // pin/cross-fade in style.css (see .brandid__dna-media's own
+      // comment there: a tall-but-still-desktop-width window, stacked
+      // instead of hidden now, on request ("아이패드 프로처럼 세로가 긴
+      // 해상도일 경우... 중앙에 배치하고 그아래에 내용을 떨어뜨려
+      // 배치해보자")).
+      if (isCompact() || isDnaTall()) {
         dnaVideoScale = 1;
         if (dnaMedia) dnaMedia.style.paddingTop = '';
         if (dnaIndexEl) { dnaIndexEl.style.opacity = ''; dnaIndexEl.style.transform = ''; }
