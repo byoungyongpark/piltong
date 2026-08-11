@@ -9196,21 +9196,31 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    against var(--edge)'s own 84px there). Matching only the compact
    value left the two 216px apart at desktop, on request ("좌우 여백은
    하나의 아이덴티티, 모든 경험으로. 텍스트 그룹과 똑같이 맞춰달라니깐").
-   That held the two in sync, but read as too imbalanced once actually
-   seen at wide desktop widths — .apps's own 300px ceiling is offset by
-   an equally generous vh-based top/bottom padding there, while Outro's
-   own top/bottom stays a much smaller 112px ceiling, so the same 300px
-   side padding reads lopsided here specifically (measured: 300px
-   sides vs 112px top at 1600px). Reusing the exact same clamp as
-   padding-top instead, on request ("1600구간에서 마지막 섹션 부분
-   좌우 여백 위아래 여백정도로 최소화 해줘") — guarantees the two always
-   match rather than tying side padding to .apps's own unrelated
-   scale. Compact still gets its own override below, unrelated to this
-   desktop-only imbalance. */
+   That held the two in sync at every desktop width — but the actual
+   ask was narrower than that: keep matching .apps__intro's own margin
+   normally, and only minimize it specifically once past 1600px, not
+   from 1024px on (request: "하단부 좌우 여백 이전으로 돌리고 1600구간
+   진입시 좌우 여백을 최소화 하자는 의미야 즉 1600 이상인 해상도에서는
+   기존 좌우 여백을 유지해야 하는거야 처음부터 최소화 되는게 아니라" —
+   note the wording inverts what "기존"/"유지" refer to: the margin
+   that gets minimized AT 1600px+ is the NEW behaviour; "기존" is the
+   .apps__intro-matching clamp this reverts to below it). Back to
+   clamp(var(--edge),24vw,300px) here; the >=1600px override sits in
+   its own media query further down, right after the >=1024px block
+   this section shares with everything else here. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
-  padding-left: clamp(64px, 11vw, 112px);
-  padding-right: clamp(64px, 11vw, 112px);
+  padding-left: clamp(var(--edge), 24vw, 300px);
+  padding-right: clamp(var(--edge), 24vw, 300px);
+}
+/* The >=1600px-only minimize, matching top/bottom's own scale instead
+   of continuing to widen with .apps's — see the base rule's own note
+   above for the exact request this narrows down to just this range. */
+@media (min-width: 1600px) {
+  .outro {
+    padding-left: clamp(64px, 11vw, 112px);
+    padding-right: clamp(64px, 11vw, 112px);
+  }
 }
 /* justify-content was space-between, stretching .outro__info out to
    the row's own far right edge — a 50/50 split with the row's own
