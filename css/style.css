@@ -9224,22 +9224,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘"),
    then widened a further notch (request: "상단 여백 조금만 더주고").
    Side padding went back and forth on direction several times before
-   landing on its actual final shape — a real STEP at 1600px, not one
-   continuous curve through it: below 1600px it eases smoothly from
-   compact's own var(--edge) (at 1024px) up to 120px (just under
-   1600px), then at 1600px itself it jumps back up to the wide 300px
-   ceiling (.apps__intro's own value) and holds there (request: "1600
-   이상 해상도에선 300 상한선 유지하고 1600진입하면 120 그 이하는
-   120기준에서 자연스럽게 줄도록"). Base rule below covers the <1600px
-   curve (floor pinned to var(--edge) itself, not a fixed px, so it
-   lands on exactly compact's own value at the 1023/1024 seam); the
-   >=1600px override sits in its own media query, right after. */
+   landing on its actual shape — a real STEP, not one continuous curve
+   through it: below the step it eases smoothly from compact's own
+   var(--edge) (at 1024px) up to 120px (just under the step), then at
+   the step itself it jumps back up to the wide 300px ceiling
+   (.apps__intro's own value) and holds there. Step point moved
+   1600px -> 1900px, on request ("구간을 1900으로 올리자") — the
+   sub-step curve's own two-point line was rebuilt through the same
+   1024px floor up to the new 1900px point instead of re-using the old
+   1600px numbers past their own breakpoint. Base rule below covers the
+   pre-step curve (floor pinned to var(--edge) itself, not a fixed px,
+   so it lands on exactly compact's own value at the 1023/1024 seam);
+   the >=1900px override sits in its own media query, right after.
+   6.6849/vw slope, -7.01 intercept. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
-  padding-left: clamp(var(--edge), calc(-42.63px + 10.1667vw), 120px);
-  padding-right: clamp(var(--edge), calc(-42.63px + 10.1667vw), 120px);
+  padding-left: clamp(var(--edge), calc(-7.01px + 6.6849vw), 120px);
+  padding-right: clamp(var(--edge), calc(-7.01px + 6.6849vw), 120px);
 }
-@media (min-width: 1600px) {
+@media (min-width: 1900px) {
   .outro {
     padding-left: clamp(var(--edge), 24vw, 300px);
     padding-right: clamp(var(--edge), 24vw, 300px);
