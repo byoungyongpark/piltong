@@ -1740,7 +1740,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   pointer-events: none;
 }
 /* Two-point line: 40px ceiling at 1024px (matches the base rule, no jump entering compact) down to 18px at 420px. */
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 650px) {
   .whyp__media-label { font-size: clamp(14px, calc(-4.08px + 4.3046vw), 40px); }
 }
 /* ---- Copy stage: a second, separate scroll runway — its own pin, its own progress, independent of the marquee stage above. grid-area:1/1 on every .whyp__step stacks them into one shared cell. ---- */
@@ -3499,9 +3499,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: relative;
     left: auto;
     z-index: 1;
-    /* Left-aligned to the edge, overriding the <=1600px tier's centring — same reasoning as .brandid__colorstory-copy below, which already did this; the card kept the wider tier's auto/auto margins since only margin-top was set here. */
-    margin-left: var(--edge);
-    margin-right: auto;
     margin-top: clamp(64px, 11vw, 108px);
   }
   .brandid__colorstory-copy {
