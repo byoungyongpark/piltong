@@ -957,8 +957,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .vwipe--static .vwipe__vstep { opacity: 0; filter: none; }
 .vwipe--static .vwipe__vstep:last-child { opacity: 1; }
 
-/* Sticky zoom/cross-blur doesn't map to touch scroll — unpinned into a static photo band with VISION as a caption and the statements as a swipeable row. initVisionWipe (main.js) stops touching this past 1024px and clears its inline styles. */
-@media (max-width: 1023px) {
+/* Sticky zoom/cross-blur doesn't map to touch scroll — unpinned into a static photo band with VISION as a caption and the statements as a swipeable row. initVisionWipe (main.js) stops touching this past isVwipeCompact(). The (max-height: 400px) arm covers wide-but-short viewports too — .vwipe__vision's statement cards (~215px tall even at their widest) are the actual fit constraint, since .vwipe__word's own zoom is designed to fill/exceed the viewport at any aspect ratio already. */
+@media (max-width: 1023px), (max-height: 400px) {
   /* .vwipe itself is now the positioning context for -ground/-word (both escape .vwipe__stage, left unpositioned below) so the one continuous photo covers title and cards together. */
   .vwipe {
     height: auto;

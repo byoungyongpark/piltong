@@ -31,21 +31,29 @@
   // height they clip against the marquee sticky's own overflow:hidden.
   const WHYP_SHORT_H = 650;
   const isWhypCompact = () => isCompact() || window.innerHeight <= WHYP_SHORT_H;
+  // .vwipe__word's own zoom is designed to fill/exceed the viewport at any
+  // aspect ratio (--vwipe-base already folds in a 24vh term for this) — the
+  // real fit constraint is .vwipe__vision's statement cards, only ~215px
+  // tall even at their widest. Generous margin since the zoom's JS-driven
+  // scale can't be observed directly here.
+  const VWIPE_SHORT_H = 400;
+  const isVwipeCompact = () => isCompact() || window.innerHeight <= VWIPE_SHORT_H;
 
   // isCompact() branches (and CSS's max-width:1025px rules) evaluate once at
   // setup, not live on every scroll tick — checking live caused scroll jank.
   // Resizing across the breakpoint mid-session reloads the page instead of
   // re-running each init live. Debounced so a mid-drag resize reloads once
   // it settles, not on every intermediate frame. isDnaCompact()/
-  // isBlueprintCompact()/isColorStoryCompact()/isWhypCompact() get the same
-  // treatment, since their height term gates setup-time branches
-  // (initBlueprintTransition, initColorStory, initWhyPiltong, etc.) just
-  // like isCompact() does.
+  // isBlueprintCompact()/isColorStoryCompact()/isWhypCompact()/
+  // isVwipeCompact() get the same treatment, since their height term gates
+  // setup-time branches (initBlueprintTransition, initColorStory,
+  // initWhyPiltong, initVisionWipe, etc.) just like isCompact() does.
   let lastIsCompact = isCompact();
   let lastIsDnaCompact = isDnaCompact();
   let lastIsBlueprintCompact = isBlueprintCompact();
   let lastIsColorStoryCompact = isColorStoryCompact();
   let lastIsWhypCompact = isWhypCompact();
+  let lastIsVwipeCompact = isVwipeCompact();
   let resizeReloadTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeReloadTimer);
@@ -54,7 +62,8 @@
           isDnaCompact() !== lastIsDnaCompact ||
           isBlueprintCompact() !== lastIsBlueprintCompact ||
           isColorStoryCompact() !== lastIsColorStoryCompact ||
-          isWhypCompact() !== lastIsWhypCompact) location.reload();
+          isWhypCompact() !== lastIsWhypCompact ||
+          isVwipeCompact() !== lastIsVwipeCompact) location.reload();
     }, 200);
   }, { passive: true });
 
@@ -1125,7 +1134,7 @@
     // a scroll listener that only ever bails still costs a rAF callback and
     // a full getBoundingClientRect/update pass every scroll tick, which
     // compounds across every section's listener into janky scrolling.
-    if (isCompact()) return;
+    if (isVwipeCompact()) return;
     const vsteps = Array.from(sec.querySelectorAll('.vwipe__vstep'));
     // The released statement column, faded out below as VISION grows in, so
     // it doesn't sit fully opaque over the blank paper while the word is
@@ -3526,8 +3535,8 @@
 
   [
     { sel: '.acycle__steps', when: isCompact },
-    { sel: '.vwipe__vision', when: isCompact },
-    { sel: '.whyp__copy-sticky', when: isCompact },
+    { sel: '.vwipe__vision', when: isVwipeCompact },
+    { sel: '.whyp__copy-sticky', when: isWhypCompact },
     { sel: '.brandid__dna-items', when: isDnaCompact },
     { sel: '.brandid__color-caption', when: isBlueprintCompact },
   ].forEach(({ sel, when }) => {
@@ -4879,8 +4888,8 @@
   function initHorizontalScrollDots() {
     const ROWS = [
       { wrap: '.acycle__steps', item: '.acycle__step', when: isCompact },
-      { wrap: '.vwipe__vision', item: '.vwipe__vstep', when: isCompact },
-      { wrap: '.whyp__copy-sticky', item: '.whyp__step', when: isCompact },
+      { wrap: '.vwipe__vision', item: '.vwipe__vstep', when: isVwipeCompact },
+      { wrap: '.whyp__copy-sticky', item: '.whyp__step', when: isWhypCompact },
       { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isDnaCompact },
       // Color Principle's dots are created + driven in initBrandIdentity
       // (updateColorHeadSync) instead — its cards are stacked cross-fade
