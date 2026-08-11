@@ -19,25 +19,34 @@
   // wrap); below this height it clips against the sticky's overflow:hidden.
   const BLUEPRINT_SHORT_H = 920;
   const isBlueprintCompact = () => isCompact() || window.innerHeight <= BLUEPRINT_SHORT_H;
+  // Color Story's swatch card is absolutely positioned at a fixed vertical
+  // fraction of the sticky (top: 48.25%) rather than truly centred — below
+  // this height its top edge clips against the sticky's overflow:hidden
+  // before its bottom edge would.
+  const COLORSTORY_SHORT_H = 620;
+  const isColorStoryCompact = () => isCompact() || window.innerHeight <= COLORSTORY_SHORT_H;
 
   // isCompact() branches (and CSS's max-width:1025px rules) evaluate once at
   // setup, not live on every scroll tick — checking live caused scroll jank.
   // Resizing across the breakpoint mid-session reloads the page instead of
   // re-running each init live. Debounced so a mid-drag resize reloads once
   // it settles, not on every intermediate frame. isDnaCompact()/
-  // isBlueprintCompact() get the same treatment, since their height term
-  // gates setup-time branches (initBlueprintTransition etc.) just like
-  // isCompact() does.
+  // isBlueprintCompact()/isColorStoryCompact() get the same treatment,
+  // since their height term gates setup-time branches
+  // (initBlueprintTransition, initColorStory, etc.) just like isCompact()
+  // does.
   let lastIsCompact = isCompact();
   let lastIsDnaCompact = isDnaCompact();
   let lastIsBlueprintCompact = isBlueprintCompact();
+  let lastIsColorStoryCompact = isColorStoryCompact();
   let resizeReloadTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeReloadTimer);
     resizeReloadTimer = setTimeout(() => {
       if (isCompact() !== lastIsCompact ||
           isDnaCompact() !== lastIsDnaCompact ||
-          isBlueprintCompact() !== lastIsBlueprintCompact) location.reload();
+          isBlueprintCompact() !== lastIsBlueprintCompact ||
+          isColorStoryCompact() !== lastIsColorStoryCompact) location.reload();
     }, 200);
   }, { passive: true });
 
@@ -3641,7 +3650,7 @@
     // Checked before attaching the scroll listener below, not live
     // inside update() — see the matching comment in initVisionWipe for
     // why (reported scroll jank on real compact-viewport devices).
-    if (isCompact()) return;
+    if (isColorStoryCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const lerp = (a, b, t) => a + (b - a) * t;

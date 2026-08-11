@@ -2296,7 +2296,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: -.04em;
   color: var(--ink);
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 780px) {
   .brandid__dna-title {
     font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
   }
@@ -2692,7 +2692,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   gap: clamp(48px, 6vw, 96px);
 }
 .brandid__blueprint-visual { flex: 0 0 48%; }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   .brandid__blueprint-row {
     flex-direction: column;
     align-items: center;
@@ -2725,7 +2725,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   stroke: var(--ink-70);
   stroke-width: .09;
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   /* Matches .brandid__blueprint-wordmark-svg's stroke exactly. vector-effect:non-scaling-stroke keeps .7 as real pixels regardless of viewBox scale — the desktop rule's user-unit .09 scales WITH it instead. */
   .bp-outline path {
     stroke: var(--ink);
@@ -2741,7 +2741,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   stroke: var(--ink-12);
   stroke-width: .06;
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   /* Bumped to ink-45 (same level .bp-handles uses) and doubled the stroke width — ink-12 read as barely-there next to the outline's full-ink compact style. */
   .bp-grid line,
   .bp-grid circle {
@@ -2760,7 +2760,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* Shared by .brandid__blueprint-index's margin-bottom and .brandid__blueprint-principles' margin-top — one value so the two stay unified. */
   --bp-gap: clamp(40px, 6vw, 64px);
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   /* Zeroed — this desktop-only extra inset made the panel narrower on the right than left in the stacked layout. width:100% is explicit too, since the row's centered align-items would otherwise shrink-wrap and center this block, reading as indented despite text-align:left. */
   .brandid__blueprint-text { padding-right: 0; width: 100%; }
 }
@@ -2776,7 +2776,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin-bottom: var(--bp-gap);
 }
 /* Two-point line, matching .brandid__dna-name's 50->32 pattern through this element's own 50/28 endpoints. */
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   .brandid__blueprint-index {
     /* Same shared triple as .brandid__dna-index/.brandid__construction-index. Covers both SYMBOL and WORDMARK — same class, both panels. */
     font-size: clamp(28px, calc(8.53px + 4.6358vw), 56px);
@@ -2847,7 +2847,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-70);
   word-break: keep-all;
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   /* Flat sizes above were about staying put regardless of Korean wrap state, not about avoiding viewport scaling — safe to extend the clamp technique here too. Placed after the base rules, not before, to avoid the equal-specificity source-order trap. */
   .brandid__blueprint-principle-key {
     font-size: clamp(13px, calc(9.52px + .8278vw), 18px);
@@ -2908,7 +2908,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* vh-driven so the mark and text below it keep fitting inside the 100svh sticky rather than overflowing into its overflow:hidden. */
   gap: clamp(72px, 15vh, 168px);
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   /* Zeroed to match the diagram panel's own compact inset. This padding sits on the shared parent of both the svg and text below — the svg's own extra margin now lives on .brandid__blueprint-wordmark-svg instead, so the two children can differ. */
   .brandid__blueprint-wordmark-inner {
     padding: 0;
@@ -2923,7 +2923,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   /* overflow:visible — the viewBox's .15-unit padding is only enough for the .7px stroke at wider widths; at narrower rendered widths the same stroke is a larger fraction of a user unit and the G's edge clips. */
   overflow: visible;
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 920px) {
   /* Independent of .brandid__blueprint-wordmark-inner so the svg can be more generously inset without widening the text block below. box-sizing:border-box (global reset) means this eats into the 100% width rather than adding to it. */
   .brandid__blueprint-wordmark-svg {
     padding: 0 clamp(16px, 5vw, 48px);
@@ -2985,14 +2985,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     width: 100%;
     margin-top: clamp(32px, 4vw, 56px);
   }
-}
-/* This panel is the taller of the two and first to run out of room in the 100svh sticky — measured 746px against a 700px box on a 1366x700 laptop, clipped by overflow:hidden. Tightening the internal gaps claws back ~100px. */
-/* min-width guard, matched to the breakpoint — without it this fired on any short-but-narrow viewport (most phones in portrait), clobbering the compact-width gap fix above since it came later in source and won the tie. */
-@media (max-height: 860px) and (min-width: 1024px) {
-  /* Kept well short of the base rule's own range — this query exists specifically to claw space back on short viewports. */
-  .brandid__blueprint-wordmark-inner { gap: clamp(32px, 6vh, 64px); }
-  /* Un-scoped (not just --wordmark) — scoping it made SYMBOL's own unclamped margin visibly wider than WORDMARK's on short viewports, even though both share --bp-gap outside this query. */
-  .brandid__blueprint-text { --bp-gap: clamp(16px, 3vh, 32px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .brandid__blueprint-wordmark-svg path { transition: none; }
@@ -3311,7 +3303,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink);
 }
 .brandid__colorstory-hex { margin-bottom: 4px; }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 620px) {
   /* Two-point line — same 24->16 reduction pattern used elsewhere (.brandid__dna-copy/.acycle__copy). */
   .brandid__colorstory-hex,
   .brandid__colorstory-swatchname {
@@ -3342,7 +3334,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   color: var(--signal-100);
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 620px) {
   /* Plateaued at 15px across the whole compact range (1vw hits the floor by 1500px). Same two-point formula as .vwipe__veng: 16px at 1025px to 13px at 420px. */
   .brandid__colorstory-eng {
     font-size: clamp(13px, calc(10.92px + .4959vw), 16px);
@@ -3360,7 +3352,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--paper);
   word-break: keep-all;
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 620px) {
   .brandid__colorstory-lead {
     font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
   }
@@ -3377,7 +3369,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
   overflow-wrap: break-word;
 }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 620px) {
   /* Plateaued at 16-16.4px across the compact range (1.6vw hits the floor by 1000px). Two-point line to the 24px ceiling, matching .brandid__body's pattern. */
   .brandid__colorstory-body {
     font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
@@ -3454,8 +3446,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
 }
 
-/* Sticky pin + curtain-wipe don't map to touch scroll — unpinned into stacked flow (photo at its natural ratio, then card, then copy) like Shape DNA's own compact pattern. initColorStory (main.js) stops touching this past 1024px and clears its inline styles. */
-@media (max-width: 1023px) {
+/* Sticky pin + curtain-wipe don't map to touch scroll — unpinned into stacked flow (photo at its natural ratio, then card, then copy) like Shape DNA's own compact pattern. initColorStory (main.js) stops touching this past isColorStoryCompact(). The (max-height: 620px) arm covers wide-but-short viewports too — below it the swatch card (fixed at top: 48.25%, not truly centred) clips against the sticky's overflow:hidden. */
+@media (max-width: 1023px), (max-height: 620px) {
   .brandid__colorstory { height: auto; }
   .brandid__colorstory-sticky {
     position: static;
@@ -4468,38 +4460,34 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 /* ---- Desktop type scale: 2560 = 1x, easing down to ~88% at 1024 ----
    Korean text groups under the big English titles were flat px and never moved above 1024px. Shared formula so every size moves in step: each element keeps its current value as the 2560px ceiling and eases to ~88% of it at 1024px — for value V, clamp(0.88V, calc(0.8V + (V/128)vw), V).
    Targets the shared classes (.brandid__lead/.brandid__body/etc) so one rule covers every section at once — an earlier pass scoped this to the SYMBOL panel alone, which is why nothing else appeared to change. Anything already vw-driven is left alone.
-   min-width:1024 only — compact has its own 1023->420 clamps and the breakpoint reloads, so the two never fight. Placed at the end of the file to win the equal-specificity tie against the base rules it overrides. */
+   min-width:1024 only — compact has its own 1023->420 clamps and the breakpoint reloads, so the two never fight. Placed at the end of the file to win the equal-specificity tie against the base rules it overrides. Shape DNA/Blueprint+Color Principle/Color Story's own selectors carry an added min-height floor (matching each section's own isDnaCompact()/isBlueprintCompact()/isColorStoryCompact() threshold) so this doesn't re-win the tie inside their wide-but-short compact fallback. */
 @media (min-width: 1024px) {
   /* 36px group — the Korean lead lines */
-  .brandid__lead,
-  .brandid__dna-kr,
-  .brandid__color-lead,
-  .brandid__colorstory-lead {
+  .brandid__lead {
     font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px);
   }
   /* 24px group — the Korean body copy + card labels */
-  .brandid__body,
-  .brandid__dna-copy,
-  .brandid__color-name span,
-  .brandid__colorstory-hex,
-  .brandid__colorstory-swatchname {
+  .brandid__body {
     font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px);
   }
-  /* 50px group — the section sub-titles */
-  .brandid__blueprint-index,
-  .brandid__dna-name {
-    font-size: clamp(44px, calc(40px + 0.3906vw), 50px);
-  }
-  /* 22px / 20px / 18px — the smaller supporting labels */
-  .brandid__color-name {
-    font-size: clamp(19.4px, calc(17.6px + 0.1719vw), 22px);
-  }
-  .brandid__blueprint-principle-desc {
-    font-size: clamp(17.6px, calc(16px + 0.1563vw), 20px);
-  }
-  .brandid__blueprint-principle-key {
-    font-size: clamp(15.8px, calc(14.4px + 0.1406vw), 18px);
-  }
+}
+@media (min-width: 1024px) and (min-height: 781px) {
+  .brandid__dna-kr { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .brandid__dna-copy { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  .brandid__dna-name { font-size: clamp(44px, calc(40px + 0.3906vw), 50px); }
+}
+@media (min-width: 1024px) and (min-height: 921px) {
+  .brandid__color-lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .brandid__color-name span { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+  .brandid__color-name { font-size: clamp(19.4px, calc(17.6px + 0.1719vw), 22px); }
+  .brandid__blueprint-index { font-size: clamp(44px, calc(40px + 0.3906vw), 50px); }
+  .brandid__blueprint-principle-desc { font-size: clamp(17.6px, calc(16px + 0.1563vw), 20px); }
+  .brandid__blueprint-principle-key { font-size: clamp(15.8px, calc(14.4px + 0.1406vw), 18px); }
+}
+@media (min-width: 1024px) and (min-height: 621px) {
+  .brandid__colorstory-lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
+  .brandid__colorstory-hex,
+  .brandid__colorstory-swatchname { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
 }
 
 /* ---------- Outro: closing CTA + info ---------- */
