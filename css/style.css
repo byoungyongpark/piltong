@@ -9173,15 +9173,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    padding was ALSO removed the same pass, so the two sections had
    landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘"),
    then widened a further notch (request: "상단 여백 조금만 더주고").
-   Side padding was its own generous clamp(var(--edge),10vw,180px) —
-   unified instead with .apps__intro's own compact margin (plain
-   var(--edge), the same "하나의 아이덴티티" text group this section's
-   own copy answers), on request ("좌우 여백은 하나의 아이덴티티 한글
-   그룹 좌우 여백과 통일시키자"). */
+   Side padding: first tried plain var(--edge), matching .apps__intro's
+   COMPACT margin only — but .apps__intro has no padding of its own at
+   all, so at desktop it actually inherits .apps's much wider side
+   padding (clamp(var(--edge),24vw,300px) — 300px at 1400px, measured
+   against var(--edge)'s own 84px there). Matching only the compact
+   value left the two 216px apart at desktop, on request ("좌우 여백은
+   하나의 아이덴티티, 모든 경험으로. 텍스트 그룹과 똑같이 맞춰달라니깐").
+   Now the exact same clamp as the base (desktop) rule, with the same
+   compact override .apps__intro itself gets, just below. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
-  padding-left: var(--edge);
-  padding-right: var(--edge);
+  padding-left: clamp(var(--edge), 24vw, 300px);
+  padding-right: clamp(var(--edge), 24vw, 300px);
 }
 /* justify-content was space-between, stretching .outro__info out to
    the row's own far right edge — a 50/50 split with the row's own
@@ -9242,10 +9246,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   gap: clamp(28px, 3.6vw, 48px);
   text-align: left;
 }
+/* gap narrowed 6->3px — this is now ONLY the space between consecutive
+   .outro__value lines (the label gets its own, larger, explicit
+   margin-bottom below instead of sharing this same gap), on request
+   ("이름간 여백은 더 좁히자"). */
 .outro__block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 /* Was var(--mono) (IBM Plex Mono) — switched to Outfit, on request
    ("우측 내용들도 다 Outfit 폰트로 대체"). Size bumped 12->14px, on
@@ -9257,6 +9265,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--ink-45);
+  /* Adds on top of .outro__block's own gap:3px (margins and flex gap
+     stack), giving the label→value space more room than the
+     value→value space below it, on request ("타이틀 아래로 여백이
+     좀더 있고"). */
+  margin-bottom: 10px;
 }
 .outro__value {
   /* <p>'s own UA-stylesheet margin (1em top+bottom) was stacking on
@@ -9300,6 +9313,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-45);
 }
 @media (max-width: 1023px) {
+  /* Matches .apps__intro's own compact override — see the base rule's
+     own comment for why desktop and compact need two different
+     values here. */
+  .outro {
+    padding-left: var(--edge);
+    padding-right: var(--edge);
+  }
   .outro__row {
     flex-direction: column;
     gap: clamp(40px, 8vw, 64px);
