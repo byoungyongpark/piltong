@@ -2437,7 +2437,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-bottom: 0;
   }
   .brandid__dna-media-video {
-    object-position: 50% 31%;
+    object-position: 50% 40%;
   }
   .brandid__dna-right {
     flex: none;
