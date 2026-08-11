@@ -469,6 +469,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: max-content;
   max-width: var(--hero-measure);
 }
+@media (max-width: 1023px) {
+  .hero-content {
+    /* Deliberately not matched to --hero-gutter's own 20px floor here — at compact widths bottom reads better sitting closer to the edge than left does. */
+    bottom: clamp(8px, 2vh, 40px);
+  }
+}
 .hero-eyebrow {
   /* Floored — a pure ratio fell to 7.5px on phones where the title itself is only ~40px. */
   margin: 0 0 max(14px, calc(var(--hero-big) * .16));
