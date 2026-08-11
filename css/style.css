@@ -2231,11 +2231,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* A flat object-position shift was wrong — the offset is time-varying (only while the symbol turns right). Fixed via a wobble loop in initBrandIdentity (main.js) reading the video's currentTime, composed with the existing scroll-driven scale. */
-  --dna-wobble-amp: 14px;
-  --dna-wobble-phase: 0;
-  --dna-wobble-turn-fraction: .4;
-  /* transform set inline every frame (updateDna's scale + the wobble loop's translateX). */
   will-change: transform;
 }
 /* position:relative makes this the containing block for .brandid__dna-detail-col's absolute position below. z-index:0 gives it its own stacking context so .brandid__dna-num's z-index:-1 stays behind this column's content instead of escaping. No overflow:hidden — that clipped the word/title's slide-in entrance with a hard edge. */

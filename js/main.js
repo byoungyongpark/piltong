@@ -1879,12 +1879,8 @@
     // rendered inside it zooms.
     const DNA_SCALE_START = .62;
     const DNA_SCALE_END = 1;
-    // Shared with initDnaVideoWobble below: updateDna computes the
-    // scroll-driven scale but no longer writes .transform directly, since
-    // the wobble function owns that property every frame and needs to
-    // compose the scale with its own translateX rather than the two
-    // fighting over the same inline style. 1 (not DNA_SCALE_START) is the
-    // compact/idle default — compact never runs the zoom at all.
+    // 1 (not DNA_SCALE_START) is the compact/idle default — compact never
+    // runs the zoom at all.
     let dnaVideoScale = 1;
     // Top padding animates from the same value .brandid__intro's own top
     // padding resolves to (computed here since it drives an inline style,
@@ -1931,6 +1927,7 @@
       if (isCompact()) {
         dnaVideoScale = 1;
         if (dnaMedia) dnaMedia.style.paddingTop = '';
+        if (dnaVideo) dnaVideo.style.transform = '';
         if (dnaIndexEl) { dnaIndexEl.style.opacity = ''; dnaIndexEl.style.transform = ''; }
         if (dnaTitleEl) { dnaTitleEl.style.opacity = ''; dnaTitleEl.style.transform = ''; }
         if (dnaDetailEl) { dnaDetailEl.style.opacity = ''; dnaDetailEl.style.transform = ''; }
@@ -1964,6 +1961,7 @@
       const eased = smoothstep(entryP);
       if (dnaVideo) {
         dnaVideoScale = lerp(DNA_SCALE_START, DNA_SCALE_END, eased);
+        dnaVideo.style.transform = `scale(${dnaVideoScale.toFixed(3)})`;
       }
       const padTop = lerp(dnaPadMax(), DNA_MEDIA_PAD_REST, eased).toFixed(1) + 'px';
       if (dnaMedia) dnaMedia.style.paddingTop = padTop;
@@ -2306,44 +2304,6 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
 
-    // ---- Shape DNA: correct the symbol video's own off-centre lean
-    // while it turns ----
-    // The footage's rotating symbol reads as biased right of frame while it
-    // turns that way, and centred again once it turns back — not a
-    // constant offset, so a flat object-position is wrong for most of the
-    // loop. Runs continuously off the video's own currentTime (not
-    // scroll), composing a small translateX with updateDna's scroll-driven
-    // scale so the two don't fight over the same inline transform.
-    if (dnaVideo && !prefersReduced) {
-      // The video is object-fit:cover inside an overflow:hidden box, so
-      // translateX alone would slide its edge into view on one side (or
-      // open a gap on the other). WOBBLE_SAFETY_SCALE pre-zooms the footage
-      // a little first, purely inside the box that already clips it, so
-      // there's slack to pan within without exposing an edge. 1.12 gives
-      // ~19px of slack per side even at a 320px-wide box.
-      const WOBBLE_SAFETY_SCALE = 1.12;
-      let wobbleRafId = null;
-      function wobbleFrame() {
-        wobbleRafId = requestAnimationFrame(wobbleFrame);
-        if (!dnaVideo.duration) return;
-        if (!isCompact()) {
-          dnaVideo.style.transform = `scale(${dnaVideoScale.toFixed(3)})`;
-          return;
-        }
-        const cs = getComputedStyle(dnaVideo);
-        const amp = parseFloat(cs.getPropertyValue('--dna-wobble-amp')) || 0;
-        const phase = parseFloat(cs.getPropertyValue('--dna-wobble-phase')) || 0;
-        const turnFraction = Math.min(1, Math.max(0.01,
-          parseFloat(cs.getPropertyValue('--dna-wobble-turn-fraction')) || 0.4));
-        const t = (dnaVideo.currentTime / dnaVideo.duration + phase) % 1;
-        const pull = t < turnFraction
-          ? -amp * Math.sin((t / turnFraction) * Math.PI)
-          : 0;
-        const scale = dnaVideoScale * WOBBLE_SAFETY_SCALE;
-        dnaVideo.style.transform = `translateX(${pull.toFixed(2)}px) scale(${scale.toFixed(3)})`;
-      }
-      wobbleRafId = requestAnimationFrame(wobbleFrame);
-    }
   }
 
   initBrandIdentity();
