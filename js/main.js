@@ -4219,6 +4219,25 @@
     const diagramVisual = diagramPanel.querySelector('.brandid__blueprint-visual');
     const diagramGrid = diagramPanel.querySelector('.bp-grid');
     let diagramShift = 0;
+    // Same idea, vertical axis — only actually non-zero in the tall-
+    // desktop-ratio layout (style.css: min-width:1024px and
+    // max-aspect-ratio:5/3), where .brandid__blueprint-row is a COLUMN
+    // (mark above the text) instead of a row. There the row's own
+    // vertical centre sits BELOW the mark's natural centre (the text
+    // block underneath pulls the whole group's centre down), so while
+    // the mark is still drawing alone it reads as sitting high/off-
+    // centre rather than "화면 기준 정중앙" — this measures that gap so
+    // the mark can start there and settle down into its natural spot as
+    // the text rises in, matching the horizontal version's own already-
+    // working shape for the side-by-side layout (request: "그려질때는
+    // 화면기준 정중앙에서 그려지다가 컨텐츠 나타날시 자연스럽게 위로
+    // 올라가서 심볼 + 컨텐츠 그룹이 정중앙에 위치하게" — "위로 올라가서"
+    // is the mark's motion relative to the page, which reads as the
+    // mark rising UP out of dead-centre into its own smaller share of
+    // the now-taller combined block). In the normal row layout the row
+    // and mark already share the same vertical centre, so this measures
+    // ~0 there and the extra translateY below is a harmless no-op.
+    let diagramShiftY = 0;
     function measureDiagramShift() {
       if (!diagramRow || !diagramVisual) return;
       const prev = diagramVisual.style.transform;
@@ -4226,6 +4245,7 @@
       const rr = diagramRow.getBoundingClientRect();
       const vr = diagramVisual.getBoundingClientRect();
       diagramShift = (rr.left + rr.width / 2) - (vr.left + vr.width / 2);
+      diagramShiftY = (rr.top + rr.height / 2) - (vr.top + vr.height / 2);
       diagramVisual.style.transform = prev;
     }
     measureDiagramShift();
@@ -4264,7 +4284,8 @@
       const moveT = smoothstep(clamp01((p - MOVE0) / (MOVE1 - MOVE0)));
       if (diagramVisual) {
         const shift = diagramShift * (1 - moveT);
-        diagramVisual.style.transform = moveT >= 1 ? '' : `translateX(${shift.toFixed(1)}px)`;
+        const shiftY = diagramShiftY * (1 - moveT);
+        diagramVisual.style.transform = moveT >= 1 ? '' : `translateX(${shift.toFixed(1)}px) translateY(${shiftY.toFixed(1)}px)`;
       }
       if (diagramGrid) {
         // The guides have done their job once the mark is drawn and on
