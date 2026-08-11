@@ -8,12 +8,34 @@
   // Function, not a cached const, since viewport width can change mid-session.
   const isCompact = () => window.innerWidth <= 1023;
 
+  // Below this height even the hybrid (pinned title + compact items)
+  // layout runs out of room — the bottom-right num, absolutely
+  // positioned within the still-100svh-tall pinned sticky, collides
+  // with the now-compact items regardless of their own smaller form,
+  // since the sticky's fixed height doesn't shrink to fit content the
+  // way an unpinned block would. Past this point the whole section
+  // just drops to the same non-sticky touch-scroll structure width
+  // <=1023px already uses (style.css's own (min-width:1024px) and
+  // (max-height:500px) block) — simpler than continuing to patch the
+  // pinned version's fit.
+  const DNA_EXTREME_SHORT_H = 500;
   // Used to gate DNA's pin/cross-fade (updateDna) vs. its compact swipe
-  // row — width alone now, matching style.css's own
-  // (min-width:1024px) and (max-height:780px) exception, which restores
-  // the pinned/animated single-column layout for wide-but-short windows
-  // (e.g. iPad landscape) instead of the touch-swipe compact fallback.
-  const isDnaCompact = isCompact;
+  // row — matches style.css's own (min-width:1024px) and
+  // (max-height:780px) exception, which restores the pinned/animated
+  // single-column layout for wide-but-short windows (e.g. iPad
+  // landscape) instead of the touch-swipe compact fallback, down to
+  // DNA_EXTREME_SHORT_H where that exception itself gives way again.
+  const isDnaCompact = () => isCompact() || window.innerHeight <= DNA_EXTREME_SHORT_H;
+  // Narrower than isDnaCompact — the pin itself stays restored down to
+  // DNA_EXTREME_SHORT_H, but the centered detail-col + bottom-right num
+  // start colliding with each other and with the title group below
+  // ~550-600px height (style.css's own (min-width:1024px) and
+  // (max-height:600px) block). Only the 4 items' swipe-row form/
+  // behaviour reverts there, not the whole pin — so this gates just the
+  // dots + wheel-scroll, not updateDna's cross-fade (CSS alone handles
+  // that revert).
+  const DNA_ITEMS_SHORT_H = 600;
+  const isDnaItemsCompact = () => isCompact() || window.innerHeight <= DNA_ITEMS_SHORT_H;
   // The symbol diagram's copy column is the tallest content the merged
   // blueprint/color-principle sticky ever centres (~880px at its widest
   // wrap); below this height it clips against the sticky's overflow:hidden.
@@ -75,6 +97,7 @@
   // etc.) just like isCompact() does.
   let lastIsCompact = isCompact();
   let lastIsDnaCompact = isDnaCompact();
+  let lastIsDnaItemsCompact = isDnaItemsCompact();
   let lastIsBlueprintCompact = isBlueprintCompact();
   let lastIsColorStoryCompact = isColorStoryCompact();
   let lastIsWhypCompact = isWhypCompact();
@@ -86,6 +109,7 @@
     resizeReloadTimer = setTimeout(() => {
       if (isCompact() !== lastIsCompact ||
           isDnaCompact() !== lastIsDnaCompact ||
+          isDnaItemsCompact() !== lastIsDnaItemsCompact ||
           isBlueprintCompact() !== lastIsBlueprintCompact ||
           isColorStoryCompact() !== lastIsColorStoryCompact ||
           isWhypCompact() !== lastIsWhypCompact ||
@@ -749,6 +773,10 @@
         stage.style.minHeight = '';
         return;
       }
+      // Captured before resetToBeside() below clears it — which mode this
+      // call started in, so the fit check just below can bias toward
+      // staying there (see HYST).
+      const wasBelow = stage.classList.contains('is-copy-below');
       // Reset to "beside" layout before measuring, or a call that landed in
       // "below" mode last time would measure its own below-mode state.
       resetToBeside();
@@ -771,7 +799,17 @@
       copy.style.left = besideLeft.toFixed(1) + 'px';
       const besideBottom = copy.getBoundingClientRect().bottom - stageRect.top;
 
-      if (besideBottom <= figBottom) {
+      // Asymmetric on purpose. Beside -> below fires the instant the copy
+      // no longer fits (zero slack) — any later and the Korean column has
+      // already stretched taller than the video beside it, reading as
+      // cramped/broken right before the switch. Below -> beside needs real
+      // headroom (HYST) first, or a live drag-resize hovering within a
+      // pixel or two of the crossover width flips the whole layout back
+      // and forth on every intermediate frame (no CSS transition softens
+      // it, so each flip is an instant snap).
+      const HYST = 24;
+      const fitsBeside = wasBelow ? besideBottom <= figBottom - HYST : besideBottom <= figBottom;
+      if (fitsBeside) {
         // ---- Beside layout stands. ----
         const philoLeft = philoRect.left - stageRect.left;
         big.style.transform = `translateX(${(besideLeft - philoLeft).toFixed(1)}px)`;
@@ -956,7 +994,11 @@
 
     check();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
+    // Not 'resize' too, unlike the other scroll watchers in this file —
+    // innerHeight is one of check()'s own two thresholds, so wiring
+    // resize to it made a live resize repeatedly cross the enter/exit
+    // line on its own (no scrolling involved) and pour()/reset() the
+    // Korean lines out and back in on every tick.
   }
 
   initPhilosophyScatter();
@@ -2061,9 +2103,19 @@
           : `translate(${lerp(-DNA_TITLE_HIDE_PX, 0, t).toFixed(2)}px, ${rise}px)`;
       }
       if (dnaDetailEl) {
-        const s = lerp(DNA_DETAIL_SCALE_START, 1, eased);
-        dnaDetailEl.style.opacity = eased.toFixed(3);
-        dnaDetailEl.style.transform = `translate(-50%, -50%) scale(${s.toFixed(3)})`;
+        // Past DNA_ITEMS_SHORT_H the items revert to a static swipe row
+        // (style.css) — this inline translate(-50%,-50%) scale(...) was
+        // written for the absolute-centered version and, being inline,
+        // overrides that CSS unconditionally, relocating the row off
+        // its normal-flow position instead of leaving it there.
+        if (isDnaItemsCompact()) {
+          dnaDetailEl.style.opacity = '';
+          dnaDetailEl.style.transform = '';
+        } else {
+          const s = lerp(DNA_DETAIL_SCALE_START, 1, eased);
+          dnaDetailEl.style.opacity = eased.toFixed(3);
+          dnaDetailEl.style.transform = `translate(-50%, -50%) scale(${s.toFixed(3)})`;
+        }
       }
     }
 
@@ -3498,38 +3550,108 @@
 
   initColorSnap();
 
-  /* ---------- Horizontal scroll-snap rows: plain mouse-wheel fallback ----------
-     A plain vertical mouse wheel/trackpad scroll over a horizontal-only
-     overflow:auto box does nothing in most browsers (no gesture to
-     translate) — a genuine touchscreen provides horizontal drag/swipe
-     natively, but desktop/DevTools testing has no such gesture. This maps
-     vertical wheel delta to scrollLeft instead, only when the gesture is
-     more vertical than horizontal (a real horizontal trackpad swipe still
-     scrolls natively), and only at isCompact() widths, where these rows
-     exist at all. */
-  function enableWheelHorizontalScroll(el) {
+  /* ---------- Horizontal scroll-snap rows: press-and-drag ----------
+     Rows with their own dot navigation (bottom of each card stack) are
+     the touch-carousel form — interaction there should be drag/swipe,
+     the same as a real touchscreen, never wheel. A wheel/trackpad
+     gesture over these is left to do its normal job (scroll the page)
+     instead of being hijacked — wheel only ever drives motion on the
+     *pinned, full-screen* form of these same sections (Shape DNA's
+     cross-fade, Color Principle's panel steps, etc.), which reads
+     scroll position directly off normal page scroll and needs no
+     row-level listener at all. An earlier version mapped wheel to
+     scrollLeft here too; removed in favour of that split. */
+  /* Press-and-drag scroll for these same rows — a genuine touchscreen
+     already gets native drag/swipe for free from overflow-x:auto, but a
+     desktop mouse has no equivalent gesture at all (the wheel fallback
+     above covers the wheel/trackpad case, this covers click-drag).
+     Pointer Events, filtered to pointerType 'mouse' specifically, so
+     real touch/pen input keeps using the native path untouched instead
+     of double-handling the same drag. Plain scrollLeft assignment during
+     the drag, not scrollTo — this needs to track the pointer 1:1 every
+     move, and scroll-snap-type:x mandatory (style.css) settles it onto
+     the nearest card natively once the pointer releases and the row's
+     own scroll comes to rest, the same as it would after a touch swipe. */
+  function enableDragScroll(el) {
     if (!el) return;
-    el.addEventListener('wheel', (e) => {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      // Only steal the gesture while the row still has somewhere to go in
-      // that direction — otherwise every vertical scroll over the row
-      // (trackpad/mouse wheel) got swallowed permanently, even once the
-      // row was already at its first/last card, which read as "page won't
-      // scroll" while the pointer sat over one of these rows.
-      const atStart = el.scrollLeft <= 0;
-      const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
-      if ((e.deltaY < 0 && atStart) || (e.deltaY > 0 && atEnd)) return;
-      el.scrollLeft += e.deltaY;
-      e.preventDefault();
-    }, { passive: false });
+    let dragging = false, moved = false, startX = 0, startScrollLeft = 0, startIdx = 0;
+    let lastX = 0, lastT = 0, velocity = 0;
+    el.addEventListener('pointerdown', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      lastX = e.clientX;
+      lastT = e.timeStamp;
+      velocity = 0;
+      startScrollLeft = el.scrollLeft;
+      startIdx = Math.round(startScrollLeft / (el.clientWidth || 1));
+      // Capture is a reliability nicety (keeps the drag tracking even if
+      // the pointer leaves the row mid-gesture) — not required for the
+      // drag itself, so a failure here (synthetic events, odd browser
+      // states) shouldn't abort the state changes below it.
+      try { el.setPointerCapture(e.pointerId); } catch (err) {}
+      el.classList.add('is-dragging');
+      // scroll-snap-type:x mandatory (style.css) fights any scrollLeft
+      // that isn't already at a valid snap point, which mid-drag is
+      // true almost the entire time — every intermediate position got
+      // silently reverted, same as the wheel handler's original bug.
+      // Suspended for the drag's duration; release computes an explicit
+      // target below instead of leaving it to native snap-settle, whose
+      // own nearest-point threshold sits around the card's midpoint and
+      // reads as needing a forceful, half-card-width yank to advance.
+      el.style.scrollSnapType = 'none';
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!dragging || e.pointerType !== 'mouse') return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 3) moved = true;
+      el.scrollLeft = startScrollLeft - dx;
+      const dt = e.timeStamp - lastT;
+      if (dt > 0) velocity = (e.clientX - lastX) / dt; // px/ms, recent segment only
+      lastX = e.clientX;
+      lastT = e.timeStamp;
+    });
+    const end = (e) => {
+      if (!dragging || e.pointerType !== 'mouse') return;
+      dragging = false;
+      el.classList.remove('is-dragging');
+      const step = el.clientWidth || 1;
+      const maxIdx = Math.round((el.scrollWidth - el.clientWidth) / step);
+      const dx = (typeof e.clientX === 'number' ? e.clientX : lastX) - startX;
+      // A short, fast flick advances just like a long slow drag does —
+      // matching a real touch swipe, where speed matters as much as
+      // distance. Distance threshold is deliberately well under half a
+      // card (native snap's implicit cutoff) so a normal, unhurried drag
+      // is already enough.
+      const FLICK_SPEED = 0.35; // px/ms
+      const DIST_FRAC = 0.18; // fraction of card width
+      let targetIdx = startIdx;
+      if (Math.abs(velocity) > FLICK_SPEED) {
+        targetIdx = startIdx + (velocity < 0 ? 1 : -1);
+      } else if (Math.abs(dx) > step * DIST_FRAC) {
+        targetIdx = startIdx + (dx < 0 ? 1 : -1);
+      }
+      targetIdx = Math.max(0, Math.min(maxIdx, targetIdx));
+      el.style.scrollSnapType = '';
+      el.scrollTo({ left: targetIdx * step, behavior: 'smooth' });
+    };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    // A drag that actually moved the row shouldn't also fire as a click
+    // on whatever's underneath the pointer (e.g. a card link) once released.
+    el.addEventListener('click', (e) => {
+      if (moved) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
   }
 
   /* Loop the carousels: resting on the last card, a forward swipe wraps
-     back to the first (and vice versa). Touch only — a wheel/trackpad at
-     the boundary still lets the page scroll past the section (see
-     enableWheelHorizontalScroll above). Keyed on where the swipe started,
-     not where it ended, so a normal forward swipe that merely reaches the
-     last card doesn't bounce straight back. */
+     back to the first (and vice versa). Touch only — wheel/trackpad
+     gestures over these rows aren't hijacked at all (see
+     enableDragScroll above), so there's nothing to keep in sync with
+     here. Keyed on where the swipe started, not where it ended, so a
+     normal forward swipe that merely reaches the last card doesn't
+     bounce straight back. */
   function enableLoopWrap(el) {
     if (!el) return;
     const THRESH = 40; // px of horizontal travel to count as a swipe
@@ -3564,12 +3686,12 @@
     { sel: '.acycle__steps', when: isAcycleCompact },
     { sel: '.vwipe__vision', when: isVwipeCompact },
     { sel: '.whyp__copy-sticky', when: isWhypCompact },
-    { sel: '.brandid__dna-items', when: isDnaCompact },
+    { sel: '.brandid__dna-items', when: isDnaItemsCompact },
     { sel: '.brandid__color-caption', when: isBlueprintCompact },
   ].forEach(({ sel, when }) => {
     if (!when()) return;
     const el = document.querySelector(sel);
-    enableWheelHorizontalScroll(el);
+    enableDragScroll(el);
     enableLoopWrap(el);
   });
 
@@ -4917,12 +5039,11 @@
       { wrap: '.acycle__steps', item: '.acycle__step', when: isAcycleCompact },
       { wrap: '.vwipe__vision', item: '.vwipe__vstep', when: isVwipeCompact },
       { wrap: '.whyp__copy-sticky', item: '.whyp__step', when: isWhypCompact },
-      // isCompact() only, not isDnaCompact() — at width>=1024 with a short
-      // height (e.g. iPad landscape) the row is still a horizontal
-      // scroll-snap swipe underneath, but the dots read as an unwanted
-      // mobile-carousel tell against the otherwise desktop-like 1024x768
-      // reference; narrower/portrait widths keep them.
-      { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isCompact },
+      // isDnaItemsCompact(), not isCompact()/isDnaCompact() — at
+      // width>=1024 with a merely-short height (e.g. iPad landscape) the
+      // pin+cross-fade stays, so no dots. Only past DNA_ITEMS_SHORT_H,
+      // where style.css reverts the items to a swipe row, do dots belong.
+      { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isDnaItemsCompact },
       // Color Principle's dots are created + driven in initBrandIdentity
       // (updateColorHeadSync) instead — its cards are stacked cross-fade
       // layers, not sliding items, so this generic "active = card nearest

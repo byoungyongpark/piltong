@@ -441,10 +441,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     calc(var(--hero-symbol-left) - var(--hero-gutter) - clamp(12px, 1.6vw, 28px)),
     calc(100vw - 2 * var(--hero-gutter))
   );
+  /* How far down the wordmark's own bottom edge actually sits: its entrance reveal (.hero-in, below) rests at a permanent translateY(20px) even once "in", on top of its own top inset and height — 18px here, overridden alongside height at each width tier below. Kept in sync with .hero-logo's own top/height by hand; the two aren't in the same cascade scope to share a var directly. */
+  --hero-logo-clear: calc(20px + clamp(20px, 2vw, 28px) + 18px);
+  /* .hero-content's own bottom offset, mirrored here so --hero-vfit (below) can reserve exactly this much room at the foot of the block too — see .hero-content for the value's own reasoning. */
+  --hero-content-bottom: calc(max(20px, min(var(--hero-gutter), 6vh, 96px)) + 24px);
   /* "Appropriate" is the binding line (6.56em + .70em step = 7.26em uppercase) and sizes all four lines; the divisor below is tuned from it — raise to shrink, lower to grow. */
-  /* Divisor (4.40) is the block's own height in em at line-height .93 (measured, not derived — the eyebrow's px floors add to it). Changing the leading without updating this reopens a collision with the wordmark on short-wide windows. */
+  /* Divisor (4.40) is the block's own height in em at line-height .93 (measured, not derived — the eyebrow's px floors add to it). Changing the leading without updating this reopens a collision with the wordmark on short-wide windows. Reserved space: the wordmark's own clearance at the top, and --hero-content-bottom twice — once as the gap between wordmark and title (kept equal to the block's own bottom margin, so a very short viewport reads as symmetric top/bottom breathing room), once as the actual bottom margin itself. Plus a flat 44px slop: the eyebrow's own px floors (13px font, 14px margin) don't shrink proportionally with the rest at small sizes, so the real block always runs taller than this formula's proportional estimate — measured empirically, not derived. */
   --hero-vfit: calc(
-    (100svh - clamp(40px, 7vh, 96px) - clamp(80px, 12vh, 140px)) / 4.40
+    (100svh - var(--hero-logo-clear) - (2 * var(--hero-content-bottom)) - 44px) / 4.40
   );
   /* 200px cap is a sanity stop, not a design limit — geometry allows ~194px at 2560px width; only binds past ~2640px. */
   /* 8.36, not Round Control's 9.6 — Outfit's caps are 13.3% narrower, so the old divisor would've shrunk the composition; this keeps the same ~87% fill. */
@@ -462,6 +466,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 /* Must come after the aspect-ratio override above — both match most portrait phones, and source order decides the winner. Reuses the base formula with the floor raised to 36px, so the curve stays continuous across 1025px. */
 @media (max-width: 1023px) {
   .hero {
+    /* .hero-logo drops to a 14px mark below this width, and .hero-content's own bottom switches to a flat 4px (see below) — both fed back into --hero-vfit so it keeps reserving what's actually used here, not the desktop figures. */
+    --hero-logo-clear: calc(20px + clamp(20px, 2vw, 28px) + 14px);
+    --hero-content-bottom: 4px;
     --hero-big: clamp(36px, min(9.2vw, var(--hero-measure) / 8.36, var(--hero-vfit)), 200px);
   }
 }
@@ -469,15 +476,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   position: absolute;
   z-index: 1;
   left: var(--hero-gutter);
-  /* Tracks the same --hero-gutter as left so the block sits the same distance off every edge, but capped by 6vh so a wide-but-short viewport (gutter grows with width, not height) doesn't push it implausibly far up. Floored at 20px, matching --hero-gutter's own floor. +24px on top — sat too close to the bottom edge. */
-  bottom: calc(max(20px, min(var(--hero-gutter), 6vh, 96px)) + 24px);
+  /* Tracks the same --hero-gutter as left so the block sits the same distance off every edge, but capped by 6vh so a wide-but-short viewport (gutter grows with width, not height) doesn't push it implausibly far up. Floored at 20px, matching --hero-gutter's own floor. +24px on top — sat too close to the bottom edge. Mirrored into --hero-vfit (above) as --hero-content-bottom, so a short viewport shrinks the title enough to actually clear the wordmark instead of just shrinking the bottom gap. */
+  bottom: var(--hero-content-bottom);
   width: max-content;
   max-width: var(--hero-measure);
 }
 @media (max-width: 1023px) {
   .hero-content {
     /* Deliberately not matched to --hero-gutter's own 20px floor — a flat, near-edge value, not vh-driven, so it doesn't creep back up on tall portrait phones the way a vh-based figure did. */
-    bottom: 4px;
+    bottom: var(--hero-content-bottom);
   }
 }
 .hero-eyebrow {
@@ -2510,9 +2517,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     line-height: 1;
   }
   /* Two-point lines through each element's own desktop value down to a target floor at 420px. */
-  .brandid__dna-name { font-size: clamp(24px, calc(5.92px + 4.3046vw), 50px); }
-  .brandid__dna-kr { font-size: clamp(20px, calc(8.87px + 2.649vw), 36px); }
-  .brandid__dna-copy { font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px); }
+  /* -copy matched to .vwipe__vbody/.brandid__colorstory-body's own compact
+     clamp (was its own 16->24 line) — -name/-kr scaled down by the same
+     proportion at both anchor widths so the three keep shrinking together
+     instead of -copy suddenly reading small against them. */
+  .brandid__dna-name { font-size: clamp(22.5px, calc(10.6px + 2.833vw), 39.6px); }
+  .brandid__dna-kr { font-size: clamp(18.75px, calc(11.96px + 1.617vw), 28.5px); }
+  .brandid__dna-copy { font-size: clamp(15px, calc(12.22px + .66vw), 19px); }
   /* No longer viewport-centered via position:absolute at this width —
      back in normal stacked flow, full width. */
   .brandid__dna-detail-col {
@@ -2628,12 +2639,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 .brandid__construction-text .brandid__body { max-width: none; margin: 0; }
 @media (max-width: 1023px) {
-  /* Scoped to this section's copy specifically — .brandid__lead is shared with Blueprint and others. Same two-point technique as Shape DNA's item text. */
+  /* Scoped to this section's copy specifically — .brandid__lead is shared with Blueprint and others. Matched to .vwipe__vtitle/.vwipe__vbody's own compact clamp — same pairing already used for this text at width>=1024 (see the shared wide-but-short block further down). */
   .brandid__construction-text .brandid__lead {
-    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
   }
   .brandid__construction-text .brandid__body {
-    font-size: clamp(15px, calc(8.74px + 1.4901vw), 24px);
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
   }
   .brandid__construction-text {
     flex: none;
@@ -2841,10 +2852,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
   /* Scoped to this section's copy specifically — .brandid__lead/.brandid__body are shared base classes left unscoped generally. */
   .brandid__blueprint-text .brandid__lead {
-    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
   }
   .brandid__blueprint-text .brandid__body {
-    font-size: clamp(15px, calc(8.74px + 1.4901vw), 24px);
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
   }
 }
 .brandid__blueprint-text .brandid__lead { margin-bottom: clamp(16px, 2vw, 24px); }
@@ -2898,11 +2909,16 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 @media (max-width: 1023px), (max-height: 920px) {
   /* Flat sizes above were about staying put regardless of Korean wrap state, not about avoiding viewport scaling — safe to extend the clamp technique here too. Placed after the base rules, not before, to avoid the equal-specificity source-order trap. */
+  /* Matched to .brandid__colorstory-eng's own compact clamp — same reference this label already follows at width>=1024 (see the wide-but-short block further down: "matched to .brandid__colorstory-eng exactly"). Smaller than the old independent 13->18 line. */
   .brandid__blueprint-principle-key {
-    font-size: clamp(13px, calc(9.52px + .8278vw), 18px);
+    font-size: clamp(13px, calc(10.92px + .4959vw), 16px);
   }
+  /* Sized down further past the vwipe/colorstory body match above — still
+     a two-point line to the same 420/1023 anchors, just eased toward
+     .brandid__blueprint-principle-key's own smaller range instead, since
+     this reads as a short list caption more than a full body paragraph. */
   .brandid__blueprint-principle-desc {
-    font-size: clamp(15px, calc(11.52px + .8278vw), 20px);
+    font-size: clamp(13.5px, calc(11.41px + .5vw), 16.5px);
   }
 }
 /* Desktop type-scaling for this text now lives in the consolidated block at the end of the file (shared classes), not scoped here. */
@@ -3012,8 +3028,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__wordmark-row { gap: clamp(28px, 5vw, 44px); }
   .brandid__wordmark-row .brandid__blueprint-principles { flex: 1 1 auto; width: 100%; }
 }
-@media (max-width: 420px) {
-  /* Both breaks read as forced mid-thought wraps at this width. word-break:keep-all (shared with the SYMBOL panel's fix) already handles wrapping, so hiding the <br>s is all this needs. */
+@media (max-width: 480px) {
+  /* Both breaks read as forced mid-thought wraps at this width — phone
+     portrait widths generally, not just the narrowest phones (was
+     420px). word-break:keep-all (shared with the SYMBOL panel's fix)
+     already handles wrapping, so hiding the <br>s is all this needs. */
   .brandid__wordmark-copy .brandid__lead br,
   .brandid__wordmark-copy .brandid__body br {
     display: none;
@@ -3208,14 +3227,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
   /* With the head's own padding-bottom now 0, this lead's margin-bottom is the only space left between the title and the first card. */
   .brandid__color-lead {
-    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
     margin-bottom: clamp(24px, 5vw, 40px);
   }
   .brandid__color-name {
     font-size: clamp(16px, calc(11.83px + .9934vw), 22px);
   }
+  /* Matched to .vwipe__vbody's own compact clamp — the Korean description under each swatch is this caption's body-equivalent text. */
   .brandid__color-name span {
-    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
   }
   /* Title stays fixed above; only the 3 colour cards swipe below it. updateColorHeadSync (main.js) keeps title+row+dots agreeing on one colour at a time. */
   .brandid__color-block {
@@ -3411,8 +3431,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
 }
 @media (max-width: 1023px) {
+  /* Matched to .vwipe__vtitle's own compact clamp — same pairing this text already uses at width>=1024 (see the shared wide-but-short block further down). */
   .brandid__colorstory-lead {
-    font-size: clamp(22px, calc(12.26px + 2.3179vw), 36px);
+    font-size: clamp(24px, calc(15.67px + 1.98vw), 36px);
   }
 }
 @media (min-width: 1024px) and (max-height: 620px) {
@@ -3441,9 +3462,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   overflow-wrap: break-word;
 }
 @media (max-width: 1023px) {
-  /* Plateaued at 16-16.4px across the compact range (1.6vw hits the floor by 1000px). Two-point line to the 24px ceiling, matching .brandid__body's pattern. */
+  /* Matched to .vwipe__vbody's own compact clamp — same pairing this text already uses at width>=1024 (see the shared wide-but-short block further down). */
   .brandid__colorstory-body {
-    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
   }
 }
 @media (min-width: 1024px) and (max-height: 620px) {
@@ -3641,9 +3662,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   word-break: keep-all;
 }
 @media (max-width: 1023px) {
-  /* Two-point line, same 24->16 reduction used elsewhere. */
+  /* Matched to .vwipe__vbody/.brandid__colorstory-body's own compact clamp — same reference .apps__body/.brandid__dna-copy now follow. */
   .brandid__closing-body {
-    font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px);
+    font-size: clamp(15px, calc(12.22px + .66vw), 19px);
   }
 }
 /* Section centres its children — giving this the video's own width is what lines up their left edges. */
@@ -4040,7 +4061,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
   /* rem alone follows its own curve, not .brandid__closing-line's (this section's visual reference) — the two only agreed at 2560px. Matched to closing-line/-body's exact clamp formulas instead so they read as the same size through the whole compact range. */
   .apps__lead { font-size: clamp(24px, calc(15.67px + 1.98vw), 36px); }
-  .apps__body { font-size: clamp(16px, calc(10.44px + 1.3245vw), 24px); }
+  /* Matched to .vwipe__vbody/.brandid__colorstory-body's own compact clamp — same reference -lead already follows. */
+  .apps__body { font-size: clamp(15px, calc(12.22px + .66vw), 19px); }
   /* Relocated from the closing ticker (see index.html) — kept the same display formula .brandid__closing-next's compact rule used, so relocating it doesn't also change how it reads. Coefficient bumped 7.2->8.5vw alongside .brandid__intro-index/.statement's --big, which shared this exact formula. */
   .apps__title {
     display: block;
@@ -4127,13 +4149,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    next to the ticker; backed off ~10% from the measured correction. */
 @media (max-width: 1600px) {
   .brandid__closing-mark {
-    transform: scale(1.037);
+    transform: scale(0.95);
     transform-origin: center bottom;
   }
 }
 @media (min-width: 1601px) {
   .brandid__closing-mark {
-    transform: scale(1.1);
+    transform: scale(1.06);
     transform-origin: center bottom;
   }
 }
@@ -4573,6 +4595,28 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .music-toggle.is-playing .music-toggle__bar:nth-child(4) { height: 14px; }
 }
 
+/* ---- Horizontal touch-scroll rows: press-and-drag cursor ----
+   Same five rows enableDragScroll (main.js) attaches a mouse-only
+   pointer-drag to. grab/grabbing gives a desktop mouse the same visual
+   affordance a touchscreen doesn't need (a finger doesn't need a
+   cursor hint); user-select:none while .is-dragging stops the drag
+   from also highlighting the row's own text. */
+.acycle__steps,
+.vwipe__vision,
+.whyp__copy-sticky,
+.brandid__dna-items,
+.brandid__color-caption {
+  cursor: grab;
+}
+.acycle__steps.is-dragging,
+.vwipe__vision.is-dragging,
+.whyp__copy-sticky.is-dragging,
+.brandid__dna-items.is-dragging,
+.brandid__color-caption.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+
 /* ---- Horizontal touch-scroll rows: progress dots ----
    Injected by initHorizontalScrollDots (main.js) after each scroll-snap row (.acycle__steps, .vwipe__vision, .whyp__copy-sticky, .brandid__dna-items, .brandid__color-caption), toggling .is-active per swipe. background:currentColor follows the row's own text colour rather than a hardcoded one, since sections mix light/dark grounds. */
 .hscroll-dots {
@@ -4712,6 +4756,96 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      right:0 lines the two up symmetrically. */
   .brandid__dna-num { display: flex; right: 0; }
 }
+/* Extra-short complement — even the restored pin layout runs out of
+   room past a point: the centered detail-col and the bottom-right
+   num start colliding with each other (measured overlap starting
+   ~550px height) and with the title group (~500px). Below 600px
+   height, drop just the 4 items back to their compact swipe-row
+   form (much shorter — one row, not a large centered block) so
+   there's room again, while .brandid__dna-index/-title keep the
+   size they already settled on above (not reset to the compact
+   clamp) — only the content items' form and behaviour revert. */
+@media (min-width: 1024px) and (max-height: 600px) {
+  .brandid__dna-detail-col {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: clamp(24px, 6vw, 40px);
+  }
+  .brandid__dna-items {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: clamp(16px, 4vw, 28px);
+    max-width: none;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+  }
+  .brandid__dna-item {
+    position: static;
+    grid-area: auto;
+    flex: 0 0 100%;
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+    padding-left: var(--edge);
+    padding-right: var(--edge);
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    opacity: 1;
+    transform: none;
+  }
+  .brandid__dna-name, .brandid__dna-copy { opacity: 1; }
+  /* Reverts the eased pin-mode sizing (min-width:1024px, max-height:780px
+     block above) back to the compact two-point clamps — these three are
+     part of "the 4 items", not the section title pair, so they follow
+     the items' own form back to compact rather than staying at the
+     larger pinned-mode size. */
+  .brandid__dna-name { font-size: clamp(22.5px, calc(10.6px + 2.833vw), 39.6px); }
+  .brandid__dna-kr { font-size: clamp(18.75px, calc(11.96px + 1.617vw), 28.5px); }
+  .brandid__dna-copy { font-size: clamp(15px, calc(12.22px + .66vw), 19px); }
+  /* Hidden, not shrunk — once the items are the same touch-scroll
+     structure width<=1023px uses, the num should match that structure
+     wholesale (it's hidden there too: .brandid__dna-item is
+     position:static, so num's own position:absolute would resolve
+     against the wrong containing block, same reasoning as the
+     width<=1023px rule below). */
+  .brandid__dna-num { display: none; }
+}
+/* Full revert to the same non-sticky touch-scroll structure width
+   <=1023px uses — a pinned 100svh sticky can't shrink to fit content
+   the way an unpinned block can, so the items-compact fix above still
+   fights the bottom-right num for room below this point. Simpler to
+   drop the whole hybrid than keep patching the pinned version's fit.
+   Reuses the width<=1023px compact block's own values verbatim (dna,
+   dna-sticky, dna-right, dna-index, dna-num); dna-name/-kr/-copy and
+   detail-col/items/item already match via the max-height:600px block
+   above (its own values are identical to the <=1023px ones), and
+   dna-media/dna-right's flex-basis:100% stay as-is (video hidden,
+   full-width, already correct in both layouts). */
+@media (min-width: 1024px) and (max-height: 500px) {
+  .brandid__dna {
+    min-height: auto;
+    padding: clamp(32px, 6vw, 48px) var(--edge) 0;
+  }
+  .brandid__dna-sticky {
+    position: static;
+    height: auto;
+    max-width: none;
+    flex-direction: column;
+    gap: clamp(12px, 3vw, 20px);
+  }
+  .brandid__dna-right { padding-top: clamp(20px, 6vw, 40px); }
+  /* dna-index left out on purpose — .brandid__dna-title already never
+     reverts here (its own compact rule is width-only, max-width:1023px,
+     so it's untouched at any height once width>=1024), and dna-index
+     should read the same way: keep the wide-but-short clamp(60,7vw,128px)
+     from the (min-width:1024px) and (max-height:780px) block above
+     instead of dropping to the narrow compact clamp, even at this
+     extreme a height. */
+  .brandid__dna-num { display: none; }
+}
 @media (min-width: 1024px) and (min-height: 921px) {
   .brandid__color-lead { font-size: clamp(31.7px, calc(28.8px + 0.2813vw), 36px); }
   .brandid__color-name span { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
@@ -4769,6 +4903,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      now (matches .vwipe__vtitle), so per this block's own exemption
      rule ("anything already vw-driven is left alone") it doesn't
      belong in the eased desktop-type scale anymore. */
+  .brandid__colorstory-hex,
+  .brandid__colorstory-swatchname { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
+}
+/* Same drift this whole file keeps hitting: the base compact rule's
+   (max-height:620px) arm (further up) wins the tie at width>=1024 —
+   e.g. Nest Hub's real 1024x600 — with the mobile-calibrated clamp
+   instead of the matched value the block above intends for this exact
+   width/height band. Reusing that same matched formula here. */
+@media (min-width: 1024px) and (max-height: 620px) {
   .brandid__colorstory-hex,
   .brandid__colorstory-swatchname { font-size: clamp(21.1px, calc(19.2px + 0.1875vw), 24px); }
 }
