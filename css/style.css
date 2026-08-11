@@ -5175,6 +5175,31 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      --wordmark's own text-align:left) — only the title itself centers,
      see .brandid__blueprint-index's own compact rule below. */
 }
+/* Same "diagram centred above, text drops below" shape the compact
+   block just above already uses (this section's own proven fix for
+   the identical row-doesn't-fit problem), applied to a tall-but-
+   desktop-width window instead (iPad Pro portrait etc.) — the drawn
+   symbol was still pinned to the left edge here with the text column
+   squeezed beside it, on request ("Shape DNA... 이거 원한거 아니야...
+   참조 사진 부분을 말했던거야" — the reference screenshot was this
+   panel, not Shape DNA's own video; request restated for this panel:
+   "Symbol Construction 섹션에 적용해줘"). Sized larger than compact's
+   own 200-280px since a desktop-width window has more room to spend,
+   text stays left-aligned same as compact. Doesn't touch the shared
+   pinned stage itself (.brandid__blueprint-stage/-sticky, also used by
+   the wordmark/redraw/Color Principle phases) — only this one panel's
+   own internal row/column arrangement. */
+@media (min-width: 1024px) and (max-aspect-ratio: 5/3) {
+  .brandid__blueprint-row {
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(32px, 4vw, 56px);
+  }
+  .brandid__blueprint-visual {
+    flex: none;
+    width: min(50%, 400px);
+  }
+}
 .brandid__blueprint-svg { width: 100%; height: auto; display: block; }
 /* Stroke/marker weights all thinned down together, on request ("전체
    테두리는 얄쌍하게... 참조 이미지처럼 슬림하고 세련되게"), then the
