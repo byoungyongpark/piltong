@@ -8,17 +8,36 @@
   // Function, not a cached const, since viewport width can change mid-session.
   const isCompact = () => window.innerWidth <= 1023;
 
+  // Shape DNA's title sits at a fixed padding-top while its 4-principle
+  // block centres on the sticky's full height (style.css) — below this
+  // height the two collide. Matches the CSS's own
+  // `(max-height: 780px)` addition to the same compact block.
+  const DNA_SHORT_H = 780;
+  const isDnaCompact = () => isCompact() || window.innerHeight <= DNA_SHORT_H;
+  // The symbol diagram's copy column is the tallest content the merged
+  // blueprint/color-principle sticky ever centres (~880px at its widest
+  // wrap); below this height it clips against the sticky's overflow:hidden.
+  const BLUEPRINT_SHORT_H = 920;
+  const isBlueprintCompact = () => isCompact() || window.innerHeight <= BLUEPRINT_SHORT_H;
+
   // isCompact() branches (and CSS's max-width:1025px rules) evaluate once at
   // setup, not live on every scroll tick — checking live caused scroll jank.
   // Resizing across the breakpoint mid-session reloads the page instead of
   // re-running each init live. Debounced so a mid-drag resize reloads once
-  // it settles, not on every intermediate frame.
+  // it settles, not on every intermediate frame. isDnaCompact()/
+  // isBlueprintCompact() get the same treatment, since their height term
+  // gates setup-time branches (initBlueprintTransition etc.) just like
+  // isCompact() does.
   let lastIsCompact = isCompact();
+  let lastIsDnaCompact = isDnaCompact();
+  let lastIsBlueprintCompact = isBlueprintCompact();
   let resizeReloadTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeReloadTimer);
     resizeReloadTimer = setTimeout(() => {
-      if (isCompact() !== lastIsCompact) location.reload();
+      if (isCompact() !== lastIsCompact ||
+          isDnaCompact() !== lastIsDnaCompact ||
+          isBlueprintCompact() !== lastIsBlueprintCompact) location.reload();
     }, 200);
   }, { passive: true });
 
@@ -1919,12 +1938,13 @@
     function updateDna() {
       if (!dnaSection || !dnaItems.length) return;
       // The whole sticky/cross-fade/entrance system below doesn't apply at
-      // this width — .brandid__dna-sticky unpins to normal flow and
-      // .brandid__dna-items becomes a horizontal touch-scroll row instead
-      // (style.css). Clearing inline styles (not just skipping the write)
-      // matters because a leftover value from before the viewport crossed
-      // 1024px would otherwise keep overriding the new CSS indefinitely.
-      if (isCompact()) {
+      // this width (or below DNA_SHORT_H) — .brandid__dna-sticky unpins to
+      // normal flow and .brandid__dna-items becomes a horizontal
+      // touch-scroll row instead (style.css). Clearing inline styles (not
+      // just skipping the write) matters because a leftover value from
+      // before the viewport crossed the breakpoint would otherwise keep
+      // overriding the new CSS indefinitely.
+      if (isDnaCompact()) {
         dnaVideoScale = 1;
         if (dnaMedia) dnaMedia.style.paddingTop = '';
         if (dnaVideo) dnaVideo.style.transform = '';
@@ -2009,7 +2029,7 @@
     // directly; position:sticky (style.css) keeps title and dots visually
     // pinned to the left edge while only the cards move underneath, the
     // same mechanism a sticky first table column uses.
-    if (isCompact() && colorCaption && colorHead && colorNames.length) {
+    if (isBlueprintCompact() && colorCaption && colorHead && colorNames.length) {
       // cards-row holds the 3 colour cards stacked (grid, style.css) so
       // they cross-fade in place instead of sliding.
       const cardsRow = document.createElement('div');
@@ -2074,7 +2094,7 @@
     const STATE_FG = [readColorVar('--ink'), readColorVar('--paper'), readColorVar('--paper')];
 
     function updateColorHeadSync() {
-      if (!isCompact() || !colorCaption || !colorNames.length) return;
+      if (!isBlueprintCompact() || !colorCaption || !colorNames.length) return;
       // The swipe scrolls the hidden sizer; that scroll position gives a
       // fractional card index, and: one interpolated fill is painted on
       // the caption, the stacked card labels cross-fade their opacity, and
@@ -2103,7 +2123,7 @@
           d.classList.toggle('is-active', i === active));
       }
     }
-    if (isCompact()) {
+    if (isBlueprintCompact()) {
       updateColorHeadSync();
       if (colorCaption) colorCaption.addEventListener('scroll', updateColorHeadSync, { passive: true });
       window.addEventListener('resize', updateColorHeadSync, { passive: true });
@@ -2150,7 +2170,7 @@
       // flat-coloured cards at this width (style.css) — each card carries
       // its own background colour in CSS, so none of the shared sticky's
       // JS-driven cross-fade/ripple/entrance below applies.
-      if (isCompact()) {
+      if (isBlueprintCompact()) {
         colorSticky.style.backgroundColor = '';
         colorSticky.style.color = '';
         colorSticky.style.transform = '';
@@ -2319,7 +2339,7 @@
     // Both the mark-redraw-and-fill phase and the pinball physics below
     // are removed outright at this width — style.css hides
     // .brandid__color-seal/-symbol, so there's nothing left to drive.
-    if (!stage || !sticky || !symbol || prefersReduced || isCompact()) return;
+    if (!stage || !sticky || !symbol || prefersReduced || isBlueprintCompact()) return;
 
     // Bounces off the sticky stage's edges and the title/lead/caption text
     // groups (must never overlap them), free-running rather than tied to
@@ -2909,7 +2929,7 @@
     // own dash values still need clearing or nothing reveals them.
     // isCompact() shares this same fallback: a static, fully-drawn mark
     // rather than a smaller wheel-scrubbed draw.
-    if (prefersReduced || isCompact()) {
+    if (prefersReduced || isBlueprintCompact()) {
       section.classList.add('is-drawing');
       segs.forEach(seg => { seg.style.strokeDasharray = 'none'; seg.style.strokeDashoffset = '0'; });
       const handleLines0 = Array.from(section.querySelectorAll('.bp-handles line'));
@@ -3085,10 +3105,11 @@
     const wordmarkPanel = document.querySelector('.brandid__blueprint-panel--wordmark');
     if (!stage || !diagramPanel || !wordmarkPanel) return;
 
-    // Reduced motion / isCompact(): the shared CSS block already switches
-    // .brandid__blueprint-stage back to plain stacked flow with both panels
-    // forced visible — nothing for this scroll-driven crossfade to do.
-    if (prefersReduced || isCompact()) return;
+    // Reduced motion / isBlueprintCompact(): the shared CSS block already
+    // switches .brandid__blueprint-stage back to plain stacked flow with
+    // both panels forced visible — nothing for this scroll-driven
+    // crossfade to do.
+    if (prefersReduced || isBlueprintCompact()) return;
 
     const clamp01 = v => Math.max(0, Math.min(1, v));
     const smoothstep = t => t * t * (3 - 2 * t);
@@ -3378,10 +3399,10 @@
   function initColorSnap() {
     const stage = document.getElementById('colorPrinciple');
     // Gated outright, not relying only on Lenis skipping coarse pointers —
-    // a narrow desktop/DevTools window with a real mouse is isCompact()
+    // a narrow desktop/DevTools window with a real mouse is isBlueprintCompact()
     // AND fine-pointer at once, where Lenis stays active and this could
     // still fire.
-    if (!stage || prefersReduced || isCompact()) return;
+    if (!stage || prefersReduced || isBlueprintCompact()) return;
 
     // Only within this band of .brandid__color-stage's own top crossing
     // the viewport top do we pull — far outside it, normal scroll (and
@@ -3486,19 +3507,18 @@
     }, { passive: true });
   }
 
-  if (isCompact()) {
-    [
-      '.acycle__steps',
-      '.vwipe__vision',
-      '.whyp__copy-sticky',
-      '.brandid__dna-items',
-      '.brandid__color-caption',
-    ].forEach(sel => {
-      const el = document.querySelector(sel);
-      enableWheelHorizontalScroll(el);
-      enableLoopWrap(el);
-    });
-  }
+  [
+    { sel: '.acycle__steps', when: isCompact },
+    { sel: '.vwipe__vision', when: isCompact },
+    { sel: '.whyp__copy-sticky', when: isCompact },
+    { sel: '.brandid__dna-items', when: isDnaCompact },
+    { sel: '.brandid__color-caption', when: isBlueprintCompact },
+  ].forEach(({ sel, when }) => {
+    if (!when()) return;
+    const el = document.querySelector(sel);
+    enableWheelHorizontalScroll(el);
+    enableLoopWrap(el);
+  });
 
   /* ---------- Color Story: three photos cross-fade with a curtain wipe, one pinned stage ---------- */
 
@@ -4840,19 +4860,19 @@
      used elsewhere for the active card (initApproachActive's
      updateHorizontal, updateColorHeadSync, etc). */
   function initHorizontalScrollDots() {
-    if (!isCompact()) return;
     const ROWS = [
-      { wrap: '.acycle__steps', item: '.acycle__step' },
-      { wrap: '.vwipe__vision', item: '.vwipe__vstep' },
-      { wrap: '.whyp__copy-sticky', item: '.whyp__step' },
-      { wrap: '.brandid__dna-items', item: '.brandid__dna-item' },
+      { wrap: '.acycle__steps', item: '.acycle__step', when: isCompact },
+      { wrap: '.vwipe__vision', item: '.vwipe__vstep', when: isCompact },
+      { wrap: '.whyp__copy-sticky', item: '.whyp__step', when: isCompact },
+      { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isDnaCompact },
       // Color Principle's dots are created + driven in initBrandIdentity
       // (updateColorHeadSync) instead — its cards are stacked cross-fade
       // layers, not sliding items, so this generic "active = card nearest
       // the wrap's centre" test can't tell them apart, and the caption
       // (not the cards-row wrap) is the actual scroll container.
     ];
-    ROWS.forEach(({ wrap, item }) => {
+    ROWS.forEach(({ wrap, item, when }) => {
+      if (!when()) return;
       const el = document.querySelector(wrap);
       if (!el) return;
       const items = Array.from(el.querySelectorAll(item));
@@ -4896,7 +4916,7 @@
   // into .brandid__color-cards-row's own position, immediately after
   // it), so no separate touch-forwarding wiring is needed here either —
   // native scroll already covers them.
-  if (isCompact()) {
+  if (isBlueprintCompact()) {
     const colorCaptionEl = document.querySelector('.brandid__color-caption');
     if (colorCaptionEl) colorCaptionEl.dispatchEvent(new Event('scroll'));
   }

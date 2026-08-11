@@ -2417,8 +2417,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin: 0;
 }
 
-/* Sticky pin + cross-fade don't map to touch scroll — video moves to stacked flow, principles become a horizontal scroll-snap row like .acycle__steps/.whyp__copy-sticky. updateDna (main.js) returns early at isCompact(). */
-@media (max-width: 1023px) {
+/* Sticky pin + cross-fade don't map to touch scroll — video moves to stacked flow, principles become a horizontal scroll-snap row like .acycle__steps/.whyp__copy-sticky. updateDna (main.js) returns early at isDnaCompact(). The (max-height: 780px) arm covers wide-but-short viewports too — below it the title (fixed padding-top) and the absolutely-centred 4-principle block collide. */
+@media (max-width: 1023px), (max-height: 780px) {
   .brandid__dna { min-height: auto; padding: clamp(32px, 6vw, 48px) var(--edge) 0; }
   .brandid__dna-sticky {
     position: static;
@@ -3120,8 +3120,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   will-change: background-image;
 }
 
-/* None of the wheel-paced cross-fade/redraw/pinball maps to touch scroll. Diagram/Wordmark drop their pin and stack (reusing the reduced-motion resting values); the redraw+fill phase and pinball logo are removed outright. Color Principle's caption becomes a horizontal scroll-snap row. initBlueprintDraw/initBlueprintTransition/initColorPinball/updateColor all gain a matching isCompact() early return. */
-@media (max-width: 1023px) {
+/* None of the wheel-paced cross-fade/redraw/pinball maps to touch scroll. Diagram/Wordmark drop their pin and stack (reusing the reduced-motion resting values); the redraw+fill phase and pinball logo are removed outright. Color Principle's caption becomes a horizontal scroll-snap row. initBlueprintDraw/initBlueprintTransition/initColorPinball/updateColor all gain a matching isBlueprintCompact() early return. The (max-height: 920px) arm covers wide-but-short viewports too — below it the symbol diagram's copy column (the tallest content this stage ever centres) clips against the sticky's overflow:hidden. */
+@media (max-width: 1023px), (max-height: 920px) {
   .brandid__blueprint-wordmark-svg path { transition: none; }
   .brandid__blueprint-stage,
   .brandid__color-stage { height: auto; }
