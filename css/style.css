@@ -3471,6 +3471,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     min-height: clamp(360px, 72vw, 560px);
     overflow: hidden;
     margin-bottom: 0;
+    /* Explicit, not inherited — the (max-height: 620px) arm above can fire at a width still inside the 1024-1600px tier's own range, and that tier sets flex-direction:row/justify-content:center/gap on this same element. Without resetting them here too, this block only wins the properties it happens to also declare, leaving the rest as a broken row/column hybrid. */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
   }
   /* Fills the area the image's top-edge fade leaves transparent — each panel's own brand colour, not the plain page background. */
   .brandid__colorstory-panel[data-panel="0"] { background: var(--paper); }
@@ -3488,22 +3494,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     width: 100%;
     height: min(70vw, 60vh);
     aspect-ratio: auto;
+    /* Explicit — the 1024-1600px tier sets its own 20%/75% for a different (row) layout; unreset here it skews this scale off-centre. */
+    transform-origin: center;
     /* object-position X is inverted: a higher % crops the left, shifting the subject left on screen. */
     transform: scale(1.2);
     object-position: 20% 100%;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
     mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
   }
-  /* position:relative reactivates the base rule's left:50% (inert under position:static above) — that alone pushed the card 50% of the panel's width right of centre; left:auto here cancels it. */
+  /* position:relative reactivates the base rule's left:50% (inert under position:static above) — that alone pushed the card 50% of the panel's width right of centre; left:auto here cancels it. margin is a full shorthand (not just margin-top) so the 1024-1600px tier's own margin:0 can't leave this un-centred. */
   .brandid__colorstory-card {
     position: relative;
     left: auto;
     z-index: 1;
-    margin-top: clamp(64px, 11vw, 108px);
+    margin: clamp(64px, 11vw, 108px) auto 0;
   }
   .brandid__colorstory-copy {
     position: relative;
     z-index: 1;
+    /* Explicit — the 1024-1600px tier sets order:-1 and its own narrower width for a row layout; both need resetting here or they leak into this stacked one. */
+    order: 0;
+    width: min(480px, calc(100% - var(--edge) * 2));
     /* Left-aligned to the edge, overriding the <=1600px tier's centring — left margin pinned to var(--edge), right stays auto. Children are already left-set. */
     margin-left: var(--edge);
     margin-right: auto;
