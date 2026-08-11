@@ -38,6 +38,13 @@
   // scale can't be observed directly here.
   const VWIPE_SHORT_H = 400;
   const isVwipeCompact = () => isCompact() || window.innerHeight <= VWIPE_SHORT_H;
+  // Not a clipping risk (.acycle__step uses min-height, never overflow:hidden)
+  // — this is purely cosmetic. .acycle__word's font-size is a pure vw clamp
+  // (up to 300px) with no height term, so on a short-but-wide viewport a
+  // single word can dwarf the available height; below this the compact
+  // clamp (much smaller ceiling) reads better.
+  const ACYCLE_SHORT_H = 500;
+  const isAcycleCompact = () => isCompact() || window.innerHeight <= ACYCLE_SHORT_H;
 
   // isCompact() branches (and CSS's max-width:1025px rules) evaluate once at
   // setup, not live on every scroll tick — checking live caused scroll jank.
@@ -45,15 +52,17 @@
   // re-running each init live. Debounced so a mid-drag resize reloads once
   // it settles, not on every intermediate frame. isDnaCompact()/
   // isBlueprintCompact()/isColorStoryCompact()/isWhypCompact()/
-  // isVwipeCompact() get the same treatment, since their height term gates
-  // setup-time branches (initBlueprintTransition, initColorStory,
-  // initWhyPiltong, initVisionWipe, etc.) just like isCompact() does.
+  // isVwipeCompact()/isAcycleCompact() get the same treatment, since their
+  // height term gates setup-time branches (initBlueprintTransition,
+  // initColorStory, initWhyPiltong, initVisionWipe, initApproachTextFog,
+  // etc.) just like isCompact() does.
   let lastIsCompact = isCompact();
   let lastIsDnaCompact = isDnaCompact();
   let lastIsBlueprintCompact = isBlueprintCompact();
   let lastIsColorStoryCompact = isColorStoryCompact();
   let lastIsWhypCompact = isWhypCompact();
   let lastIsVwipeCompact = isVwipeCompact();
+  let lastIsAcycleCompact = isAcycleCompact();
   let resizeReloadTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeReloadTimer);
@@ -63,7 +72,8 @@
           isBlueprintCompact() !== lastIsBlueprintCompact ||
           isColorStoryCompact() !== lastIsColorStoryCompact ||
           isWhypCompact() !== lastIsWhypCompact ||
-          isVwipeCompact() !== lastIsVwipeCompact) location.reload();
+          isVwipeCompact() !== lastIsVwipeCompact ||
+          isAcycleCompact() !== lastIsAcycleCompact) location.reload();
     }, 200);
   }, { passive: true });
 
@@ -339,7 +349,7 @@
     }
 
     function update() {
-      if (isCompact()) updateHorizontal();
+      if (isAcycleCompact()) updateHorizontal();
       else updateVertical();
     }
 
@@ -365,7 +375,7 @@
     // widths since it works the same under touch as wheel. This blur-clear
     // /fade-in on the copy is scroll-driven text motion instead, which is
     // in scope for the standing "no text animation" rule, so it alone skips.
-    if (prefersReduced || isCompact()) return;
+    if (prefersReduced || isAcycleCompact()) return;
     const sec = document.getElementById('ourApproach');
     if (!sec) return;
     // Only the intro title and the first step (Essential); the other three
@@ -415,7 +425,7 @@
   function initApproachReveals() {
     // Same reasoning as initApproachTextFog above: text motion skips at
     // compact widths, background switch doesn't.
-    if (prefersReduced || isCompact()) return;
+    if (prefersReduced || isAcycleCompact()) return;
     const sec = document.getElementById('ourApproach');
     if (!sec) return;
     const steps = Array.from(sec.querySelectorAll('.acycle__step'));
@@ -3534,7 +3544,7 @@
   }
 
   [
-    { sel: '.acycle__steps', when: isCompact },
+    { sel: '.acycle__steps', when: isAcycleCompact },
     { sel: '.vwipe__vision', when: isVwipeCompact },
     { sel: '.whyp__copy-sticky', when: isWhypCompact },
     { sel: '.brandid__dna-items', when: isDnaCompact },
@@ -4887,7 +4897,7 @@
      updateHorizontal, updateColorHeadSync, etc). */
   function initHorizontalScrollDots() {
     const ROWS = [
-      { wrap: '.acycle__steps', item: '.acycle__step', when: isCompact },
+      { wrap: '.acycle__steps', item: '.acycle__step', when: isAcycleCompact },
       { wrap: '.vwipe__vision', item: '.vwipe__vstep', when: isVwipeCompact },
       { wrap: '.whyp__copy-sticky', item: '.whyp__step', when: isWhypCompact },
       { wrap: '.brandid__dna-items', item: '.brandid__dna-item', when: isDnaCompact },

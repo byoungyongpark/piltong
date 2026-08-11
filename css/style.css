@@ -1375,7 +1375,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   will-change: opacity, transform;
 }
 .acycle__ground.is-active { opacity: 1; }
-@media (max-width: 1023px) {
+@media (max-width: 1023px), (max-height: 500px) {
   /* :first-child, not .is-active — this must stay tied to the first image specifically, regardless of which one is currently active. */
   .acycle__ground:first-child {
     background-position: 88% center;
@@ -1493,8 +1493,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .acycle__ground, .acycle__scrim { transition: none; }
 }
 
-/* Touch scroll: initApproachActive (main.js) keeps switching .acycle__ground's .is-active as before; only how much screen it occupies changes. Steps become a horizontal scroll-snap row (like .vwipe__vision), and initApproachActive switches to a "closest to centre" test (updateHorizontal) for which step is active. */
-@media (max-width: 1023px) {
+/* Touch scroll: initApproachActive (main.js) keeps switching .acycle__ground's .is-active as before; only how much screen it occupies changes. Steps become a horizontal scroll-snap row (like .vwipe__vision), and initApproachActive switches to a "closest to centre" test (updateHorizontal) for which step is active. isAcycleCompact() (main.js) gates this same way past the width breakpoint — not a clipping fix (.acycle__step's min-height just grows with content, never clips) but a typography one: .acycle__word's font-size is a pure vw clamp with no height term, so it can dwarf a short-but-wide viewport at desktop sizing. */
+@media (max-width: 1023px), (max-height: 500px) {
   /* position:absolute + inset:0, not sticky with a timed release — a fixed-height peek window used to release early and leave a black gap before .whyp while content kept scrolling. This covers the section by construction instead. */
   .acycle__bg {
     position: absolute;
