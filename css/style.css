@@ -9229,24 +9229,27 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    clamp(var(--edge),24vw,300px), leaving the two 216px apart at
    1400px (request: "좌우 여백은... 텍스트 그룹과 똑같이
    맞춰달라니깐"). Matched that exact clamp next, which held them in
-   sync everywhere — then asked to only minimize past 1600px, kept as
-   a hard @media(min-width:1600px) jump, then asked to make that jump
-   smooth instead. All of that had the direction backwards, though —
-   confirmed after actually seeing it: it should be the OTHER way
-   round, minimized below 1600px and wide from 1600px up (request:
-   "하단부 여백 반대로 된것 같은데 1600이상 해상도에서 좌우 여백이
-   넓어야하고 1600이하 구간에서 여백이 먼저 최소화 시킨 후 그 기준으로
-   자연스럽게 축소화 되고 늘어나는 구성이어야해"). Rebuilt as one
-   two-point line running the opposite direction: 112px (padding-top's
-   own ceiling, "먼저 최소화") right at 1024px, rising to 300px
-   (.apps__intro's own ceiling, "넓어야") by 1600px — clamp()'s own
-   ceiling then holds it flat past that point on its own, so the whole
-   1024px+ range is covered by this single declaration, no separate
-   media query needed. 32.6389/vw slope, -222.22 intercept. */
+   sync everywhere, then narrowed to only minimizing past 1600px (kept
+   wide below it, matching .apps__intro) — briefly flipped the other
+   way round on a request that read as the opposite direction, then
+   flipped back to this shape once more, on request ("1600구간
+   진입하면 좌우 여백을 줄여줘"): wide (.apps__intro's own clamp) below
+   1600px, easing down smoothly to the minimized 112px floor (matching
+   padding-top's own ceiling) by 1600px, flat past that on the clamp's
+   own floor. Below the base rule's own 1250px plateau (24vw=300 is
+   reached there) this is still rising toward that same 300px meeting
+   point, so the whole curve reads as one smooth rise-then-fall-then-
+   flat shape with no seam at either 1250 or 1600. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
-  padding-left: clamp(112px, calc(-222.22px + 32.6389vw), 300px);
-  padding-right: clamp(112px, calc(-222.22px + 32.6389vw), 300px);
+  padding-left: clamp(var(--edge), 24vw, 300px);
+  padding-right: clamp(var(--edge), 24vw, 300px);
+}
+@media (min-width: 1250px) {
+  .outro {
+    padding-left: clamp(112px, calc(971.43px - 53.7143vw), 300px);
+    padding-right: clamp(112px, calc(971.43px - 53.7143vw), 300px);
+  }
 }
 /* justify-content was space-between, stretching .outro__info out to
    the row's own far right edge — a 50/50 split with the row's own
