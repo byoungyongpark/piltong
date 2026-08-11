@@ -468,6 +468,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   width: max-content;
   max-width: var(--hero-measure);
 }
+@media (max-width: 1023px) {
+  .hero-content {
+    /* Matched to this element's own left inset (--hero-gutter) instead of the desktop-tuned 7vh figure, so the eyebrow+title block sits the same distance off every edge. */
+    bottom: var(--hero-gutter);
+  }
+}
 .hero-eyebrow {
   /* Floored — a pure ratio fell to 7.5px on phones where the title itself is only ~40px. */
   margin: 0 0 max(14px, calc(var(--hero-big) * .16));
