@@ -464,15 +464,10 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   position: absolute;
   z-index: 1;
   left: var(--hero-gutter);
-  bottom: clamp(40px, 7vh, 96px);
+  /* Tracks the same --hero-gutter as left so the block sits the same distance off every edge, but capped by 10vh so a wide-but-short viewport (gutter grows with width, not height) doesn't push it implausibly far up. Floored at 20px, matching --hero-gutter's own floor. */
+  bottom: max(20px, min(var(--hero-gutter), 10vh, 96px));
   width: max-content;
   max-width: var(--hero-measure);
-}
-@media (max-width: 1023px) {
-  .hero-content {
-    /* Matched to this element's own left inset (--hero-gutter) instead of the desktop-tuned 7vh figure, so the eyebrow+title block sits the same distance off every edge. */
-    bottom: var(--hero-gutter);
-  }
 }
 .hero-eyebrow {
   /* Floored — a pure ratio fell to 7.5px on phones where the title itself is only ~40px. */
