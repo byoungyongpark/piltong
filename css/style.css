@@ -9171,18 +9171,17 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    ("영문 타이틀 위의 여백은 0"), then asked back once it read as too
    flush against Applications above it (that section's own bottom
    padding was ALSO removed the same pass, so the two sections had
-   landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘").
-   Same shared clamp(56px,10vw,96px) top-padding convention every
-   other section in this file already uses, not the original
-   frame--auto value.
-   Side padding widened past frame--auto's own plain var(--edge), on
-   request ("참조 사진처럼 좌우 여백 넉넉히 준뒤") — same two-point
-   shape as .apps's own generous side margin, just a shorter reach
-   since this section's content is narrower. */
+   landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘"),
+   then widened a further notch (request: "상단 여백 조금만 더주고").
+   Side padding was its own generous clamp(var(--edge),10vw,180px) —
+   unified instead with .apps__intro's own compact margin (plain
+   var(--edge), the same "하나의 아이덴티티" text group this section's
+   own copy answers), on request ("좌우 여백은 하나의 아이덴티티 한글
+   그룹 좌우 여백과 통일시키자"). */
 .outro {
-  padding-top: clamp(56px, 10vw, 96px);
-  padding-left: clamp(var(--edge), 10vw, 180px);
-  padding-right: clamp(var(--edge), 10vw, 180px);
+  padding-top: clamp(64px, 11vw, 112px);
+  padding-left: var(--edge);
+  padding-right: var(--edge);
 }
 /* justify-content was space-between, stretching .outro__info out to
    the row's own far right edge — a 50/50 split with the row's own
@@ -9210,10 +9209,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      whatever margin an element inside the left one carries. */
   margin: 0;
   font-family: var(--font-en);
-  font-size: clamp(28px, 3.4vw, 48px);
+  font-size: clamp(24px, 2.6vw, 36px);
   font-weight: 500;
   line-height: 1.18;
-  letter-spacing: -.015em;
+  /* Was -.015em — widened toward normal, on request ("자간은 살짝
+     넓히고"). */
+  letter-spacing: -.005em;
   text-transform: uppercase;
   color: var(--ink);
 }
@@ -9241,10 +9242,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   gap: 6px;
 }
 /* Was var(--mono) (IBM Plex Mono) — switched to Outfit, on request
-   ("우측 내용들도 다 Outfit 폰트로 대체"). */
+   ("우측 내용들도 다 Outfit 폰트로 대체"). Size bumped 12->14px, on
+   request ("우측 정보는 타이틀 폰트 사이즈 조금 더 키워주고"). */
 .outro__label {
   font-family: var(--font-en);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -9254,7 +9256,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   font-family: var(--font-en);
   font-size: 17px;
   font-weight: 500;
-  line-height: 1.4;
+  /* Was 1.4 — tightened, on request ("우측 이름간 행간 줄여주고"). */
+  line-height: 1.25;
   color: var(--ink);
 }
 .outro__value--muted { color: var(--ink-70); }
@@ -9277,7 +9280,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   border-top: 1px solid var(--ink-12);
   font-family: var(--font-en);
   font-weight: 300;
-  font-size: 12px;
+  /* Was 12px, on request ("카피라이터도 조금 더 키우고"). */
+  font-size: 14px;
   /* Was .02em, widened on request ("하단 카피라이터 자간은 조금 넓히고"). */
   letter-spacing: .05em;
   color: var(--ink-45);
