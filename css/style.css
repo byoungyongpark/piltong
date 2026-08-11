@@ -471,8 +471,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 @media (max-width: 1023px) {
   .hero-content {
-    /* Deliberately not matched to --hero-gutter's own 20px floor here — at compact widths bottom reads better sitting closer to the edge than left does. 1vh (not 2vh) so tall portrait phones settle near the same floor landscape already does, instead of sitting visibly higher. */
-    bottom: clamp(8px, 1vh, 40px);
+    /* Deliberately not matched to --hero-gutter's own 20px floor — a flat, near-edge value, not vh-driven, so it doesn't creep back up on tall portrait phones the way a vh-based figure did. */
+    bottom: 4px;
   }
 }
 .hero-eyebrow {
