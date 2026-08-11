@@ -9223,25 +9223,25 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    padding was ALSO removed the same pass, so the two sections had
    landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘"),
    then widened a further notch (request: "상단 여백 조금만 더주고").
-   Side padding went back and forth on direction a few times (matching
-   .apps__intro's own wide clamp everywhere, then only below 1600px,
-   then only above it, then below it again) before landing on its final
-   shape, confirmed explicitly: >=1600px keeps the wide value
-   (.apps__intro's own clamp(var(--edge),24vw,300px) — plenty of screen
-   real estate there anyway), and BELOW 1600px it's reduced well past
-   that, freeing up real content width on the narrower desktop range
-   where it actually matters (request: "1600이상 구간에서는 좌우
-   여백이 이전 수치가 맞고 1600진입하고 그 이하부터는 좌우 여백을
-   이전 수치보다 확 줄여서 공간을 확보하자"). One continuous two-point
-   line covers the whole 1024px+ range: 112px (padding-top's own
-   ceiling) at 1024px, rising to 300px by 1600px — clamp()'s own
-   ceiling then holds it flat past that point on its own, so nothing
-   separate is needed for >=1600px. 32.6389/vw slope, -222.22
-   intercept. */
+   Side padding went back and forth on direction several times (matching
+   .apps__intro's own wide 300px clamp everywhere, then only below
+   1600px, then only above it, and so on) before landing on its actual
+   final shape: 300px was too wide a ceiling everywhere, full stop —
+   at 1600px specifically it should land around 120px, well under
+   300px, and from there it keeps decreasing smoothly the whole way
+   down to compact's own var(--edge) territory instead of holding flat
+   or matching .apps__intro's scale at all (request: "1600진입시 좌우
+   여백을 300이하(120정도)로 줄이고 그기준에서 모바일까지 자연스럽게
+   줄어들길 원한거야"). One continuous two-point line, floor pinned to
+   var(--edge) itself (not a fixed px) so it lands on EXACTLY the same
+   value compact's own override uses right at the 1023/1024 seam, no
+   jump there: var(--edge) at 1024px, rising to 120px by 1600px, then
+   flat on the clamp's own ceiling past that (no separate >=1600px rule
+   needed). 10.1667/vw slope, -42.63 intercept. */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
-  padding-left: clamp(112px, calc(-222.22px + 32.6389vw), 300px);
-  padding-right: clamp(112px, calc(-222.22px + 32.6389vw), 300px);
+  padding-left: clamp(var(--edge), calc(-42.63px + 10.1667vw), 120px);
+  padding-right: clamp(var(--edge), calc(-42.63px + 10.1667vw), 120px);
 }
 /* justify-content was space-between, stretching .outro__info out to
    the row's own far right edge — a 50/50 split with the row's own
