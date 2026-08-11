@@ -9209,7 +9209,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      whatever margin an element inside the left one carries. */
   margin: 0;
   font-family: var(--font-en);
-  font-size: clamp(24px, 2.6vw, 36px);
+  /* Back to the original clamp(28px,3.4vw,48px) — shrinking it to fit
+     3 lines was an unwanted side effect nobody asked for (request:
+     "왼쪽 영문 타이틀 사이즈 왜줄인거야? 원래대로"). The 3-line split
+     itself is now handled purely by where the <br>s fall in the markup
+     (rebalanced to shorter segments that actually fit this column at
+     the original size), not by shrinking the font to make room. */
+  font-size: clamp(28px, 3.4vw, 48px);
   font-weight: 500;
   line-height: 1.18;
   /* Was -.015em — widened toward normal, on request ("자간은 살짝
@@ -9253,6 +9259,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   color: var(--ink-45);
 }
 .outro__value {
+  /* <p>'s own UA-stylesheet margin (1em top+bottom) was stacking on
+     top of .outro__block's flex gap:6px between consecutive value
+     lines in the same block — same class of bug as .outro__title's
+     own h2 margin fixed earlier, just not caught here yet (request:
+     "우측 정보 타이틀 아래 내용간 여백 벌어진것 좁히고 싶어"). Zeroed
+     so gap:6px is the only space between them now. */
+  margin: 0;
   font-family: var(--font-en);
   font-size: 17px;
   font-weight: 500;
