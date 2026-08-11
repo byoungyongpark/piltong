@@ -929,20 +929,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 }
 .hero-logo.is-on-light .hero-logo__mark { fill: var(--ink); }
 
-/* Compact-only: the fixed nav grows from a small corner mark into a
-   full-width bar — 100% wide, 50px tall — with a dark blurred surface
-   behind it once shown, on request ("상단 탑바 가로 100% 세로
-   50픽셀로 구성... 위로 스크롤 할때 어두운 블러 배경"). The hide-on-
-   scroll-down / show-on-scroll-up mechanics (initHeroLogoNav, the
-   translateY(HIDE_Y) transform + .is-nav-fixed toggle) are untouched —
-   only the visual shell changes here, so "아래로 내려올땐 지금처럼
-   안보이다가" just falls out of the existing transform carrying this
-   whole bar off-screen. top/left reset to 0 (was the small inset
-   corner position) so the bar spans edge-to-edge; width/height override
-   the mark-sized button box, and explicit mark height below keeps the
-   wordmark itself from stretching to fill the new 50px/100% box. Placed
-   after the base rules above so it wins the equal-specificity/source-
-   order tie this file hits repeatedly. */
 @media (max-width: 1023px) {
   .hero-logo.is-nav-fixed {
     top: 0;
@@ -951,13 +937,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     height: 50px;
     display: flex;
     align-items: center;
-    /* Left, not centred (was justify-content:center) — the mark keeps
-       its original corner alignment inside the new bar rather than
-       jumping to the middle, on request ("상단 워드마크 센터 정렬
-       말고 기존 좌측에"). Same inset the small corner mark used
-       (.hero-logo's own base top/left, clamp(20px,2vw,28px)) as
-       padding instead, so the horizontal position doesn't visibly
-       shift when the bar grows out of that corner mark. */
     justify-content: flex-start;
     padding-left: clamp(20px, 2vw, 28px);
     padding-left: round(clamp(20px, 2vw, 28px), 1px);
@@ -969,10 +948,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     width: auto;
     height: 14px;
   }
-  /* Always paper now that a dark surface sits behind the bar whenever
-     it's visible — the light/dark section-based ink switch above
-     (.is-on-light) would otherwise turn the mark unreadable against
-     it, on request ("워드마크 색상은 페이퍼색으로 통일"). */
   .hero-logo.is-nav-fixed.is-on-light .hero-logo__mark { fill: var(--paper); }
 }
 
@@ -3430,24 +3405,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      tight (request: "와이필통 타이틀 흘러가는 아래 여백도 더 넉넉하게
      줘"). Same two-point construction, both ends pushed up ~16px. */
   margin: clamp(36px, calc(11.01px + 5.9504vw), 72px) auto 0;
-  /* Was a two-point line matched almost edge-to-edge to the container
-     (943px ceiling in a 1024px-wide box — ~41px each side — then
-     widened further to 990px, ~17px each side, chasing height via
-     width since there's no independent height control here). Both
-     read as having no real side margin at all, and the second pass
-     made it worse, not better ("1024포함 그 이하 구간에서 와이필통
-     좌우에 여백 좀 넓혀서 심볼 영상 좌우로 여백이 어느정도 존재하길
-     희망하는거야 오히려 지금은 좌우가 더 좁아졌네"). Switched to a
-     margin-first formula instead of a width-first one: subtract the
-     SAME var(--edge) inset every other section's content uses, so the
-     video always keeps a real, familiar margin at any compact width —
-     this does mean it's no longer chasing extra height via width (that
-     was in direct tension with "more margin" anyway, given a fixed
-     aspect ratio and a fixed viewport can't grow both at once).
-     Widened a step further past plain var(--edge) since — a real,
-     dedicated margin of its own rather than sharing the site's
-     smallest/default inset (request: "와이필통 심볼 영상 좌우로 여백
-     조금 더 넓히고"). */
   width: calc(100% - 2 * clamp(32px, 8vw, 120px));
   /* Removed — desktop's shadow (below), even scaled down, still read
      as an unwanted mark under the video at compact sizes (request:
@@ -3480,19 +3437,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      and the second cut brought the top down further than the bottom,
      not an even split (request: "와이필통 한글 컨텐츠 그룹 위아래
      여백도 조금더 축소하는데 상단은 조금 더 축소"). */
-  /* Side inset moved OFF this row's own padding entirely — see the
-     note on .whyp__step's padding-left/-right below for why (request:
-     "와이필통 텍스트 그룹 터치스크롤 되는부분 컨텐츠 그룹이 가운데
-     오게 정리 현재 다음 터치스크롤 될 부분이 보인다"). Was briefly
-     var(--edge), matching .acycle__steps/.vwipe__vision's own compact
-     pattern — but unlike those two, THIS row's cards also carry their
-     own wide inner padding (below), so stacking var(--edge) on top of
-     it double-inset the text past its original, intended width
-     (request: "터치 스크롤 되는부분 좌우로 뭔가 여백이 생긴듯한데...
-     원래대로 좁혀서 100%로 컨텐츠 나오게 해줘"). 0 here, so the card's
-     own padding is the ONLY horizontal inset — same total text width
-     as the original single-padding setup, while the card's OUTER box
-     still spans the row's full, true width (no peek). */
   padding: clamp(16px, 3vw, 32px) 0 clamp(28px, 5vw, 44px);
 }
 .whyp--compact .whyp__step {
@@ -3500,36 +3444,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   grid-area: auto;
   flex: 0 0 100%;
   min-width: 0;
-  /* Base rule's max-width:900px is a desktop constraint (the stacked/
-     cross-fade layout) that doesn't belong here — left in place, it
-     capped the card narrower than its own full-width flex slot right
-     at the top of the compact range (measured: 900px card in a
-     ~941px-wide slot at 1023px), and margin:0 auto's own re-centring
-     only turns that into an even bigger two-sided peek instead of
-     fixing it — same reasoning .vwipe__vstep's own compact override
-     already documents for this exact shape of bug. */
   max-width: none;
-  /* This wide inset used to live on the ROW's own padding (was
-     clamp(88px,11vw,140px) left/right on .whyp__copy-sticky above) —
-     moved here instead, since padding on the scroll CONTAINER doesn't
-     reserve space per-card, it only insets the very first/last card.
-     Every card in between still sat directly against its neighbours
-     (just gap apart), so once scroll-snap-align:center centred a card
-     — itself only (container width − 2×padding) wide — the leftover
-     space on either side, exactly padding-wide, wasn't empty: it was
-     the next/previous card's own edge poking in. Each card's own BOX
-     is the full scroll width, so nothing adjacent is ever in view at
-     rest.
-     The clamp itself is a genuine two-point line now, not the flat
-     88px reused from .whyp__copy-sticky's own desktop 1024-1280px
-     band — that one only starts moving past 800px wide (11vw first
-     clears its own 88px floor there), so it sat flat at 88px for the
-     entire 375-800px span instead of actually scaling with it (request:
-     "1023아래 구간에선 여기 좌우 여백을 달리줘야할것 같아"). Real two-
-     point line instead: 28px@375 up to 112px@1023 (matching the old
-     formula's own value right at the 1023/1024 seam, so there's no
-     jump crossing into desktop's band), scaling the whole way instead
-     of holding flat through most of the range. */
   box-sizing: border-box;
   padding-left: clamp(28px, calc(-20.61px + 12.963vw), 112px);
   padding-right: clamp(28px, calc(-20.61px + 12.963vw), 112px);
@@ -3869,16 +3784,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-right: clamp(88px, 11vw, 140px);
   }
 }
-/* Wider still, landscape iPad Pro specifically (11": 1194 wide, 12.9":
-   1366 — the band above only reaches 1280, missing the 12.9" size
-   outright) — the same cramped-side-margin complaint as the rule above,
-   asked again for landscape once portrait got its own fix elsewhere
-   (request: "아이패드 프로 가로 모드에서 비쥬얼 아이덴티티 섹션 영문
-   타이틀 및 걸쳐진 사진 좌우로 여백 조금 더 넉넉하게"). Layered on top
-   rather than widening the rule above in place, so that rule's own
-   unconditional (any-orientation) 1024-1280 coverage — including
-   portrait at that width — stays exactly as it was. Placed after it so
-   this wins the overlapping 1024-1280 range on source order. */
 @media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
   .brandid__intro {
     padding-left: clamp(96px, 13vw, 160px);
@@ -4179,20 +4084,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      loop. Fixed instead by the wobble loop in initBrandIdentity
      (main.js) — reads the video's own currentTime and drives a small
      periodic translateX synced to the loop, composed with this
-     element's existing scroll-driven scale rather than fighting it.
-     --dna-wobble-amp/-phase/-turn-fraction are its tuning knobs, read
-     live off this element every frame so they're adjustable directly
-     in DevTools — I can't see the actual footage to know exactly when
-     the turn happens or how long it lasts, so these are a first
-     guess: a one-sided 14px pull that starts right at the loop point
-     (phase 0) and settles back to centre over the first 40% of the
-     loop (turn-fraction .4), then holds centre the rest of the way —
-     not a symmetric swing (request: "영상 시작과 함께 왼쪽으로 먼저
-     이동되고 그다음에 다시 제자리로 돌아와야"). Nudge phase in
-     0.05-ish steps (a fraction of the loop, 0-1) until the pulse
-     starts exactly when the turn does, turn-fraction until it settles
-     back to centre exactly when the turn ends, and amp until the
-     distance feels right. */
+     element's existing scroll-driven scale rather than fighting it. */
   --dna-wobble-amp: 14px;
   --dna-wobble-phase: 0;
   --dna-wobble-turn-fraction: .4;
@@ -4252,10 +4144,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 @media (min-width: 1024px) and (max-width: 1280px) {
   .brandid__dna-right { flex-basis: 54%; }
 }
-/* Padding pulled in a step at this band — was the base rule's own
-   100/100/60 (top/left/right) — on direct request. Placed after the
-   base rule so it wins the equal-specificity/source-order tie this
-   file hits repeatedly. */
 @media (min-width: 1024px) and (max-width: 1281px) {
   .brandid__dna-right {
     padding-top: 60px;
@@ -4263,42 +4151,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-right: 60px;
   }
 }
-/* Hide the left symbol video for a tall desktop-width window — was
-   done via min-height:768px, which turned out to catch ordinary
-   landscape laptops (1366x768 etc.) too and got reverted outright (see
-   git history / prior note). Originally scoped to just iPad Pro in
-   portrait (12.9": 1024x1366, capped at max-width:1280px), on request
-   ("아이패드 프로 세로모드에서 쉐입 디엔에이 왼쪽 심볼영상 숨기자").
-   Widened to any portrait-oriented desktop-width monitor, on request
-   ("모니터를 세로로 돌렸을 해상도 비율... 쉐입 디엔에이 좌측 심볼영상은
-   숨기자") — used orientation:portrait for that pass.
-   orientation:portrait alone turned out too narrow a net, though: the
-   column is a fixed 46%-of-viewport-width next to a near-full-viewport
-   -height sticky, so it reads just as awkwardly tall/cramped (empty
-   headroom above and below the subject) well BEFORE the window
-   actually crosses into portrait — confirmed at 1564x998 (ratio 1.57,
-   still technically landscape, orientation:portrait never matches)
-   which the reference screenshot showed reading exactly as bad as a
-   true portrait window (request: "참조 사진처럼 이런 어정쩡한 비율로
-   좌측 영상이 보일경우 그냥 다 숨기고 싶은데"). Switched to
-   max-aspect-ratio instead of orientation — this is a direct viewport
-   width:height comparison rather than the browser's binary port/land
-   classification, so it catches this "nearly-there" landscape case
-   too; portrait windows (ratio < 1) are already well under this
-   threshold, so nothing from the old rule is lost. 5/3 (1.667) is a
-   first-guess cutoff — comfortably past the confirmed-bad 1.57 case,
-   but I can't see the actual rendered footage here, so the exact line
-   between "reads fine" and "reads cramped" may want nudging once
-   actually seen at a few in-between ratios.
-   Briefly replaced with a centred-video/stacked-content layout on a
-   request naming "심볼 섹션" — turned out to be a mix-up with a
-   DIFFERENT section (Symbol Construction, .brandid__construction,
-   the one with the actual hand-drawn bezier diagram — "그려진 심볼"
-   literally means the DRAWN symbol, which is that diagram, not this
-   video), on request ("Shape DNA... 이거 원한거 아니야 이전으로
-   돌려줘(참조 사진 부분을 말했던거야)"). Reverted straight back to
-   this hide rule; the centred/stacked layout belongs on
-   .brandid__construction instead. */
 @media (min-width: 1024px) and (max-aspect-ratio: 5/3) {
   .brandid__dna-media { display: none; }
   .brandid__dna-right { flex-basis: 100%; }
@@ -4662,23 +4514,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     gap: clamp(16px, 4vw, 28px);
-    /* Base rule's own max-width:100% (desktop's grid-column constraint)
-       still applies here and clamps width:100vw straight back down to
-       the parent's own (narrower) content width otherwise — same
-       max-width-beats-width trap, needs an explicit override. */
+    /* Base rule's max-width:100% would otherwise clamp width:100vw back down. */
     max-width: none;
-    /* Full-bleed out of .brandid__dna's own section padding (var(--edge)
-       each side) — this row previously just sat inside that inset like
-       any other in-flow content, so each "100%-wide" card was actually
-       only the section's own narrower content width, with the section's
-       edge padding reading as a fixed side margin around every card
-       (request: "1024이하 기준으로 쉐입디엔에이 터치스크롤 되는 부분
-       좌우 여백없이 풀화면에서 브라우저 좌우로 터치스크롤 되게").
-       Same technique .brandid__construction-row/.brandid__sizes already
-       use for their own full-bleed rows. .brandid__dna-item's own
-       padding (below) reinsets the TEXT by that same var(--edge), so
-       reading width is unchanged — only the row/card's outer box now
-       runs true edge-to-edge. */
     width: 100vw;
     margin-inline: calc(50% - 50vw);
   }
@@ -4975,15 +4812,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        확보"). */
     padding: clamp(96px, 15vw, 150px) calc(var(--edge) + 16px);
     gap: clamp(24px, 4vw, 40px);
-    /* Narrowed — the gap from the Korean group above down to the first
-       logo (request: "한글 그룹 아래 여백은 지금보단 조금 좁혀주고"),
-       then again — this is the actual gap down to the torn-paper edge
-       itself (background-position:top on this element's own box, right
-       after this margin), not just "down to the first logo" as the
-       comment above says — same thing, since the torn strip sits well
-       inside this element's own top padding either way (request:
-       "심볼&워드마크 한글 그룹 텍스트 하단과 종이찢어진 부분 사이
-       여백... 조금 줄이자"). */
     margin-top: clamp(20px, 3.5vw, 44px);
   }
 }
@@ -5175,20 +5003,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      --wordmark's own text-align:left) — only the title itself centers,
      see .brandid__blueprint-index's own compact rule below. */
 }
-/* Same "diagram centred above, text drops below" shape the compact
-   block just above already uses (this section's own proven fix for
-   the identical row-doesn't-fit problem), applied to a tall-but-
-   desktop-width window instead (iPad Pro portrait etc.) — the drawn
-   symbol was still pinned to the left edge here with the text column
-   squeezed beside it, on request ("Shape DNA... 이거 원한거 아니야...
-   참조 사진 부분을 말했던거야" — the reference screenshot was this
-   panel, not Shape DNA's own video; request restated for this panel:
-   "Symbol Construction 섹션에 적용해줘"). Sized larger than compact's
-   own 200-280px since a desktop-width window has more room to spend,
-   text stays left-aligned same as compact. Doesn't touch the shared
-   pinned stage itself (.brandid__blueprint-stage/-sticky, also used by
-   the wordmark/redraw/Color Principle phases) — only this one panel's
-   own internal row/column arrangement. */
 @media (min-width: 1024px) and (max-aspect-ratio: 5/3) {
   .brandid__blueprint-row {
     flex-direction: column;
@@ -6024,12 +5838,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      장식이 아니라 위쪽의 여백 좁게 좁혀주고"). */
   margin-bottom: clamp(16px, 2vw, 28px);
 }
-/* Hidden by default — "COLOR PRINCIPLE" reads as one line everywhere
-   above 420px (the title had a line break at one point and was
-   explicitly put back to one line — see the compact rule's own note
-   above). Forced back on, but only at the narrowest phones this time
-   (request: "420이하 에서 컬러 프린서플 영문 타이틀 컬러에서
-   줄바꿈하자"), same pattern as .acycle__intro-title-break. */
 .brandid__color-index-break {
   display: none;
 }
@@ -6180,21 +5988,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      trailing space before Color Principle) is a separate, still-
      untouched concern. */
   .brandid__blueprint-panel + .brandid__blueprint-panel {
-    /* Was clamp(72px,13vw,92px) on both margin-top and padding-top —
-       narrowed a step, on request ("심볼, 워드마크 사이에 구분라인
-       위아래를... 지금보다 조금씩 좁히자") — kept equal to each other
-       so the divider still sits centred between matching spaces on
-       both sides. margin-bottom (wordmark's own trailing space before
-       Color Principle) is a separate, untouched concern. */
     margin-top: clamp(56px, 10vw, 76px);
     margin-bottom: clamp(72px, 10vw, 128px);
-    /* Divider between SYMBOL and WORDMARK, same request/convention as
-       .brandid__construction-row's own new border-top above (request:
-       "심볼과 워드마크 섹션 사이에도 넣어주고"). Sits at the top of the
-       existing margin-top gap, with its own padding-top so the
-       wordmark graphic doesn't start flush against the line.
-       padding-top matched to this same rule's own margin-top (above
-       the line) so the divider stays centred between equal spaces. */
     padding-top: clamp(56px, 10vw, 76px);
     border-top: 1px solid var(--ink-12);
   }
@@ -6866,32 +6661,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     width: 100%;
     height: min(70vw, 60vh);
     aspect-ratio: auto;
-    /* object-position is the crop-alignment lever, shifting which part
-       of the source photo the cover-crop keeps (request: "컬러스토리
-       3가지 색상 배경 오브젝트 기준으로 오른쪽으로 조금 더 옮겨보자").
-       Was the 50% default (dead centre). 65% was tried first and read
-       as the wrong direction — object-position's X axis is where that
-       point of the SOURCE photo lands in the box, so a higher value
-       pins more of the photo's own right edge in place and crops the
-       left (the visible subject reads as shifting LEFT on screen), the
-       opposite of "오른쪽으로 옮기기"; a lower value keeps more of the
-       left source content and crops the right, shifting the subject
-       right on screen instead (request: "반대로 옮겨지길 원했어").
-       Pushed further still, plus a downward Y shift (higher Y = more of
-       the source's own bottom kept, cropping the top instead — request:
-       "조금 더 과감히 옮기고 아래로도 좀 내려가면 좋겠어", then twice
-       more: "아래로 조금 더 과감히 내려봐", "아래로 더더더") until Y hit
-       100%, the axis max — the source's own true bottom edge, nothing
-       further down to crop INTO. Past that point object-position alone
-       can't push any further, so the last circular object was landing
-       fully in frame instead of bleeding off the bottom edge the way
-       the reference photo shows it (request: "참조 사진 마지막 원형
-       오브제가 반틈정도 잘려보이게 내리고 싶은건데 만약 이게 끝단이면
-       살짝 키워서 잘려보이게 해봐"). scale(1.2) zooms the already-
-       cropped result from its own centre — .brandid__colorstory-panel's
-       own overflow:hidden (compact rule, above) crops the now-larger
-       image back down to the box, pushing every edge (including the
-       bottom, past the object) outside the visible frame. */
+    /* object-position X is inverted: a higher % crops the left, shifting the subject left on screen. */
     transform: scale(1.2);
     object-position: 20% 100%;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
@@ -6909,13 +6679,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: relative;
     left: auto;
     z-index: 1;
-    /* Was matched exactly to Color Principle's own top space above its
-       title (clamp(56,10vw,96), request: "각 컬러별 위쪽 여백
-       컬러프린서플 위쪽이랑 통일") — widened a step past that shared
-       value since (request: "컬러 스토리 섹션 각 3개 색상 위 아래 여백
-       조금씩 더 늘려보자"). Since the sticky top padding above panel 1
-       is gone, this same value is the ONLY top space all three panels
-       get, so they stay matched to each other too. */
     margin-top: clamp(64px, 11vw, 108px);
   }
   .brandid__colorstory-copy {
@@ -6933,12 +6696,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
        (request: "컬러스토리 영문 및 한글 텍스트 그룹 위쪽으로 여백도 조금
        더 넓히자") — the gap between the swatch card and the copy. */
     margin-top: clamp(36px, 7vw, 56px);
-    /* Generous run of the panel's own (now solid, see above) colour
-       below the text before the image band begins, on request
-       ("컨텐츠 텍스트 구룹 아래 여백도 어느정도 넉넉히 확보"), widened
-       once more (request: "각 색상 배경 하단여백은 지금보다 넉넉히
-       확보해주고"), then again (request: "컬러 스토리 섹션 각 3개 색상
-       위 아래 여백 조금씩 더 늘려보자"). */
     margin-bottom: clamp(64px, 12vw, 108px);
   }
   .brandid__colorstory-curtain { display: none; }
@@ -7048,15 +6805,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 .brandid__closing-copy .brandid__closing-line { flex: 0 0 auto; }
 .brandid__closing-copy .brandid__closing-body { flex: 1 1 auto; min-width: 0; }
 @media (max-width: 1023px) {
-  /* Widened once, off the base rule's own clamp(28,3.6vw,56), to
-     clamp(36,4.5vw,68) ("아래 여백 조금만 더 넓히고") — narrowed back a
-     step now that the video's own top band is also shrinking (see
-     .brandid__closing-loop-wrap's own compact rule below), so the two
-     changes don't just add up to an even wider gap than before
-     (request: "위쪽 여백은 조금 더 좁히고"), then again (request:
-     "타이틀 아래 여백 조금 줄이자"), then narrowed once more (request:
-     "타이틀 그룹 아래 여백 지금보다 조금만 더 좁히자"). Desktop keeps
-     the base value untouched either way. */
   .brandid__closing-copy { margin-bottom: clamp(14px, 2.2vw, 32px); }
 }
 @media (max-width: 900px) {
@@ -7154,10 +6902,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   .brandid__closing {
     min-height: 0;
     padding-top: clamp(56px, 10vw, 96px);
-    /* Widened back out a step — was clamp(24px,4vw,40px), narrowed down
-       from clamp(64px,11vw,96px) last round; that read as a touch too
-       tight once seen (request: "어플리케이션 섹션 간격 지금보단 조금
-       넓히자"). Landed between the two rather than back at the original. */
     padding-bottom: clamp(40px, 6vw, 64px);
   }
   /* Un-pinned — initClosingFit/Handoff/Entrance all bail on
@@ -7249,29 +6993,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      ("영상 중심점을 기준으로 가장 작았다가... 탁 펼쳐지는"), matching
      what was originally (wrongly) set on the video element itself. */
   transform-origin: center;
-  /* Was two sampled tones (mean over four rows at twelve points through
-     the 20s clip, at the crop lines: (23,25,30) top / (37,38,42)
-     bottom) with a gradient between them, reasoned as necessary since
-     the footage itself reads ~14 per channel lighter at the bottom than
-     the top. That held at rest, but the handover's own scale-up
-     (--plate-spread-x/-y below) stretches this backdrop out past the
-     video's real edges into an expanding field of flat colour that no
-     longer corresponds to any actual sampled row of the footage — the
-     two-tone split just reads as an internal seam there instead, on
-     request ("화면이 확대될때 뒷배경색과 영상 상하좌우 쪽 색상이
-     달라서... 한개의 화면인것처럼 자연스럽게 보이고 싶어"). First
-     unified to the floor tone (#25262A, also what --handoff-flood, the
-     Applications hand-off target a few sections down, already uses),
-     then darkened once more to match the mask's own OUTERMOST edge
-     instead of the crop-line tone — the video fades out via mask, not
-     a crop, so its visually "last" colour is whatever showed at the
-     frame's true edge, measured darker than the crop-line sample this
-     was resting on (21,24,29) top / (32,33,38) bottom — averaged
-     (request: "통일된 색상을 영상 투명 그라데이션된 가장 바깥쪽
-     색상이랑 비슷하게... 지금색보단 조금 어두워야"). --loop-ceiling is
-     kept as its own variable (not deleted/inlined) so a future fix can
-     still special-case the rest state if a single tone ever reads
-     wrong there. */
+  /* --loop-ceiling kept as a separate variable from --loop-floor in case a future fix needs to split them again. */
   --loop-ceiling: #1B1D22;
   --loop-floor: #1B1D22;
   /* The block runs on past the footage at both ends, on request ("영상
@@ -7307,77 +7029,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      has) so it actually wins the equal-specificity tie — the same
      source-order trap this file has hit repeatedly. */
   .brandid__closing-loop-wrap {
-    /* Floor dropped to 0 (was clamp(32px,5vw,72px)) on direct request. */
     --loop-band-top: clamp(0px, 5vw, 72px);
-    /* Widened back out from clamp(28px,4.5vw,64px) — that shrink assumed
-       nothing would ever sit in this band again once the ticker's
-       "APPLICATIONS" text moved out (see the comment above), but the
-       wordmark itself (.brandid__closing-mark, unhidden below) still
-       needs to land here. Top is untouched — only the bottom band grows
-       (request: "심볼 영상 하단부만 확장해서 기존 워드마크 배치해줘").
-       ~72-140px gives .brandid__closing-mark (viewBox ratio ~7.44:1, so
-       ~13.4% of its own rendered width tall) comfortable room at its
-       40% fallback width across this range without crowding the footage
-       above it. */
-    /* --closing-mark-w moved up here from .brandid__closing-mark's own
-       rule (still referenced from there — custom properties inherit
-       downward, so the descendant can read this) since --loop-band-
-       bottom, right below, now needs the SAME value to derive its own
-       height. One definition instead of two kept in sync by hand. */
+    /* Lives here (not on .brandid__closing-mark) since --loop-band-bottom below also derives from it; inherits downward. */
     --closing-mark-w: clamp(160px, calc(-42.8px + 48.29vw), 451.7px);
-    /* Was a flat clamp(96px,13vw,170px), independent of the mark's own
-       (aspect-ratio-derived) height and lift — meaning the actual gap
-       between the mark's bottom edge and the wrap's own bottom edge
-       drifted across the compact range instead of staying put (measured
-       57-85px at different widths, not the "일정하게" a flat band height
-       and a growing mark can't both deliver). Rebuilt as a derived
-       formula: the mark's own height (--closing-mark-w / 7.44) plus its
-       lift off the video (below) plus a margin term at the end — so
-       whatever the mark's height does at any given width, the margin
-       past it stays in a fixed relationship, not drifting. That margin
-       term was a flat 56px at first — read as too narrow once actually
-       seen, because the real ask was for it to match --loop-band-top
-       (the video's OWN top margin, just above), not an independently
-       guessed constant (request: "심볼 돌아가는 영상 위쪽의 여백이
-       시각적으로 워드 마크 아래에도 똑같이 적용되길 바랬던 건데"). Using
-       --loop-band-top directly here means the two now share the exact
-       same clamp — genuinely the same value at every width, not just a
-       similar-looking one. Confirmed matching, then asked wider twice —
-       the unified look was right but too tight at 1:1 (request: "통일은
-       되어보이는데 워드 마크 아래로 여백이 좁아서 하단바 높이를 다
-       일정하게 늘리고 싶어"), then a bit more again (request: "조금더
-       늘려도 될듯"). ×2.4 keeps the relationship derived (still scales
-       with --loop-band-top, not an independent guess that could drift
-       out of sync again) while giving it more depth. See
-       .brandid__closing-mark's own `bottom` calc for the proof this
-       reduces to exactly --loop-band-top * 2.4. */
+    /* Derived so the gap below the mark always scales with --loop-band-top; see .brandid__closing-mark's `bottom` calc, which reduces to --loop-band-top * 2.4. */
     --loop-band-bottom: calc(var(--closing-mark-w) / 7.44 - clamp(8px, 1.5vw, 20px) + var(--loop-band-top) * 2.4);
-    /* The actual un-pin — see the long note on the earlier, ineffective
-       attempt at this further up. relative, not static: .brandid__
-       closing-slot (the wordmark's positioning parent) is position:
-       absolute and needs SOME positioned ancestor to anchor to — static
-       stops being one, which would send the now-visible mark off to
-       whatever positioned ancestor is next up the tree instead of
-       flush against this wrap's own bottom band. relative un-pins from
-       scroll exactly the same as static does (only sticky/fixed
-       actually track scroll), so the original fix still holds. */
+    /* relative, not static — .brandid__closing-slot (absolute) needs a positioned ancestor; relative un-pins from scroll the same way static would. */
     position: relative;
     top: auto;
-    /* Clips whatever's left of the video-vs-floor-colour width mismatch
-       that kept getting reported at high-DPR phones (measured pixel-
-       identical boxes every time this was checked — video and ::before
-       both resolve off the same wrap width — so whatever's still
-       visible is a sub-pixel rendering artefact, not a real box-model
-       gap). overflow:hidden clips both to this element's own true edge
-       regardless of which side is rounding up by a device pixel or two,
-       which is simpler and more robust than chasing an inset value that
-       only ever matched one specific screen (request: "심볼 영상 아래
-       검은바 영상보다 살짝 튀어나보이지... 전체 감싸는곳의 오버플로우
-       히든을 주던지"). Compact-only: the base rule's own scale-based
-       handover spread (--plate-spread-x/-y, further down) deliberately
-       grows ::before PAST this box on desktop, and JS bails on that
-       animation at compact anyway (isCompact() in initClosingHandoff),
-       so there's nothing here that NEEDS to overflow. */
+    /* Clips a sub-pixel video/floor-colour width mismatch at high-DPR phones. Compact-only — desktop's handover spread deliberately grows ::before past this box. */
     overflow: hidden;
   }
 }
@@ -7561,24 +7221,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   pointer-events: none;
 }
 @media (max-width: 1023px) {
-  /* Was 0 (collapsed to nothing — same reasoning as .apps__runway's
-     own compact override, no pin left for it to feed, JS bails on
-     isCompact() now). Given real height instead: this is the space
-     between the video and the section's own end, separate from
-     .brandid__closing's own outer padding-bottom (which stays matched
-     to the shared cross-section convention) — on request ("심볼 영상
-     아래 여백 더 넓히고"). Placed after the base rule above, not
-     before — the same equal-specificity/source-order bug hit
-     repeatedly this session.
-     clamp(24,4vw,48) read as too wide once added ("심볼 영상 하단
-     여백 너무 넓어졌다 조금 좁히고") — trimmed back, then widened
-     again to match ".brandid__closing's" own top padding above the
-     title group (clamp(56,10vw,96)) — "살짝만" (just a touch) more
-     than it, not the same — on request ("영상 아래로 여백 우리는
-     로고를 타이틀 그룹 위쪽 여백과 비슷하게... 살짝만 넓게"). Narrowed
-     again since — this is the space right before Applications begins
-     (request: "그 아래 여백은 좁혀주고(어플리케이션 섹션 위쪽 여백
-     부분)"). */
   .brandid__closing-runway { height: clamp(32px, 6vw, 56px); }
 }
 
@@ -7607,13 +7249,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      amount from the title's held position, since only it knows both.
      Negative only, so this can never open a gap that wasn't there. */
   margin-top: var(--apps-pull, 0px);
-  /* Side margins of about 300, and the content fills everything between
-     them ("좌우 여백이 300정도 남겨두고 꽉 채워서") — clamped so it
-     collapses to the page's own --edge on anything narrow. Bottom was
-     clamp(120px,18vh,240px) — that trailing space made sense while this
-     was the page's own last section, but the new Outro section right
-     after it (its own top padding) now supplies that gap instead, on
-     request ("목업 섹션 아래에 있던 기존 여백은 없애자"). */
   padding: clamp(90px, 13vh, 200px) clamp(var(--edge), 24vw, 300px) 0;
   background-color: var(--apps-fill);
   color: var(--paper);
@@ -7716,12 +7351,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
    compact-only replacement, see its own comment in index.html and the
    compact rule below. */
 .apps__title { display: none; }
-/* Hidden by default, same reasoning as .apps__title above — the
-   equalizer contrast-check zone this backs (see its own comment in
-   index.html) only exists for compact's static dark/paper split;
-   desktop's crossfade (initApplicationsGroundFade) already updates
-   .apps's own real background-color directly, which the plain
-   background-colour walk in isLightAt already reads correctly there. */
+/* Compact-only equalizer contrast-check zone; desktop's crossfade already updates .apps's real background-color. */
 .apps__eq-zone { display: none; }
 .apps__intro {
   position: sticky;
@@ -7971,10 +7601,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     background-color: var(--paper);
     z-index: 0;
     padding-top: clamp(56px, 10vw, 96px);
-    /* Single source of truth for the dark band's depth — read by both
-       ::before (the actual painted colour) and .apps__eq-zone (the real,
-       hit-testable twin that exists purely so the equalizer's contrast
-       switch can find it; see its own comment in index.html). */
+    /* Shared by ::before (painted colour) and .apps__eq-zone (hit-testable twin for the equalizer switch). */
     --apps-eq-zone-h: clamp(380px, 50vh, 460px);
   }
   .apps::before {
@@ -8002,46 +7629,13 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      BLOCK itself at the section's own left inset rather than centred
      — only the text's own alignment inside that block needed fixing. */
   .apps__lead { text-align: left; }
-  /* Side-by-side again (title left, body right), not forced-stacked —
-     but with room to drop the body below the title on its own once
-     there genuinely isn't space for both, rather than letting body
-     keep shrinking indefinitely and reading squeezed/distorted
-     (request: "하나의 아이덴티티 타이틀 좌우 배치로 다시 잡되 우측
-     본문이 일그러지지 않게... 브라우저 리사이즈시 자연스럽게 아래로
-     타이틀 아래로 떨어지게"). flex-wrap:wrap on the row plus a real
-     min-width on body (below) is what does this natively — no JS
-     measuring needed (unlike .statement__body's own beside/below
-     switch, which needs it because that layout's width depends on a
-     video's own rendered size, not just text). When body wraps to its
-     own line it also has the FULL row width to itself there, so it
-     reads full-width in the stacked state for free via its own
-     flex-grow, without needing an unconditional width:100% (which
-     would have also forced the TITLE to full width even side-by-side,
-     breaking that layout — the previous width:100% rule is gone). */
   .apps__intro {
     flex-direction: row;
     flex-wrap: wrap;
     row-gap: clamp(16px, 3vw, 28px);
-    /* The horizontal gap (title-to-body, side-by-side only) was falling
-       through to the same clamp(16px,3vw,28px) as row-gap above by pure
-       cascade accident — this rule only ever set row-gap explicitly, so
-       column-gap kept whatever an EARLIER .apps__intro rule in this same
-       media query happened to leave it at, not a value chosen for the
-       row layout specifically. Widened on request ("하나의 아이덴티티와
-       우측 본문 사이 여백을... 좌우로 배치된 레이아웃에만 적용, 아래로
-       떨어지는 경우 말고") — row-gap (used once body wraps below the
-       title) is untouched. */
     column-gap: clamp(24px, 5vw, 48px);
   }
   .apps__body {
-    /* 280 -> 272px, trimmed by exactly the column-gap's own increase
-       (16->24px) above, so the row's wrap threshold stays where it was
-       — the wider gap eats into body's own minimum instead of the
-       viewport width it takes to trigger wrapping. Confirmed at 476px
-       (the width flagged): title+body stayed side-by-side there before
-       this pair of changes; widening the gap alone (without this) tipped
-       that exact width into wrapping, which the request explicitly
-       excluded ("아래로 떨어지는 경우 말고"). */
     flex: 1 1 272px;
     min-width: min(272px, 100%);
   }
@@ -8086,17 +7680,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     margin-left: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-right: calc(-1 * clamp(var(--edge), 24vw, 300px));
     margin-top: 0;
-    /* Was clamp(28px,5vw,48px), zeroed on request ("타이틀 밑...
-       여백은 없어야 하고"), then asked back — flush read as too tight
-       once actually seen (request: "어플리케션 한글 텍스트 그룹
-       위아래로 여백 적절하게 넣어줘"). Landed on a value between the
-       two rather than the original — "적절하게", not back to where it
-       started. Widened again on request ("어플리케이션 타이틀 한글
-       텍스트 그룹 위아래 여백 더 넓혀줘" — .apps__intro, below, is the
-       Korean text group this and .apps__showcase's own margin-top
-       sandwich), then a third time, this pass alone rather than paired
-       with .apps__showcase's own margin-top (request: "어플리케이션
-       타이틀 아래 여백 조금더 넓혀주고"). */
     margin-bottom: clamp(40px, 6.5vw, 68px);
     padding-left: var(--edge);
     padding-right: var(--edge);
@@ -8110,53 +7693,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     text-align: center;
     color: var(--paper);
   }
-  /* Re-measured again after .apps__title's margin-bottom and
-     .apps__showcase's margin-top came back from 0 to something
-     "적절한" (a couple rules below) — content height grew back up,
-     and the previous clamp(260,...,460) (fit to the zero-margin
-     numbers) started running short (confirmed: needed 271.7px@375
-     against only 260px available). Re-fit through the new measured
-     needs at three widths (271.7px@375, 348.7px@700, 462.7px@1023)
-     with a consistent ~45-65px margin over each.
-     Re-fit AGAIN once .apps__intro went back to side-by-side (below):
-     unlike the old always-stacked layout, content height is no longer
-     monotonic in width — .apps__lead/.apps__body sit side-by-side and
-     stay short from ~550px up to 1023px, but a narrow stacked range
-     below that (own wrap breakpoint, measured ~548px in this content)
-     is comparatively tall. A single clamp can't track a rise-dip-rise
-     shape, so this row-mode formula only has to cover the >=550px
-     side; the stacked side gets its own tighter override just below.
-     Re-fit a THIRD time once .apps__title's margin-bottom and
-     .apps__showcase's margin-top (both below) widened again (request:
-     "위아래 여백 더 넓혀줘") — content height grew by the same amount
-     at every width.
-     Re-fit a FOURTH time once .apps__title's margin-bottom widened
-     once more on its own (request: "어플리케이션 타이틀 아래 여백
-     조금더 넓혀주고" — this one didn't pair with .apps__showcase's own
-     margin-top). Measured needed: 272.8px@550, 294.2px@700, 403.4px@1023,
-     ~50-70px margin over each, consistent with the margin this formula
-     has carried since the very first fit. */
+  /* Content height isn't monotonic in width: .apps__lead/.apps__body sit
+     side-by-side and stay short from ~550px to 1023px, but the narrower
+     stacked range below that is comparatively tall. This formula only
+     covers the >=550px side; the stacked side gets its own override below. */
   .apps::before { height: clamp(310px, calc(171px + 27.61vw), 460px); }
-  /* Was clamp(80px,6vw,100px), zeroed on request ("하단 텍스트 그룹
-     아래로 여백은 없어야 하고"), then asked back — flush read as too
-     tight once actually seen (request: "어플리케션 한글 텍스트 그룹
-     위아래로 여백 적절하게 넣어줘"). Landed between the two, same
-     reasoning as .apps__title's own margin-bottom just above. Widened
-     again alongside it (request: "위아래 여백 더 넓혀줘"). Desktop
-     keeps the base rule's own value either way. */
   .apps__showcase { margin-top: clamp(38px, 6.5vw, 68px); }
 }
-/* Stacked-column override for the narrow slice below .apps__intro's own
-   flex-wrap breakpoint (measured ~548px in this content): needed height
-   there runs fairly flat (.apps__lead/-body stack full-width instead of
-   scaling with vw the way the row layout's font sizes do), which the
-   >=550px row-mode formula above would undershoot near the top of this
-   range. Same-specificity selector placed after the 1023px block on
-   purpose, so it wins by source order for the widths where both match.
-   Re-fit alongside the row-mode formula above each time .apps__title/
-   .apps__showcase's margins changed — most recently .apps__title's own
-   margin-bottom widening once more on its own (measured needed:
-   305.7px@375, 328.3px@545, ~45px margin over each). */
+/* Same-specificity selector placed after the 1023px block on purpose, so it wins by source order where both match. */
 @media (max-width: 549px) {
   .apps::before { height: clamp(340px, calc(301px + 13.29vw), 378px); }
 }
@@ -8250,31 +7794,12 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   pointer-events: none;
 }
 @media (max-width: 1023px) {
-  /* The actual un-clip/un-pin — the earlier attempt at this (further up,
-     inside the .brandid__closing-next block) never won: it sat BEFORE
-     this base rule in source order, so this later, equal-specificity
-     rule silently overrode it and the slot stayed position:absolute
-     WITH its ticker clip-path live the whole time — confirmed via
-     computed style (position read "absolute", not "static") and via
-     elementFromPoint at the mark's own on-screen position returning the
-     wrap instead of the mark, meaning the clip-path's ~1.5px-tall
-     visible window (top clipped 3px in, bottom only 1.5px past the
-     slot's own zero-height box) was clipping the wordmark down to
-     nothing (request: "심볼 영상 하단쪽에 워드마크 안보여 원인찾아봐").
-     Placed after the base rule now, same fix as every other instance of
-     this trap in the file. */
   .brandid__closing-slot {
     position: static;
     width: auto;
     height: auto;
     clip-path: none;
-    /* transform is NOT a positioning property — position:static above
-       stops `left`/`top`/etc. from applying, but the base rule's own
-       translateX(-50%) (meant to centre a position:absolute, left:50%
-       box) still runs on a static element too, and shifted this whole
-       row 50% of ITS OWN width off to the left (confirmed via rect:
-       slot rendering at x:-140 instead of flush at the wrap's own left
-       edge). Needs its own explicit reset. */
+    /* transform isn't a positioning property — the base rule's translateX(-50%) still applies under position:static, so it needs an explicit reset. */
     transform: none;
   }
 }
@@ -8322,110 +7847,19 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   pointer-events: none;
 }
 @media (max-width: 1023px) {
-  /* Shown again — was hidden on the assumption nothing would replace
-     APPLICATIONS in this slot at compact, but the request turned out to
-     want the wordmark itself here, not a stand-in caption: "우리는
-     로고를 만든 것이 아니라 아래 심볼 영상 하단부만 확장해서 기존
-     워드마크 배치해줘". The ticker's JS (initClosingFit/-Handoff) still
-     bails at compact, so .is-ticked never gets added here and this
-     never animates — it just renders once and stays put, which is
-     exactly the static placement asked for.
-     Positioned directly against the wrap rather than through its own
-     .brandid__closing-slot parent: that slot gets its own compact
-     override (above, from the earlier APPLICATIONS-relocation work)
-     dropping it to position:static/width:auto/height:auto so the slot
-     itself is no longer a positioning context — the base rule's
-     left:50%+transform:translateX(-50%) centring lives on the SLOT, so
-     with the slot inert the mark's own position:absolute would instead
-     climb straight past it to the wrap and render flush to the wrap's
-     left edge (base rule's left:0), not centred. Centring reasserted
-     here instead. Needs .brandid__closing-loop-wrap's own
-     position:relative (compact override above) as its containing
-     block — see that rule's own note. Width is a fresh compact value.
-     not the 40%-of-slot fallback (that fraction was sized against the
-     slot's own narrower ticker-window box, not the full wrap) — tuned
-     small enough to sit comfortably inside the ~72-140px bottom band
-     without crowding it; needs visual confirmation like the DNA
-     wobble's own tuning knobs, since the actual rendered footage isn't
-     visible here. Placed after both the slot's and this rule's own
-     base rules, so it actually wins the equal-specificity/source-order
-     tie hit repeatedly this session. */
+  /* Centring is reasserted here (left:50%+translateX) because .brandid__closing-slot's
+     compact override strips its own position/transform, so it's no longer a
+     containing block — this mark centres against the wrap instead. */
   .brandid__closing-mark {
-    /* Back to position:absolute (was static/in-flow for one round) —
-       putting the mark in normal flow made it participate in the
-       wrap's own height for the first time, which pushed the wrap
-       taller by the mark's own box (plus its top margin). Everything
-       below the video (.brandid__closing-loop-wrap::before's own
-       compact override, further down) was tuned against the OLD,
-       mark-doesn't-count height — sized to extend the floor colour up
-       from the wrap's bottom edge just far enough to back the video's
-       own bottom fade. With the wrap now taller, that same fixed
-       extension landed short, leaving a gap between the video's fade
-       and the floor colour starting — the footage's fade was revealing
-       raw ::before ceiling-colour (or nothing) instead of dissolving
-       straight into the floor tone (request: "심볼 영상 하단부와 영상
-       하단 투명하게 그려진 부분이 이어져 하나로 합쳐진 느낌이 나야해").
-       Absolute takes the mark back out of flow — zero height
-       contribution, same as the desktop rule — so the wrap's own
-       height (and everything measured against it) goes back to exactly
-       what it was before, restoring the fade/floor join without
-       touching that other rule at all.
-       left:50% + translateX(-50%) centres the mark against the WRAP
-       (not the slot) because .brandid__closing-slot's own compact
-       override, right above, resets both position:static AND
-       transform:none — position:static stops the slot being a
-       containing block, and transform:none stops it being one via the
-       "any transform ≠ none creates a containing block for absolute
-       descendants" rule too (it still carried the base rule's own
-       translateX(-50%) otherwise, confirmed by the slot's own rect
-       landing 140px left of where it should). */
+    /* absolute, not in-flow — in-flow would add the mark's height to the wrap,
+       throwing off ::before's fade/floor sizing below, which is tuned against
+       the wrap's original height. */
     display: block;
     position: absolute;
     left: 50%;
-    /* Two-point exact line: 451.7px at 1024px wide (measured — the
-       desktop-computed width, initClosingFit's markW, at exactly the
-       compact/desktop boundary) down to 160px at 420px, holding flat
-       past either end — same construction as every other compact clamp
-       in this file, on request ("1024이상에서의 크기에서 1024~420까지
-       자연스럽게 줄고 늘다가 420이하 구간에서 적절한 크기로 고정").
-       160px floor is a first guess for the narrowest phones — the
-       desktop value scales with the video's own (much wider) box, so a
-       flat proportional carry-down would be oversized here; needs
-       visual confirmation like every other first-guess value in this
-       section. --closing-mark-w itself now lives on the ANCESTOR
-       (.brandid__closing-loop-wrap's own compact rule) instead of here
-       — --loop-band-bottom needs the same value to derive its own
-       height, and custom properties only inherit downward, so it has to
-       be defined at or above the highest point that reads it. Read here
-       via plain inheritance. */
     width: var(--closing-mark-w);
     height: auto;
-    /* All px/vw terms, no percentages — bottom (unlike top, tried and
-       reverted two rounds ago) never needed the wrap to have a definite
-       height; the earlier bug was specific to resolving a percentage,
-       not to using `bottom` itself. --loop-band-bottom is now DERIVED
-       from this same mark height plus lift plus --loop-band-top × 2.4
-       (see the wrap's own rule) specifically so this expression
-       collapses to that same value: (markH - lift + bandTop*2.4) + lift
-       - markH = bandTop*2.4. The margin below the mark therefore always
-       tracks a fixed multiple of the video's own top margin — matching
-       it 1:1 read as unified but too tight once actually seen (request:
-       "통일은 되어보이는데 워드 마크 아래로 여백이 좁아서 하단바 높이를
-       다 일정하게 늘리고 싶어"), ×2 still not quite enough (request:
-       "조금더 늘려도 될듯"). Keeping it derived (still scales with
-       --loop-band-top, can't drift back out of sync) rather than a flat
-       px bump is what makes it hold at every width, not just the one
-       last checked. The calc is kept spelled out (not hand-collapsed)
-       so retuning the lift, the multiplier, or --loop-band-top in one
-       place stays correct without re-deriving this by hand.
-       Lift (was 0, flush with the video's true bottom edge) raised the
-       mark into a small overlap with the footage's own fade zone
-       (request: "워드마크도 심볼쪽으로 좀더 올려줘") — safe to overlap:
-       the video's bottom 25% is already fading to transparent there
-       (.brandid__closing-loop's own compact mask), and the floor colour
-       behind it already extends up past this point (::before's own
-       compact override, below), so the mark simply reads as sitting
-       slightly INTO the dissolve rather than past any hard edge. */
+    /* Derived so the margin below the mark always reduces to exactly --loop-band-top * 2.4. */
     bottom: calc(var(--loop-band-bottom) + clamp(8px, 1.5vw, 20px) - var(--closing-mark-w) / 7.44);
     transform: translateX(-50%);
   }
@@ -8475,24 +7909,8 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
      corner point never fades at all), on request ("영상 투명 그라데이션을
      대각선 양사방으로도 줘서"). Sized past the symbol's own footprint so
      it only ever touches the four corners, not the mark. */
-  /* Grown in step with the handover's own spread instead of staying a
-       fixed size against a fixed-size video box (the <video> itself
-       never scales — only the backdrop behind it does, see ::before's
-       own comment on why) — proposed as an alternative to flattening
-       the ceiling/floor sampling into one colour (request: "심볼 영상에
-       올려진 방사형 마스크도 그럼 뒤에 확대되는 배경이랑 같이
-       커지면?"). Each fade's WIDTH (not just its stop position) scales
-       by the relevant spread factor, so as the plate expands, the
-       video's own edge-dissolve widens to match rather than staying a
-       fixed slice of a box that no longer matches the now-larger scene
-       around it — at spread 1 (rest) every term reduces back to exactly
-       the original value, so nothing changes until the handover
-       actually runs. Top/left grow from 0 (their own transparent-to-
-       opaque ramp starts at 0 regardless); bottom/right grow from their
-       own stop toward 100%, so `(100% - stop) * spread` is the ramp's
-       own width, not the raw stop value. The radial corner ellipse
-       scales both axes directly — a bigger radius stretches its own
-       65%-100% ring over more actual pixels. */
+  /* Each fade scales with --plate-spread-x/-y so the mask grows with the handover;
+     at spread 1 (rest) every term reduces to the original value. */
   -webkit-mask-image:
     linear-gradient(to bottom, transparent 0, #000 calc(var(--loop-mask-top, 7%) * var(--plate-spread-y, 1)), #000 calc(100% - (100% - var(--loop-mask-bottom, 94%)) * var(--plate-spread-y, 1)), transparent 100%),
     linear-gradient(to right, transparent 0, #000 calc(var(--loop-mask-left, 12%) * var(--plate-spread-x, 1)), #000 calc(100% - (100% - var(--loop-mask-right, 88%)) * var(--plate-spread-x, 1)), transparent 100%),
@@ -8505,99 +7923,22 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   mask-composite: intersect;
 }
 @media (max-width: 1023px) {
-  /* Was a plain unmasked rectangle — no top/bottom/left/right feather,
-     no corner fade (request: "심볼 영상 상하좌우 그라데이션 들어간거
-     해제하고... 순수 영상만 남겨줘"). A bottom-only fade brought back
-     since (request: "심볼 영상 하단부 투명 그라데이션 처리해서
-     자연스럽게 해주고") — top/left/right stay pure footage, only the
-     bottom quarter dissolves to fully transparent by the video's own
-     true bottom edge, so it blends into whatever's behind it there
-     (.brandid__closing-loop-wrap::before's own floor-colour band,
-     below) instead of cutting off on a hard edge. First-guess fade
-     span (last 25%) — needs visual confirmation, same as the DNA
-     wobble's own tuning knobs, since the actual rendered footage isn't
-     visible here. Placed after the base rule so it wins the
-     equal-specificity tie, the same trap this file keeps hitting. */
   .brandid__closing-loop {
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 75%, transparent 100%);
     mask-image: linear-gradient(to bottom, #000 0%, #000 75%, transparent 100%);
-    /* Still reading as poking out at high-DPR phones (iPhone 16 Pro Max,
-       DPR 3) even after the box-model was confirmed pixel-identical to
-       the floor-colour bar AND overflow:hidden was added to the wrap
-       (request: "워드마크 검은 바 영상보다 미세하게 튀어나온것
-       해결안됬어"). Since nothing is actually wider than its own box, the
-       remaining candidate is the <video> element's own GPU texture
-       sampling at its outermost edge — object-fit:cover decodes/scales
-       the frame via the compositor, and the outermost row/column of
-       sampled pixels can blend slightly with whatever the texture
-       filter treats as "beyond the edge" (a known video-rendering
-       artefact, sharper DPR making a sub-pixel blend more visible, not
-       a layout issue). Scaling the video up a hair pushes that blended
-       edge outside the visible box; the wrap's own overflow:hidden
-       (compact rule, above) crops the now-outside sliver away, leaving
-       only fully-sampled, non-blended pixels inside the box. 1% was
-       chosen to be well past any sub-pixel/DPR rounding at every
-       compact width without visibly cropping the footage itself. */
+    /* scale(1.01) pushes the video's own GPU edge-sampling artifact (visible at
+       high DPR) outside the box; the wrap's overflow:hidden crops it away. */
     transform: translateY(var(--plate-content-lift, 0px)) scale(1.01);
   }
-  /* ::after is the radial dimming layer sitting IN FRONT of the video —
-     stays gone, same reasoning as the mask above (request: "순수 영상만
-     남겨줘"). */
   .brandid__closing-loop-wrap::after {
     display: none;
   }
-  /* ::before is the dark gradient plate BEHIND the video (the padding
-     bands' own colour) — was ALSO removed here, but that left the
-     wordmark (unhidden further down, .brandid__closing-mark) sitting on
-     nothing: this wrap has no background-color of its own, so the
-     bottom band it lives in showed straight through to the page's own
-     paper, and a paper-fill wordmark on a paper background is
-     invisible (request: "아래 심볼 영상 아래 배경 하단부 영상 색깔
-     깔아서 워드마크가 보이게 해줘"). Brought back, but heavily
-     simplified rather than restoring the full desktop version: the
-     base rule's ceiling-to-floor split gradient with its scroll-driven
-     spread/offset custom properties all assume initClosingHandoff is
-     running, which still bails at compact, so instead this is just a
-     flat rect sized to the bottom band alone (top stays untouched, on
-     request — only "하단부"), in --loop-floor, the tone already sampled
-     from the footage's own lower edge (see the base rule's own note on
-     where that colour comes from) — literally "영상 색깔" rather than a
-     picked one. Placed after the base rule so it wins the equal-
-     specificity/source-order tie this file keeps hitting. */
+  /* Must stay visible: without it the bottom band is transparent and the
+     paper-fill wordmark disappears against the page's own paper. */
   .brandid__closing-loop-wrap::before {
     display: block;
-    /* Reverted — a small side inset was tried here (~4-10px) to pull
-       the bar in from what read as "poking out" past the video, but
-       that overcorrected the other way, reading as visibly narrower/
-       recessed instead (request: "검정 바가... 이번엔 영상 길이보다
-       안쪽으로 들어가보여... 튀어나오지도 안쪽으로 들어가보이지도
-       않고 딱맞아서 일체형인것처럼 보이길 원하는거야"). Flush (0/0) is
-       what actually measures identical to the video's own box — both
-       resolve off the same wrap width, confirmed via getComputedStyle
-       on the video and on this pseudo-element directly, pixel-equal at
-       every width checked — so flush is the correct match, not an
-       inset in either direction. Whatever asymmetry is still visible
-       is in the footage's own content, not the box model, and isn't
-       fixable from this rule. */
     inset: auto 0 0 0;
-    /* Was exactly var(--loop-band-bottom) — flush with the video's OWN
-       true bottom edge, which was correct back when the video was a
-       hard, unmasked cutoff there. Now that .brandid__closing-loop
-       fades to transparent over the last 25% of its own box (above),
-       that fading quarter sits ABOVE this line, inside the video's own
-       box — not covered by this rect at all — so the fade was
-       revealing whatever's behind the WRAP there instead of the floor
-       colour, reading as an uncomposited gap rather than a dissolve
-       (request: "심볼 영상 하단부 투명그라데이션 된 영역 아래에 하단부
-       배경색이 깔려서 자연스럽게 합성된것처럼 보여야해"). Extended
-       upward by an extra term sized to that same ~25%-of-video-height
-       fade span so the floor colour backs the ENTIRE fade, not just
-       the flat band below the video — first-guess sizing (~47px@375 up
-       to ~126px@1023, measured against the video's own rendered height
-       at those widths), needs visual confirmation like the fade span
-       and mark overlap it's paired with. z-index:-1 (base rule) keeps
-       this behind the video regardless, so extending it costs nothing
-       where the footage is still fully opaque. */
+    /* Extended above the flat band to also back the video's own bottom fade. */
     height: calc(var(--loop-band-bottom) + clamp(50px, calc(4px + 12.35vw), 130px));
     background: var(--loop-floor);
     opacity: 1;
@@ -9207,36 +8548,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
 }
 
-/* ---------- Outro: closing CTA + info ----------
-   New last section on the page (site's own live content ends at
-   Applications now — everything after it in the markup is the parked
-   "01 Philosophy → end" block). First pass, loosely modelled on a
-   reference screenshot: a wide left title+lead next to a narrower
-   stack of labelled info blocks, thin divider, copyright row below.
-   Right column is placeholder content on request ("우측 정보는 임의로
-   넣어놓으면 정리할께") — kept visually consistent with the rest of
-   the block so it reads as finished structure, not a stub, even though
-   the actual values will change. */
-/* Was frame--auto's own clamp(72px,11vw,140px), zeroed on request
-   ("영문 타이틀 위의 여백은 0"), then asked back once it read as too
-   flush against Applications above it (that section's own bottom
-   padding was ALSO removed the same pass, so the two sections had
-   landed fully flush) — on request ("위쪽으로 여백 다시 추가해줘"),
-   then widened a further notch (request: "상단 여백 조금만 더주고").
-   Side padding went back and forth on direction several times before
-   landing on its actual shape — a real STEP, not one continuous curve
-   through it: below the step it eases smoothly from compact's own
-   var(--edge) (at 1024px) up to 120px (just under the step), then at
-   the step itself it jumps back up to the wide 300px ceiling
-   (.apps__intro's own value) and holds there. Step point moved
-   1600px -> 1900px, on request ("구간을 1900으로 올리자") — the
-   sub-step curve's own two-point line was rebuilt through the same
-   1024px floor up to the new 1900px point instead of re-using the old
-   1600px numbers past their own breakpoint. Base rule below covers the
-   pre-step curve (floor pinned to var(--edge) itself, not a fixed px,
-   so it lands on exactly compact's own value at the 1023/1024 seam);
-   the >=1900px override sits in its own media query, right after.
-   6.6849/vw slope, -7.01 intercept. */
+/* ---------- Outro: closing CTA + info ---------- */
 .outro {
   padding-top: clamp(64px, 11vw, 112px);
   padding-left: clamp(var(--edge), calc(-7.01px + 6.6849vw), 120px);
@@ -9248,11 +8560,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     padding-right: clamp(var(--edge), 24vw, 300px);
   }
 }
-/* justify-content was space-between, stretching .outro__info out to
-   the row's own far right edge — a 50/50 split with the row's own
-   (now much narrower) gap reads as the two columns sitting closer
-   together instead, on request ("50% 화면 나뉘고 좌측 정렬로 왼쪽과
-   오른쪽 정보가 지금보단 조금 붙어 보이게"). */
 .outro__row {
   display: flex;
   align-items: flex-start;
@@ -9263,28 +8570,14 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   flex: 0 1 50%;
   max-width: none;
 }
-/* Uppercase now, weight lightened 700->500, on request ("맨 하단 왼쪽
-   영문은 대문자로 굵기는 조금더 얇게") — was sentence-case reasoning
-   below is stale but left as history. */
 .outro__title {
-  /* h2's own UA-stylesheet margin was what threw off the top-line
-     match with .outro__info's first block below (request: "영문
-     타이틀이랑 오른쪽 탑라인은 맞추고") — .outro__row's own
-     align-items:flex-start only aligns the two COLUMN boxes, not
-     whatever margin an element inside the left one carries. */
+  /* h2's own UA margin breaks top-line alignment with .outro__info;
+     align-items:flex-start only aligns the columns, not this. */
   margin: 0;
   font-family: var(--font-en);
-  /* Back to the original clamp(28px,3.4vw,48px) — shrinking it to fit
-     3 lines was an unwanted side effect nobody asked for (request:
-     "왼쪽 영문 타이틀 사이즈 왜줄인거야? 원래대로"). The 3-line split
-     itself is now handled purely by where the <br>s fall in the markup
-     (rebalanced to shorter segments that actually fit this column at
-     the original size), not by shrinking the font to make room. */
   font-size: clamp(28px, 3.4vw, 48px);
   font-weight: 500;
   line-height: 1.18;
-  /* Was -.015em — widened toward normal, on request ("자간은 살짝
-     넓히고"). */
   letter-spacing: -.005em;
   text-transform: uppercase;
   color: var(--ink);
@@ -9293,8 +8586,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   margin-top: clamp(16px, 2.2vw, 28px);
   font-size: clamp(17px, 1.6vw, 21px);
   font-weight: 500;
-  /* Tightened from 1.5/0, on request ("한글은 자간이랑 행간 조금더
-     좁혀줘"). */
   line-height: 1.35;
   letter-spacing: -.01em;
   color: var(--ink-70);
@@ -9307,18 +8598,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   gap: clamp(28px, 3.6vw, 48px);
   text-align: left;
 }
-/* gap narrowed 6->3px — this is now ONLY the space between consecutive
-   .outro__value lines (the label gets its own, larger, explicit
-   margin-bottom below instead of sharing this same gap), on request
-   ("이름간 여백은 더 좁히자"). */
 .outro__block {
   display: flex;
   flex-direction: column;
   gap: 3px;
 }
-/* Was var(--mono) (IBM Plex Mono) — switched to Outfit, on request
-   ("우측 내용들도 다 Outfit 폰트로 대체"). Size bumped 12->14px, on
-   request ("우측 정보는 타이틀 폰트 사이즈 조금 더 키워주고"). */
 .outro__label {
   font-family: var(--font-en);
   font-size: 14px;
@@ -9326,32 +8610,15 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--ink-45);
-  /* Adds on top of .outro__block's own gap:3px (margins and flex gap
-     stack), giving the label→value space more room than the
-     value→value space below it, on request ("타이틀 아래로 여백이
-     좀더 있고"). Briefly narrowed to 4px on a misread of "간격더
-     좁히자" as this gap — that request was actually about
-     .outro__value's own line-height, not this label→value space,
-     which the user then asked to widen instead (request: "타이틀과
-     정보사이는 넓히고"). */
+  /* Adds on top of .outro__block's own flex gap (margin and gap stack). */
   margin-bottom: 16px;
 }
 .outro__value {
-  /* <p>'s own UA-stylesheet margin (1em top+bottom) was stacking on
-     top of .outro__block's flex gap:6px between consecutive value
-     lines in the same block — same class of bug as .outro__title's
-     own h2 margin fixed earlier, just not caught here yet (request:
-     "우측 정보 타이틀 아래 내용간 여백 벌어진것 좁히고 싶어"). Zeroed
-     so gap:6px is the only space between them now. */
+  /* <p>'s own UA margin would stack with .outro__block's flex gap; zeroed here. */
   margin: 0;
   font-family: var(--font-en);
   font-size: 17px;
   font-weight: 500;
-  /* Was 1.4, then 1.25 — tightened again, on request ("정보 진한
-     글씨색으로 되어있는 부분 행간을 좁히자는 의미"), clarifying that
-     the earlier "간격더 좁히자" meant THIS property (the value text's
-     own line-height, for whenever a long slash-separated line wraps),
-     not the label→value spacing above. */
   line-height: 1.1;
   color: var(--ink);
 }
@@ -9363,8 +8630,6 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   transition: text-decoration-color 200ms var(--ease);
 }
 .outro__value--link:hover { text-decoration-color: var(--ink-45); }
-/* Was var(--mono)/500-ish default weight — switched to a light Outfit
-   weight, on request ("맨하단 카피라이터는 Outfit 얇은 폰트로"). */
 .outro__bottom {
   display: flex;
   align-items: baseline;
@@ -9375,16 +8640,11 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   border-top: 1px solid var(--ink-12);
   font-family: var(--font-en);
   font-weight: 300;
-  /* Was 12px, on request ("카피라이터도 조금 더 키우고"). */
   font-size: 14px;
-  /* Was .02em, widened on request ("하단 카피라이터 자간은 조금 넓히고"). */
   letter-spacing: .05em;
   color: var(--ink-45);
 }
 @media (max-width: 1023px) {
-  /* Matches .apps__intro's own compact override — see the base rule's
-     own comment for why desktop and compact need two different
-     values here. */
   .outro {
     padding-left: var(--edge);
     padding-right: var(--edge);

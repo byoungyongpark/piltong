@@ -838,20 +838,6 @@
     const fig = document.querySelector('.statement__figure');
     if (!stage || !copy || !big || !philo || !fig || lines.length < 2) return;
     const GAP = 44;
-    // Went negative (-28, -8, -16) then positive (24, then 12) and back
-    // again — the Korean copy overlaps the video's own bottom edge once
-    // more, on request ("한글 그룹떨어졌을 시점에 한글 그룹 다시 영상과
-    // 겹치게 조정"). Nudged up another notch (request: "영상 아래로
-    // 내려오는 지점에서... 전체 -1~-2정도만 위로 올려보자"), then to
-    // -22 (request: ".statement__body 인라인 엘러먼트 탑 값이 400이
-    // 되어야 원하는 바가 될것 같은데 (542구간 부터)" — copy.style.top
-    // was landing at 404px at 542px width, -22 turned that into exactly
-    // 400px), then -19 (request: "BELOW_OVERLAP을 -18→-19로 해보자"),
-    // then -20 (request: "20으로"), then -30 (request: "타이틀 및 아래
-    // 본문을 위로 조금 더 당겨보자") — that overshot, back to -20
-    // (request: "지금보단 내려야 할것 같아"), then -22 (request: "-22"),
-    // then -21 (request: "-21"), then -16 (request: "-16"), then -13
-    // (request: "-13"), now -14 (request: "-14").
     const BELOW_OVERLAP = -14;
     const TITLE_GAP = 32;
 
@@ -3063,29 +3049,7 @@
     // playback advances on its own) at every width, composing a small
     // translateX with updateDna's own scroll-driven scale so the two
     // don't fight over the same inline transform.
-    //
-    // Shape corrected a second time: a symmetric sine (pull left, then
-    // swing right past centre, then back) was wrong — the lean only
-    // ever happens once per loop, right as it starts, not twice
-    // (request: "영상 시작과 함께 왼쪽으로 먼저 이동되고 그다음에 다시
-    // 제자리로 돌아와야"). Now a one-sided pulse: starting from the
-    // loop point (t=0, shifted by --dna-wobble-phase same as before),
-    // pull ramps to -amp and back to 0 across the first
-    // --dna-wobble-turn-fraction of the loop only, then stays at 0
-    // (original position) for the remainder until it loops again.
     if (dnaVideo && !prefersReduced) {
-      // Exposed as CSS custom properties (read live off the element,
-      // not hardcoded) specifically so they can be tuned in DevTools
-      // without a rebuild — I can't see the actual footage to know
-      // exactly when the turn happens or how long it lasts, so these
-      // starting values (a modest 14px pull, pulsing across the first
-      // 40% of the loop from t=0) are a first guess, not a measured
-      // fit. --dna-wobble-amp is the peak pull in px; --dna-wobble-
-      // phase shifts WHERE in the loop (0-1) the pulse starts;
-      // --dna-wobble-turn-fraction is how much of the loop (0-1) the
-      // pulse spans before settling back to centre — nudge all three
-      // until the correction and the actual turn line up.
-      //
       // The video is object-fit:cover inside an overflow:hidden box, so
       // translateX alone would slide its own edge into view on one side
       // (or open a gap on the other) the instant the pull is non-zero.
@@ -3102,10 +3066,6 @@
       function wobbleFrame() {
         wobbleRafId = requestAnimationFrame(wobbleFrame);
         if (!dnaVideo.duration) return;
-        // PC reverted to the plain original footage — no pull, no
-        // pre-zoom (request: "피시구간에서 쉐입디엔에이 좌측 심볼영상
-        // 그냥 움직임 없는 기존 영상대로 원래대로 돌리자"). The
-        // correction stays on at compact, which is unaffected by this.
         if (!isCompact()) {
           dnaVideo.style.transform = `scale(${dnaVideoScale.toFixed(3)})`;
           return;
@@ -4219,24 +4179,9 @@
     const diagramVisual = diagramPanel.querySelector('.brandid__blueprint-visual');
     const diagramGrid = diagramPanel.querySelector('.bp-grid');
     let diagramShift = 0;
-    // Same idea, vertical axis — only actually non-zero in the tall-
-    // desktop-ratio layout (style.css: min-width:1024px and
-    // max-aspect-ratio:5/3), where .brandid__blueprint-row is a COLUMN
-    // (mark above the text) instead of a row. There the row's own
-    // vertical centre sits BELOW the mark's natural centre (the text
-    // block underneath pulls the whole group's centre down), so while
-    // the mark is still drawing alone it reads as sitting high/off-
-    // centre rather than "화면 기준 정중앙" — this measures that gap so
-    // the mark can start there and settle down into its natural spot as
-    // the text rises in, matching the horizontal version's own already-
-    // working shape for the side-by-side layout (request: "그려질때는
-    // 화면기준 정중앙에서 그려지다가 컨텐츠 나타날시 자연스럽게 위로
-    // 올라가서 심볼 + 컨텐츠 그룹이 정중앙에 위치하게" — "위로 올라가서"
-    // is the mark's motion relative to the page, which reads as the
-    // mark rising UP out of dead-centre into its own smaller share of
-    // the now-taller combined block). In the normal row layout the row
-    // and mark already share the same vertical centre, so this measures
-    // ~0 there and the extra translateY below is a harmless no-op.
+    // Vertical counterpart to diagramShift — ~0 in the normal row layout
+    // (row and mark already share a centre), non-zero only in the tall-ratio
+    // stacked layout (style.css: min-width:1024px and max-aspect-ratio:5/3).
     let diagramShiftY = 0;
     function measureDiagramShift() {
       if (!diagramRow || !diagramVisual) return;
@@ -6401,21 +6346,9 @@
     // logo reading the wrong colour (and therefore low-contrast/
     // "greyish") for part of the approach, on request ("여전히...
     // 브랜드월에서 왼쪽 상단 로고 회색으로 보여").
-    // Real photographs (Applications' own showcase/gallery stack —
-    // .apps__photo, .apps__gallery-img) vary in local brightness far
-    // more than a single flat background-color can capture: a
-    // data-eq-bg override picks one mood for the whole element, and the
-    // plain background-color walk below can't see into a raster image
-    // at all. This samples the actual pixels under the point instead,
-    // so the switch tracks whatever the equalizer happens to be sitting
-    // over as it scrolls past a real photo (request: "목업 이미지
-    // 배경색 네 판단하에 이미지 기준 자동으로 잘보이는 색으로 바꿔줄수
-    // 있어?"). Generic over any <img> rather than scoped to the
-    // Applications classes specifically — no other section currently
-    // puts a plain <img> under either target, and keeping this
-    // untargeted is what makes it "그대로 전 구간에서 적용" for free: it
-    // isn't gated by scope or width, so it already runs everywhere
-    // isLightAt does.
+    // Samples actual pixels under the point for images, since a flat
+    // background-color can't capture a photo's local brightness. Applies to
+    // any <img>, not scoped to Applications' own images specifically.
     const imageSampleCache = new WeakMap();
     function sampleImageLuminance(img, clientX, clientY) {
       if (!img.complete || !img.naturalWidth || !img.naturalHeight) return null;
@@ -6424,11 +6357,7 @@
       const relX = (clientX - rect.left) / rect.width;
       const relY = (clientY - rect.top) / rect.height;
       if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return null;
-      // object-fit:cover crops the natural bitmap to fill the box —
-      // .apps__gallery-img:last-child is the one image on the page that
-      // uses it (the rest render at their own natural ratio, so a plain
-      // rect-to-natural scale is correct there). Same cover-crop math
-      // .brandid__closing-loop's own JS fit already relies on elsewhere.
+      // object-fit:cover crops the natural bitmap to fill the box; account for that when mapping to natural-pixel coords.
       let nx, ny;
       if (getComputedStyle(img).objectFit === 'cover') {
         const scale = Math.max(rect.width / img.naturalWidth, rect.height / img.naturalHeight);
@@ -6446,10 +6375,7 @@
       const sw = Math.min(SAMPLE, img.naturalWidth - sx);
       const sh = Math.min(SAMPLE, img.naturalHeight - sy);
       if (sw <= 0 || sh <= 0) return null;
-      // One canvas per image, reused every call — this runs on every
-      // scroll-driven update(), same rAF cadence as the rest of this
-      // function, so allocating a fresh canvas each time would be
-      // needlessly wasteful.
+      // Canvas is cached per image and reused, since this runs on every scroll-driven update().
       let entry = imageSampleCache.get(img);
       if (!entry) {
         const canvas = document.createElement('canvas');
@@ -6520,14 +6446,8 @@
     function activeOverlayOverride(scope) {
       const overlays = document.querySelectorAll('[data-eq-bg]');
       for (const el of overlays) {
-        // data-eq-bg-geo opts an overlay OUT of this unconditional
-        // "visible anywhere = applies everywhere" check — see
-        // geometricOverlayOverride below, which checks these by actual
-        // screen position instead. Without this exclusion, a geo-marked
-        // zone (present in the DOM the whole time it's compact, just
-        // like this one) would win here FIRST and apply its colour to
-        // every scroll position, not just while the target is actually
-        // over it.
+        // Excludes geo-marked zones (handled by geometricOverlayOverride below) —
+        // otherwise they'd apply everywhere since they're always present in the DOM.
         if (el.dataset.eqBgGeo !== undefined) continue;
         if (getComputedStyle(el).pointerEvents !== 'none') continue;
         if (parseFloat(getComputedStyle(el).opacity) <= .05) continue;
@@ -6538,19 +6458,8 @@
       return null;
     }
 
-    // For decorative dark/light zones that are real, static blocks (not
-    // scroll-pinned/animated) but still pointer-events:none, so
-    // elementFromPoint skips them and a hit-test can never find them —
-    // .apps__eq-zone (index.html) is the first case: it backs .apps's
-    // own ::before dark band, which a plain ancestor walk can't see
-    // either since a pseudo-element is invisible to both hit-testing and
-    // DOM traversal (request: "타이틀 구간(검은색 배경)... 이퀄라이저가
-    // 이 섹션 지나갈때는 페이퍼색으로 바뀌어야할것 같아"). Checked by
-    // actual screen position (not "visible anywhere", unlike
-    // activeOverlayOverride above) because this zone is always present
-    // in the DOM at compact widths — only ITS OWN geometry says whether
-    // the target is currently over it or has scrolled past into the
-    // paper section below.
+    // For static pointer-events:none zones that elementFromPoint can't hit-test;
+    // checked by actual screen position, unlike activeOverlayOverride above.
     function geometricOverlayOverride(scope, x, y) {
       const overlays = document.querySelectorAll('[data-eq-bg][data-eq-bg-geo]');
       for (const el of overlays) {

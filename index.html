@@ -961,20 +961,9 @@
            rule ever changes. -->
       <p class="brandid__body brandid__closing-body">이제 그 기준은 모든 경험으로 이어집니다.</p>
     </div>
-    <!-- data-eq-bg marks this as a dark zone for the equalizer's own
-         contrast switch (initContrastSwitchers, main.js) — the actual
-         dark colour comes from this element's own ::before (style.css),
-         which a plain background-color ancestor walk can't see (a
-         pseudo-element is invisible to both hit-testing and DOM
-         traversal), the same gap already fixed for Applications' own
-         dark title band via .apps__eq-zone. No data-eq-bg-geo/scope
-         needed here the way that fix needed them: this IS a real,
-         directly hit-testable element (unlike .apps::before), and it
-         reads as the dark plate at every width (desktop's own pinned
-         video included), so a plain, unconditional tag is correct
-         everywhere, not just compact (request: "우측 이퀄라이저가
-         1024이하 기준 우리는 로고를 만든것이 아래에 있는 심볼 영상
-         워드마크 검은바를 지나갈때는 페이퍼색으로"). -->
+    <!-- data-eq-bg lives on this real element, not the ::before that
+         actually paints dark, since pseudo-elements aren't visible to
+         hit-testing or DOM traversal. -->
     <div class="brandid__closing-loop-wrap" data-eq-bg="dark">
       <video class="brandid__closing-loop" autoplay muted loop playsinline aria-hidden="true">
         <source src="images/symbol_seamless_loop.mp4" type="video/mp4">
@@ -1065,19 +1054,12 @@
          pinned — the wordmark lands ON this, and everything below sits
          inside it. -->
     <div class="apps__ground" aria-hidden="true"></div>
-    <!-- Compact only (see style.css) — a real (not ::before) marker over
-         the same dark band .apps::before paints, purely so the
-         equalizer's own contrast switch (initContrastSwitchers, main.js)
-         can find it. A pseudo-element is invisible to elementFromPoint
-         AND to a plain DOM ancestor walk, so without this the equalizer
-         read .apps's OWN background-color instead (paper, compact's
-         resting colour below the dark band) and switched to ink over a
-         backdrop that's actually still dark (request: "타이틀 구간(검은색
-         배경) 우측 하단 이퀄라이저가 이 섹션 지나갈때는 페이퍼색으로
-         바뀌어야할것 같아"). pointer-events:none — decorative only, must
-         never intercept clicks; the JS checks it geometrically (its own
-         getBoundingClientRect), not via hit-testing, specifically because
-         pointer-events:none makes elementFromPoint skip it too. -->
+    <!-- Compact only (see style.css) — real marker over the dark band
+         .apps::before paints, for the equalizer contrast switch
+         (initContrastSwitchers, main.js) to find; a pseudo-element isn't
+         visible to elementFromPoint or a DOM ancestor walk.
+         pointer-events:none also hides it from elementFromPoint, so the
+         JS checks it geometrically (getBoundingClientRect) instead. -->
     <div class="apps__eq-zone" data-eq-bg="dark" data-eq-bg-scope="equalizer" data-eq-bg-geo aria-hidden="true"></div>
     <!-- Compact only (see style.css) — the desktop ticker
          (.brandid__closing-next, previous section) rolls "APPLICATIONS"
@@ -1154,38 +1136,12 @@
     </div>
   </section>
 
-  <!-- ===== Outro: closing CTA + info ==========================================
-       First pass, structure only — right column is placeholder content
-       (request: "우측 정보는 임의로 넣어놓으면 정리할께"), left column's
-       copy is final (given verbatim in the request). Layout loosely
-       follows a reference screenshot: a wide left title+lead block next
-       to a narrower stack of labelled info blocks, with a thin divider
-       and a copyright row underneath. ===== -->
   <section id="outro" class="frame frame--auto frame--paper outro">
     <div class="outro__row">
       <div class="outro__lead">
         <h2 class="outro__title">Have a problem to<br>solve? Let’s find the<br>appropriate solution.</h2>
         <p class="outro__kr">문제에서 시작해,<br>가장 적절한 해결을 함께 찾습니다.</p>
       </div>
-      <!-- Credits-style, structured like the reference screenshot
-           (label header + role/name lines per block) rather than the
-           earlier Contact/Studio/Follow set (request: "오른쪽 내용은
-           참조 사진처럼 필통 크리에이티브 파트너/UX TEAM 그다음으론
-           프로젝트 디렉팅, 앤딩크레딧 같은 정보로 구성해줘"). Multiple
-           names in one role run on a single line, slash-separated
-           (request: "여러 이름을 참조 사진처럼 주욱 나열하고 슬러시로
-           구분하는 컨셉으로 구성해줘"). Real UX/Dev/Media/Strategy
-           roster filled in — names given in Korean, romanised to their
-           standard English-name form here (request: "우측 정보 한글로
-           적으면 네가 공식 영어 이름으로 변환해서 적어줘"); "UX Design
-           Director" role removed per request ("유엑스 디자이너
-           디렉터는 제거"). Ending Credits block removed entirely
-           (request: "엔딩 크레딧 내용은 제거"); Project Directing's
-           own placeholder name filled in with the same real name
-           (request: "프로젝터 디렉팅 정보는 박병용으로 다 해줘"). Team
-           blocks from Media Team on prefixed with PILTONG, matching
-           the UX Team block above them (request: "팀 앞에 다 필통
-           붙이자 미디어팀 부터"). -->
       <div class="outro__info">
         <div class="outro__block">
           <span class="outro__label">PILTONG Creative Partner / UX Team</span>
