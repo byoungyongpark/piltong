@@ -3499,6 +3499,9 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     position: relative;
     left: auto;
     z-index: 1;
+    /* Left-aligned to the edge, overriding the <=1600px tier's centring — same reasoning as .brandid__colorstory-copy below, which already did this; the card kept the wider tier's auto/auto margins since only margin-top was set here. */
+    margin-left: var(--edge);
+    margin-right: auto;
     margin-top: clamp(64px, 11vw, 108px);
   }
   .brandid__colorstory-copy {
