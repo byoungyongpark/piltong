@@ -25,20 +25,27 @@
   // before its bottom edge would.
   const COLORSTORY_SHORT_H = 620;
   const isColorStoryCompact = () => isCompact() || window.innerHeight <= COLORSTORY_SHORT_H;
+  // The marquee's two stacked text rows (font-size clamps up to 300px each,
+  // reached at 2560px width) are the tallest content Why Piltong's two
+  // sticky stages ever hold — 600px combined at that width; below this
+  // height they clip against the marquee sticky's own overflow:hidden.
+  const WHYP_SHORT_H = 650;
+  const isWhypCompact = () => isCompact() || window.innerHeight <= WHYP_SHORT_H;
 
   // isCompact() branches (and CSS's max-width:1025px rules) evaluate once at
   // setup, not live on every scroll tick — checking live caused scroll jank.
   // Resizing across the breakpoint mid-session reloads the page instead of
   // re-running each init live. Debounced so a mid-drag resize reloads once
   // it settles, not on every intermediate frame. isDnaCompact()/
-  // isBlueprintCompact()/isColorStoryCompact() get the same treatment,
-  // since their height term gates setup-time branches
-  // (initBlueprintTransition, initColorStory, etc.) just like isCompact()
-  // does.
+  // isBlueprintCompact()/isColorStoryCompact()/isWhypCompact() get the same
+  // treatment, since their height term gates setup-time branches
+  // (initBlueprintTransition, initColorStory, initWhyPiltong, etc.) just
+  // like isCompact() does.
   let lastIsCompact = isCompact();
   let lastIsDnaCompact = isDnaCompact();
   let lastIsBlueprintCompact = isBlueprintCompact();
   let lastIsColorStoryCompact = isColorStoryCompact();
+  let lastIsWhypCompact = isWhypCompact();
   let resizeReloadTimer = null;
   window.addEventListener('resize', () => {
     clearTimeout(resizeReloadTimer);
@@ -46,7 +53,8 @@
       if (isCompact() !== lastIsCompact ||
           isDnaCompact() !== lastIsDnaCompact ||
           isBlueprintCompact() !== lastIsBlueprintCompact ||
-          isColorStoryCompact() !== lastIsColorStoryCompact) location.reload();
+          isColorStoryCompact() !== lastIsColorStoryCompact ||
+          isWhypCompact() !== lastIsWhypCompact) location.reload();
     }, 200);
   }, { passive: true });
 
@@ -1370,7 +1378,7 @@
     // leaves the row animations untouched, unpins both stages into normal
     // flow, and exposes .whyp__media in place instead of leaving it parked
     // 90vh below the fold at its pre-scroll rest position.
-    if (isCompact()) {
+    if (isWhypCompact()) {
       sec.classList.add('whyp--compact');
       if (mediaVideo) mediaVideo.play().catch(() => {});
       return;
