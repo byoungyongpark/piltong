@@ -756,7 +756,7 @@
     // -14 / 32) divided by --big's rendered size there (59.5px) — same
     // reference point style.css's own --big-derived ratios use.
     const GAP_RATIO = .74;
-    const BELOW_OVERLAP_RATIO = -.45;
+    const BELOW_OVERLAP_RATIO = -.5;
     const TITLE_GAP_RATIO = .54;
 
     function resetToBeside() {
