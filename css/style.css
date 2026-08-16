@@ -4932,7 +4932,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
 
 /* ---------- Outro: closing CTA + info ---------- */
 .outro {
-  padding-top: clamp(64px, 11vw, 112px);
+  padding-top: clamp(48px, 8.2vw, 84px);
   padding-left: clamp(var(--edge), calc(-7.01px + 6.6849vw), 120px);
   padding-right: clamp(var(--edge), calc(-7.01px + 6.6849vw), 120px);
 }
@@ -4946,7 +4946,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: clamp(24px, 3.5vw, 56px);
+  gap: clamp(17px, 2.6vw, 42px);
 }
 .outro__lead {
   flex: 0 1 50%;
@@ -4969,7 +4969,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   font-size: clamp(17px, 1.6vw, 21px);
   font-weight: 500;
   line-height: 1.35;
-  letter-spacing: -.01em;
+  letter-spacing: -.025em;
   color: var(--ink-70);
   word-break: keep-all;
 }
@@ -4993,7 +4993,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   text-transform: uppercase;
   color: var(--ink-45);
   /* Adds on top of .outro__block's own flex gap (margin and gap stack). */
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 .outro__value {
   /* <p>'s own UA margin would stack with .outro__block's flex gap; zeroed here. */
@@ -5033,7 +5033,7 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
   }
   .outro__row {
     flex-direction: column;
-    gap: clamp(40px, 8vw, 64px);
+    gap: clamp(28px, 5.6vw, 45px);
   }
   .outro__lead { max-width: none; }
   .outro__info { flex: none; width: 100%; }
@@ -5041,6 +5041,30 @@ a, button, [role="button"], input, textarea, select, label { cursor: none; }
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+  /* Two-point lines (offset + vw), same technique used throughout this
+     file — title/kr previously just used their own base clamp() past
+     1023px too, but its floor (28px/17px) bound almost immediately on
+     entering compact width (around 823px/1062px), reading as flat
+     everywhere below that instead of actually scaling down through the
+     phone range. label/value/bottom had no responsive sizing at all
+     (flat px). Ceilings anchor each at its own current ~1024px-adjacent
+     size; floors are a smaller but still readable size at 420px, held
+     flat below that rather than continuing to shrink. */
+  .outro__title {
+    font-size: clamp(26px, calc(19.87px + 1.46vw), 34.8px);
+  }
+  .outro__kr {
+    font-size: clamp(14px, calc(11.91px + .5vw), 17px);
+  }
+  .outro__label {
+    font-size: clamp(11.5px, calc(9.76px + .41vw), 14px);
+  }
+  .outro__value {
+    font-size: clamp(14px, calc(11.91px + .5vw), 17px);
+  }
+  .outro__bottom {
+    font-size: clamp(11.5px, calc(9.76px + .41vw), 14px);
   }
 }
 
